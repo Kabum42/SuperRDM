@@ -4,7 +4,9 @@ using System.Collections;
 public class WorldScript : MonoBehaviour {
 
     public GameObject board;
-    public BoardCell[] boardCells = new BoardCell[1];
+    public BoardCell[] boardCells;
+    private int currentCell = 0;
+    private int[] cellsPerRing;
 
     private float cellWidth = 1.48f;
     private float cellHeight = 1.51f;
@@ -12,6 +14,14 @@ public class WorldScript : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
         // GlobalData.Start();
+
+        boardCells = new BoardCell[37];
+        cellsPerRing = new int[4];
+        cellsPerRing[0] = 1;
+        cellsPerRing[1] = 6;
+        cellsPerRing[2] = 12;
+        cellsPerRing[3] = 18;
+
         board = new GameObject();
         board.name = "Board";
         board.transform.position = new Vector3(0f, 0f, 0f);
@@ -21,20 +31,19 @@ public class WorldScript : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-	
+
+        //Debug.Log(boardCells[1].south);
+        //boardCells[1].south.root.transform.position = boardCells[1].south.root.transform.position + new Vector3(0f, 0.02f, 0f);
+
 	}
 
     void GenerateBoard()
     {
-        // RING 0
+
+        // RINGS
         makeRing(0);
-
-        // RING 1
         makeRing(1);
-
-        // RING 2
         makeRing(2);
-
         makeRing(3);
 
     }
@@ -49,10 +58,18 @@ public class WorldScript : MonoBehaviour {
 
         //INITIAL CELL
         b = new BoardCell();
+        b.root = Instantiate(Resources.Load("Prefabs/BoardCell")) as GameObject;
+        b.randomBiome();
         b.root.transform.parent = board.transform;
         b.root.name = "Cell_" + number + "_" + currentCounter;
         positionCell(b, currentWidth, currentHeight);
+        if (currentCell != 0)
+        {
+            connectCells(b, "south", boardCells[currentCell - cellsPerRing[number-1]]);
+        }
         currentCounter++;
+        boardCells[currentCell] = b;
+        currentCell++;
 
         //DIAGONAL TO THE RIGHT COLUMN
         while (currentWidth < number)
@@ -61,10 +78,14 @@ public class WorldScript : MonoBehaviour {
             currentHeight -= 0.5f;
 
             b = new BoardCell();
+            b.root = Instantiate(Resources.Load("Prefabs/BoardCell")) as GameObject;
+            b.randomBiome();
             b.root.transform.parent = board.transform;
             b.root.name = "Cell_" + number + "_" + currentCounter;
             positionCell(b, currentWidth, currentHeight);
             currentCounter++;
+            boardCells[currentCell] = b;
+            currentCell++;
         }
 
         //RIGHT COLUMN
@@ -73,10 +94,14 @@ public class WorldScript : MonoBehaviour {
             currentHeight -= 1f;
 
             b = new BoardCell();
+            b.root = Instantiate(Resources.Load("Prefabs/BoardCell")) as GameObject;
+            b.randomBiome();
             b.root.transform.parent = board.transform;
             b.root.name = "Cell_" + number + "_" + currentCounter;
             positionCell(b, currentWidth, currentHeight);
             currentCounter++;
+            boardCells[currentCell] = b;
+            currentCell++;
         }
 
         // DIAGONAL TO THE CENTRAL DOWN
@@ -86,10 +111,14 @@ public class WorldScript : MonoBehaviour {
             currentHeight -= 0.5f;
 
             b = new BoardCell();
+            b.root = Instantiate(Resources.Load("Prefabs/BoardCell")) as GameObject;
+            b.randomBiome();
             b.root.transform.parent = board.transform;
             b.root.name = "Cell_" + number + "_" + currentCounter;
             positionCell(b, currentWidth, currentHeight);
             currentCounter++;
+            boardCells[currentCell] = b;
+            currentCell++;
         }
 
         // DIAGONAL TO THE LEFT COLUMN
@@ -99,10 +128,14 @@ public class WorldScript : MonoBehaviour {
             currentHeight += 0.5f;
 
             b = new BoardCell();
+            b.root = Instantiate(Resources.Load("Prefabs/BoardCell")) as GameObject;
+            b.randomBiome();
             b.root.transform.parent = board.transform;
             b.root.name = "Cell_" + number + "_" + currentCounter;
             positionCell(b, currentWidth, currentHeight);
             currentCounter++;
+            boardCells[currentCell] = b;
+            currentCell++;
         }
 
         //LEFT COLUMN
@@ -111,10 +144,14 @@ public class WorldScript : MonoBehaviour {
             currentHeight += 1f;
 
             b = new BoardCell();
+            b.root = Instantiate(Resources.Load("Prefabs/BoardCell")) as GameObject;
+            b.randomBiome();
             b.root.transform.parent = board.transform;
             b.root.name = "Cell_" + number + "_" + currentCounter;
             positionCell(b, currentWidth, currentHeight);
             currentCounter++;
+            boardCells[currentCell] = b;
+            currentCell++;
         }
 
         // DIAGONAL TO THE INITIAL
@@ -124,10 +161,14 @@ public class WorldScript : MonoBehaviour {
             currentHeight += 0.5f;
 
             b = new BoardCell();
+            b.root = Instantiate(Resources.Load("Prefabs/BoardCell")) as GameObject;
+            b.randomBiome();
             b.root.transform.parent = board.transform;
             b.root.name = "Cell_" + number + "_" + currentCounter;
             positionCell(b, currentWidth, currentHeight);
             currentCounter++;
+            boardCells[currentCell] = b;
+            currentCell++;
         }
 
     }
@@ -135,6 +176,42 @@ public class WorldScript : MonoBehaviour {
     private void positionCell(BoardCell b, float width, float height)
     {
         b.root.transform.position = board.transform.position + new Vector3(width * cellWidth, 0.1f, height * cellHeight);
+    }
+
+    private void connectCells(BoardCell b1, string direction, BoardCell b2)
+    {
+        if (direction == "northWest")
+        {
+            b1.northWest = b2;
+            b2.southEast = b1;
+        }
+        else if (direction == "north")
+        {
+            b1.north = b2;
+            b2.south = b1;
+        }
+        else if (direction == "northEast")
+        {
+            b1.northEast = b2;
+            b2.southWest = b1;
+        }
+        else if (direction == "southEast")
+        {
+            b1.southEast = b2;
+            b2.northWest = b1;
+        }
+        else if (direction == "south")
+        {
+            b1.south = b2;
+            b2.north = b1;
+        }
+        else if (direction == "southWest")
+        {
+            b1.southWest = b2;
+            b2.northEast = b1;
+        }
+
+
     }
 
 }
