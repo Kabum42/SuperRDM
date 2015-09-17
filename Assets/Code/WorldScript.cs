@@ -181,6 +181,11 @@ public class WorldScript : MonoBehaviour {
             positionCell(b, currentWidth, currentHeight);
 
             connectCells(b, "northEast", boardCells[currentCell - 1]);
+            connectCells(b, "north", boardCells[currentCell - cellsPerRing[number - 1] - 3]);
+            if (currentWidth > 0)
+            {
+                connectCells(b, "northWest", boardCells[currentCell - cellsPerRing[number - 1] - 2]);
+            }
 
             currentCounter++;
             boardCells[currentCell] = b;
@@ -201,6 +206,11 @@ public class WorldScript : MonoBehaviour {
             positionCell(b, currentWidth, currentHeight);
 
             connectCells(b, "southEast", boardCells[currentCell - 1]);
+            connectCells(b, "northEast", boardCells[currentCell - cellsPerRing[number - 1] - 4]);
+            if (currentWidth > -number)
+            {
+                connectCells(b, "north", boardCells[currentCell - cellsPerRing[number - 1] - 3]);
+            }
 
             currentCounter++;
             boardCells[currentCell] = b;
@@ -220,6 +230,12 @@ public class WorldScript : MonoBehaviour {
             positionCell(b, currentWidth, currentHeight);
 
             connectCells(b, "south", boardCells[currentCell - 1]);
+            connectCells(b, "southEast", boardCells[currentCell - cellsPerRing[number - 1] - 5]);
+            if (i+1 < number)
+            {
+                connectCells(b, "northEast", boardCells[currentCell - cellsPerRing[number - 1] - 4]);
+            }
+
             if ((currentCounter + 1) == cellsPerRing[number])
             {
                 connectCells(b, "northEast", boardCells[currentCell - cellsPerRing[number] + 1]);
@@ -244,6 +260,18 @@ public class WorldScript : MonoBehaviour {
             positionCell(b, currentWidth, currentHeight);
 
             connectCells(b, "southWest", boardCells[currentCell - 1]);
+            //connectCells(b, "southEast", boardCells[currentCell - cellsPerRing[number - 1] - 5]);
+            connectCells(b, "south", boardCells[currentCell - cellsPerRing[number]]);
+
+            if (currentWidth < -1)
+            {
+                connectCells(b, "southEast", boardCells[currentCell - cellsPerRing[number] +1]);
+            }
+            else
+            {
+                connectCells(b, "southEast", boardCells[currentCell - cellsPerRing[number] - cellsPerRing[number-1] +1]);
+            }
+
             if ((currentCounter+1) == cellsPerRing[number])
             {
                 connectCells(b, "northEast", boardCells[currentCell - cellsPerRing[number] +1]);
