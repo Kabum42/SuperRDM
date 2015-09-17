@@ -11,6 +11,9 @@ public class WorldScript : MonoBehaviour {
     private float cellWidth = 1.48f;
     private float cellHeight = 1.51f;
 
+    private Vector3 lastMousePosition;
+    private BoardCell selected;
+
 	// Use this for initialization
 	void Start () {
         // GlobalData.Start();
@@ -35,6 +38,47 @@ public class WorldScript : MonoBehaviour {
         //Debug.Log(boardCells[1].south);
         //boardCells[1].south.root.transform.position = boardCells[1].south.root.transform.position + new Vector3(0f, 0.02f, 0f);
 
+        for (int i = 0; i < boardCells.Length; i++)
+        {
+            boardCells[i].root.GetComponent<SpriteRenderer>().material.color = new Color(0.5f, 0.5f, 0.5f, 1f);
+            if (ClickedOn(boardCells[i].root))
+            {
+                selected = boardCells[i];
+            }
+        }
+
+        if (selected != null)
+        {
+
+            selected.root.GetComponent<SpriteRenderer>().material.color = new Color(0.2f, 0.2f, 0.2f, 1f);
+
+            if (selected.northWest != null)
+            {
+                selected.northWest.root.GetComponent<SpriteRenderer>().material.color = new Color(1f, 1f, 1f, 1f);
+            }
+            if (selected.north != null)
+            {
+                selected.north.root.GetComponent<SpriteRenderer>().material.color = new Color(1f, 1f, 1f, 1f);
+            }
+            if (selected.northEast != null)
+            {
+                selected.northEast.root.GetComponent<SpriteRenderer>().material.color = new Color(1f, 1f, 1f, 1f);
+            }
+            if (selected.southEast != null)
+            {
+                selected.southEast.root.GetComponent<SpriteRenderer>().material.color = new Color(1f, 1f, 1f, 1f);
+            }
+            if (selected.south != null)
+            {
+                selected.south.root.GetComponent<SpriteRenderer>().material.color = new Color(1f, 1f, 1f, 1f);
+            }
+            if (selected.southWest != null)
+            {
+                selected.southWest.root.GetComponent<SpriteRenderer>().material.color = new Color(1f, 1f, 1f, 1f);
+            }
+
+        }
+
 	}
 
     void GenerateBoard()
@@ -45,6 +89,8 @@ public class WorldScript : MonoBehaviour {
         makeRing(1);
         makeRing(2);
         makeRing(3);
+
+        selected = boardCells[0];
 
     }
 
@@ -83,6 +129,15 @@ public class WorldScript : MonoBehaviour {
             b.root.transform.parent = board.transform;
             b.root.name = "Cell_" + number + "_" + currentCounter;
             positionCell(b, currentWidth, currentHeight);
+
+            connectCells(b, "northWest", boardCells[currentCell - 1]);
+            connectCells(b, "southWest", boardCells[currentCell - cellsPerRing[number - 1] -1]);
+            if (currentWidth != number)
+            {
+                connectCells(b, "south", boardCells[currentCell - cellsPerRing[number - 1]]);
+            }
+            
+
             currentCounter++;
             boardCells[currentCell] = b;
             currentCell++;
@@ -99,6 +154,14 @@ public class WorldScript : MonoBehaviour {
             b.root.transform.parent = board.transform;
             b.root.name = "Cell_" + number + "_" + currentCounter;
             positionCell(b, currentWidth, currentHeight);
+
+            connectCells(b, "north", boardCells[currentCell - 1]);
+            connectCells(b, "northWest", boardCells[currentCell - cellsPerRing[number-1] -2]);
+            if (i+1 < number)
+            {
+                connectCells(b, "southWest", boardCells[currentCell - cellsPerRing[number - 1] - 1]);
+            }
+
             currentCounter++;
             boardCells[currentCell] = b;
             currentCell++;
@@ -116,6 +179,9 @@ public class WorldScript : MonoBehaviour {
             b.root.transform.parent = board.transform;
             b.root.name = "Cell_" + number + "_" + currentCounter;
             positionCell(b, currentWidth, currentHeight);
+
+            connectCells(b, "northEast", boardCells[currentCell - 1]);
+
             currentCounter++;
             boardCells[currentCell] = b;
             currentCell++;
@@ -133,6 +199,9 @@ public class WorldScript : MonoBehaviour {
             b.root.transform.parent = board.transform;
             b.root.name = "Cell_" + number + "_" + currentCounter;
             positionCell(b, currentWidth, currentHeight);
+
+            connectCells(b, "southEast", boardCells[currentCell - 1]);
+
             currentCounter++;
             boardCells[currentCell] = b;
             currentCell++;
@@ -149,6 +218,13 @@ public class WorldScript : MonoBehaviour {
             b.root.transform.parent = board.transform;
             b.root.name = "Cell_" + number + "_" + currentCounter;
             positionCell(b, currentWidth, currentHeight);
+
+            connectCells(b, "south", boardCells[currentCell - 1]);
+            if ((currentCounter + 1) == cellsPerRing[number])
+            {
+                connectCells(b, "northEast", boardCells[currentCell - cellsPerRing[number] + 1]);
+            }
+
             currentCounter++;
             boardCells[currentCell] = b;
             currentCell++;
@@ -166,6 +242,13 @@ public class WorldScript : MonoBehaviour {
             b.root.transform.parent = board.transform;
             b.root.name = "Cell_" + number + "_" + currentCounter;
             positionCell(b, currentWidth, currentHeight);
+
+            connectCells(b, "southWest", boardCells[currentCell - 1]);
+            if ((currentCounter+1) == cellsPerRing[number])
+            {
+                connectCells(b, "northEast", boardCells[currentCell - cellsPerRing[number] +1]);
+            }
+
             currentCounter++;
             boardCells[currentCell] = b;
             currentCell++;
@@ -175,7 +258,7 @@ public class WorldScript : MonoBehaviour {
 
     private void positionCell(BoardCell b, float width, float height)
     {
-        b.root.transform.position = board.transform.position + new Vector3(width * cellWidth, 0.1f, height * cellHeight);
+        b.root.transform.position = board.transform.position + new Vector3(width * cellWidth, height * cellHeight, -0.1f);
     }
 
     private void connectCells(BoardCell b1, string direction, BoardCell b2)
@@ -211,6 +294,48 @@ public class WorldScript : MonoBehaviour {
             b2.northEast = b1;
         }
 
+
+    }
+
+    private bool ClickedOn(GameObject target)
+    {
+
+        if (Input.GetMouseButtonDown(0))
+        {
+
+            lastMousePosition = Input.mousePosition;
+
+        }
+        else if (Input.GetMouseButtonUp(0))
+        {
+
+            Ray ray = Camera.main.ScreenPointToRay(lastMousePosition);
+
+            // CLICKABLE MASK
+            RaycastHit2D[] hits = Physics2D.RaycastAll(new Vector2(ray.origin.x, ray.origin.y), Vector2.zero, 0f, LayerMask.GetMask("Clickable"));
+
+            for (int i = 0; i < hits.Length; i++)
+            {
+                Ray ray2 = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+                RaycastHit2D[] hits2 = Physics2D.RaycastAll(new Vector2(ray2.origin.x, ray2.origin.y), Vector2.zero, 0f, LayerMask.GetMask("Clickable"));
+
+                for (int j = 0; j < hits2.Length; j++)
+                {
+
+                    if (j < hits.Length)
+                    {
+                        if (hits[j].collider.gameObject == hits2[j].collider.gameObject && hits[j].collider.gameObject == target) { return true; }
+                    }
+
+                }
+
+            }
+
+
+        }
+
+        return false;
 
     }
 
