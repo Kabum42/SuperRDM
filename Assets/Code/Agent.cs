@@ -8,6 +8,7 @@ public class Agent {
     public int level = 1;
     public double experience = 0f;
     public double gold = 0f;
+	public double currentHealth = 0f;
 	
     public Agent()
     {
