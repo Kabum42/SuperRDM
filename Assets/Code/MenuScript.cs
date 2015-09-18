@@ -94,9 +94,29 @@ public class MenuScript : MonoBehaviour {
             if (button1.activeInHierarchy) { button1.SetActive(false); }
             if (!button2.activeInHierarchy) { button2.SetActive(true); }
 
-            if (Input.GetKeyDown("joystick button 0"))
+            if (Application.platform == RuntimePlatform.WindowsEditor || Application.platform == RuntimePlatform.WindowsPlayer || Application.platform == RuntimePlatform.WindowsWebPlayer)
             {
-                transition -= Time.deltaTime;
+                // WINDOWS
+                if (Input.GetKeyDown("joystick button 0"))
+                {
+                    transition -= Time.deltaTime;
+                }
+            }
+            if (Application.platform == RuntimePlatform.OSXDashboardPlayer || Application.platform == RuntimePlatform.OSXEditor || Application.platform == RuntimePlatform.OSXPlayer || Application.platform == RuntimePlatform.OSXWebPlayer)
+            {
+                // MAC
+                if (Input.GetKeyDown("joystick button 16"))
+                {
+                    transition -= Time.deltaTime;
+                }
+            }
+            if (Application.platform == RuntimePlatform.LinuxPlayer)
+            {
+                // LINUX
+                if (Input.GetKeyDown("joystick button 0"))
+                {
+                    transition -= Time.deltaTime;
+                }
             }
 
         }
