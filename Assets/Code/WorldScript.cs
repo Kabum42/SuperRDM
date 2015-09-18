@@ -14,16 +14,26 @@ public class WorldScript : MonoBehaviour {
     private Vector3 lastMousePosition;
     private BoardCell selected;
 
+    private const int numRings = 3;
+
 	// Use this for initialization
 	void Start () {
         // GlobalData.Start();
 
-        boardCells = new BoardCell[37];
-        cellsPerRing = new int[4];
+        //boardCells = new BoardCell[37];
+
+        int numCells = 1;
+        
+        cellsPerRing = new int[numRings+1];
         cellsPerRing[0] = 1;
-        cellsPerRing[1] = 6;
-        cellsPerRing[2] = 12;
-        cellsPerRing[3] = 18;
+
+        for (int i = 1; i <= numRings; i++)
+        {
+            cellsPerRing[i] = 6 * i;
+            numCells += 6 * i;
+        }
+
+        boardCells = new BoardCell[numCells];
 
         board = new GameObject();
         board.name = "Board";
@@ -85,10 +95,10 @@ public class WorldScript : MonoBehaviour {
     {
 
         // RINGS
-        makeRing(0);
-        makeRing(1);
-        makeRing(2);
-        makeRing(3);
+        for (int i = 0; i <= numRings; i++)
+        {
+            makeRing(i);
+        }
 
         selected = boardCells[0];
 
