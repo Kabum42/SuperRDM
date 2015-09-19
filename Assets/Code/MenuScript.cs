@@ -11,10 +11,11 @@ public class MenuScript : MonoBehaviour {
     private float radius2 = 300f;
     public GameObject button1;
     public GameObject button2;
-    public AudioSource intro;
+    private AudioSource intro;
+    private AudioSource preparation;
     private float transition = 1f;
     private float phase = 0f;
-    private GameObject agent1;
+    private selectableAgent[] selectables = new selectableAgent[6];
 
     // Use this for initialization
     void Start () {
@@ -22,15 +23,22 @@ public class MenuScript : MonoBehaviour {
         intro = gameObject.AddComponent<AudioSource>();
         intro.clip = Resources.Load("Music/Intro") as AudioClip;
         intro.volume = 1f;
-        intro.playOnAwake = true;
         intro.loop = true;
         intro.Play();
+
+        preparation = gameObject.AddComponent<AudioSource>();
+        preparation.clip = Resources.Load("Music/Preparation") as AudioClip;
+        preparation.volume = 1f;
+        preparation.loop = true;
+        
 
         logoPosition = logo.transform.position;
         logo.GetComponent<SpriteRenderer>().color = new Color(logo.GetComponent<SpriteRenderer>().color.r, logo.GetComponent<SpriteRenderer>().color.g, logo.GetComponent<SpriteRenderer>().color.b, 0f);
 
-        agent1 = GameObject.Find("Agent1");
-        agent1.SetActive(false);
+        for (int i = 0; i < selectables.Length; i++)
+        {
+            selectables[i] = new selectableAgent(i);
+        }
 
 	}
 	
@@ -146,8 +154,11 @@ public class MenuScript : MonoBehaviour {
                 button2.SetActive(false);
                 transition = 0f;
 
-                agent1.SetActive(true);
-                agent1.GetComponent<SpriteRenderer>().color = new Color(agent1.GetComponent<SpriteRenderer>().color.r, agent1.GetComponent<SpriteRenderer>().color.g, agent1.GetComponent<SpriteRenderer>().color.b, 0f);
+                intro.Stop();
+                preparation.Play();
+
+                //agent1_pictureHolder.SetActive(true);
+                //agent1_pictureHolder.GetComponent<SpriteRenderer>().color = new Color(agent1_pictureHolder.GetComponent<SpriteRenderer>().color.r, agent1_pictureHolder.GetComponent<SpriteRenderer>().color.g, agent1_pictureHolder.GetComponent<SpriteRenderer>().color.b, 0f);
             }
 
         }
@@ -160,13 +171,73 @@ public class MenuScript : MonoBehaviour {
                 {
                     transition = 1f;
                 }
-                agent1.GetComponent<SpriteRenderer>().color = new Color(agent1.GetComponent<SpriteRenderer>().color.r, agent1.GetComponent<SpriteRenderer>().color.g, agent1.GetComponent<SpriteRenderer>().color.b, transition);
-                intro.volume = transition;
+                //agent1_pictureHolder.GetComponent<SpriteRenderer>().color = new Color(agent1_pictureHolder.GetComponent<SpriteRenderer>().color.r, agent1_pictureHolder.GetComponent<SpriteRenderer>().color.g, agent1_pictureHolder.GetComponent<SpriteRenderer>().color.b, transition);
+                preparation.volume = transition;
+
+                for (int i = 0; i < selectables.Length; i++)
+                {
+                    selectables[i].changeAlpha(transition);
+                }
+
             }
+
         }
 
 
 
 
     }
+
+    private class selectableAgent
+    {
+
+        public GameObject root;
+
+        public string status = "closed";
+        public string currentLegend = "barbarian";
+
+        public GameObject pictureHolder;
+        public GameObject icon;
+        public GameObject arrowBackground;
+        public GameObject arrow;
+
+        public selectableAgent(int number)
+        {
+            root = Instantiate(Resources.Load("Prefabs/SelectableAgent") as GameObject);
+            root.name = "Agent" + number;
+            root.transform.localPosition = new Vector3(0f, (+2.5f -number)*2.7f, 0.1f);
+            pictureHolder = root.transform.FindChild("PictureHolder").gameObject;
+            icon = root.transform.FindChild("Icon").gameObject;
+            arrowBackground = root.transform.FindChild("ArrowBackground").gameObject;
+            arrow = root.transform.FindChild("Arrow").gameObject;
+
+            changeAlpha(0f);
+
+            if (number == 0)
+            {
+                changeLegend("barbarian");
+            }
+            if (number == 1)
+            {
+                changeLegend("pilumantic");
+            }
+
+        }
+
+        public void changeAlpha(float amount)
+        {
+            pictureHolder.GetComponent<SpriteRenderer>().color = new Color(pictureHolder.GetComponent<SpriteRenderer>().color.r, pictureHolder.GetComponent<SpriteRenderer>().color.g, pictureHolder.GetComponent<SpriteRenderer>().color.b, amount);
+            icon.GetComponent<SpriteRenderer>().color = new Color(icon.GetComponent<SpriteRenderer>().color.r, icon.GetComponent<SpriteRenderer>().color.g, icon.GetComponent<SpriteRenderer>().color.b, amount);
+            arrowBackground.GetComponent<SpriteRenderer>().color = new Color(arrowBackground.GetComponent<SpriteRenderer>().color.r, arrowBackground.GetComponent<SpriteRenderer>().color.g, arrowBackground.GetComponent<SpriteRenderer>().color.b, amount);
+            arrow.GetComponent<SpriteRenderer>().color = new Color(arrow.GetComponent<SpriteRenderer>().color.r, arrow.GetComponent<SpriteRenderer>().color.g, arrow.GetComponent<SpriteRenderer>().color.b, amount);
+        }
+
+        public void changeLegend(string newLegend)
+        {
+            currentLegend = newLegend;
+            icon.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Legends/"+currentLegend);
+        }
+
+    }
+
 }
