@@ -50,7 +50,6 @@
      <Compile Include="Assets\Code\GlobalData.cs" />
      <Compile Include="Assets\Code\MenuScript.cs" />
      <Compile Include="Assets\Code\WorldScript.cs" />
-     <Compile Include="Assets\PreparationScript.cs" />
  <Reference Include="UnityEngine.UI">
  <HintPath>E:/Programas/Unity2/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
  </Reference>
