@@ -115,6 +115,7 @@ public class WorldScript : MonoBehaviour {
         //INITIAL CELL
         b = new BoardCell();
         b.root = Instantiate(Resources.Load("Prefabs/BoardCell")) as GameObject;
+        b.ring = number;
         b.randomBiome();
         b.root.transform.parent = board.transform;
         b.root.name = "Cell_" + number + "_" + currentCounter;
@@ -135,6 +136,7 @@ public class WorldScript : MonoBehaviour {
 
             b = new BoardCell();
             b.root = Instantiate(Resources.Load("Prefabs/BoardCell")) as GameObject;
+            b.ring = number;
             b.randomBiome();
             b.root.transform.parent = board.transform;
             b.root.name = "Cell_" + number + "_" + currentCounter;
@@ -160,6 +162,7 @@ public class WorldScript : MonoBehaviour {
 
             b = new BoardCell();
             b.root = Instantiate(Resources.Load("Prefabs/BoardCell")) as GameObject;
+            b.ring = number;
             b.randomBiome();
             b.root.transform.parent = board.transform;
             b.root.name = "Cell_" + number + "_" + currentCounter;
@@ -185,6 +188,7 @@ public class WorldScript : MonoBehaviour {
 
             b = new BoardCell();
             b.root = Instantiate(Resources.Load("Prefabs/BoardCell")) as GameObject;
+            b.ring = number;
             b.randomBiome();
             b.root.transform.parent = board.transform;
             b.root.name = "Cell_" + number + "_" + currentCounter;
@@ -210,6 +214,7 @@ public class WorldScript : MonoBehaviour {
 
             b = new BoardCell();
             b.root = Instantiate(Resources.Load("Prefabs/BoardCell")) as GameObject;
+            b.ring = number;
             b.randomBiome();
             b.root.transform.parent = board.transform;
             b.root.name = "Cell_" + number + "_" + currentCounter;
@@ -234,6 +239,7 @@ public class WorldScript : MonoBehaviour {
 
             b = new BoardCell();
             b.root = Instantiate(Resources.Load("Prefabs/BoardCell")) as GameObject;
+            b.ring = number;
             b.randomBiome();
             b.root.transform.parent = board.transform;
             b.root.name = "Cell_" + number + "_" + currentCounter;
@@ -264,6 +270,7 @@ public class WorldScript : MonoBehaviour {
 
             b = new BoardCell();
             b.root = Instantiate(Resources.Load("Prefabs/BoardCell")) as GameObject;
+            b.ring = number;
             b.randomBiome();
             b.root.transform.parent = board.transform;
             b.root.name = "Cell_" + number + "_" + currentCounter;
