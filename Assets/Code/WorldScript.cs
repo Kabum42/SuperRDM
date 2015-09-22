@@ -8,7 +8,7 @@ public class WorldScript : MonoBehaviour {
     private int currentCell = 0;
     private int[] cellsPerRing;
 
-    private float cellWidth = 1.48f;
+    private float cellWidth = 1.30f;
     private float cellHeight = 1.51f;
 
     private Vector3 lastMousePosition;

@@ -23,6 +23,12 @@ public class MenuScript : MonoBehaviour {
     public GameObject playText;
     public GameObject playText2;
 
+    private int selectableX = 0;
+    private int selectableY = 0;
+
+    private float lastDPadX = 0f;
+    private float lastDPadY = 0f;
+
     // Use this for initialization
     void Start () {
 
@@ -36,7 +42,7 @@ public class MenuScript : MonoBehaviour {
 
         intro = gameObject.AddComponent<AudioSource>();
         intro.clip = Resources.Load("Music/Intro") as AudioClip;
-        intro.volume = 1f;
+        intro.volume = 0f;
         intro.loop = true;
         intro.Play();
 
@@ -156,6 +162,7 @@ public class MenuScript : MonoBehaviour {
             {
                 transition += Time.deltaTime;
                 fading.GetComponent<SpriteRenderer>().color = new Color(fading.GetComponent<SpriteRenderer>().color.r, fading.GetComponent<SpriteRenderer>().color.g, fading.GetComponent<SpriteRenderer>().color.b, transition);
+                intro.volume = 1f - transition;
 
                 if (transition >= 1f)
                 {
@@ -205,8 +212,116 @@ public class MenuScript : MonoBehaviour {
                 transition = 0f;
             }
 
-            for (int i = 0; i < selectables.Length; i++)
+
+            int controllerConnected = -1;
+            for (int i = 0; i < Input.GetJoystickNames().Length; i++)
             {
+                if (Input.GetJoystickNames()[i] != "")
+                {
+                    controllerConnected = i;
+                    break;
+                }
+            }
+
+            if (controllerConnected != -1)
+            {
+                // CONTROLLER PLUGGED
+
+                if (GlobalData.OS == "Windows")
+                {
+                    // WINDOWS
+                    if (lastDPadX != Input.GetAxis("DPad1") && Input.GetAxis("DPad1") != 0 && selectableY != 6 && selectables[selectableY].status == "opened")
+                    {
+                        if (Input.GetAxis("DPad1") == 1)
+                        {
+                            selectableX += 1;
+                            if (selectableX > 2) { selectableX = 0; }
+                            // TEMPORARY (?)
+                            if (selectableX == 1) { selectableX = 2; }
+                        }
+                        else if (Input.GetAxis("DPad1") == -1)
+                        {
+                            selectableX -= 1;
+                            if (selectableX < 0) { selectableX = 2; }
+                            // TEMPORARY (?)
+                            if (selectableX == 1) { selectableX = 0; }
+                        }
+                    }
+                    if (lastDPadY != Input.GetAxis("DPad2") && Input.GetAxis("DPad2") != 0)
+                    {
+                        if (Input.GetAxis("DPad2") == 1)
+                        {
+                            selectableY -= 1;
+                            if (selectableY < 0) { selectableY = 6; }
+                        }
+                        else if (Input.GetAxis("DPad2") == -1)
+                        {
+                            selectableY += 1;
+                            if (selectableY > 6) { selectableY = 0; }
+                        }
+                    }
+
+                    lastDPadX = Input.GetAxis("DPad1");
+                    lastDPadY = Input.GetAxis("DPad2");
+
+                    //CHECK BUTTON A
+                    if (Input.GetKeyDown("joystick button 0"))
+                    {
+                        if (selectableY < 6)
+                        {
+                            if (selectables[selectableY].status == "closed")
+                            {
+                                selectables[selectableY].status = "opened";
+                            } else
+                            {
+                                if (selectableX == 0)
+                                {
+                                    // CHANGE CHAMPION
+                                }
+                                else if (selectableX == 2)
+                                {
+                                    selectables[selectableY].status = "closed";
+                                }
+                            }
+                        }
+                        else if (selectableY == 6)
+                        {
+                            phase = 3;
+                            transition = 0f;
+                        }
+                    }
+
+                }
+
+            }
+
+            playBackground.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1f);
+            if (selectableY == 6)
+            {
+                playBackground.GetComponent<SpriteRenderer>().color = new Color(0.7f, 0.7f, 0.7f, 0.7f);
+            }
+
+            for (int i = 0; i < selectables.Length; i++)
+                {
+                 selectables[i].nameBackground.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1f);
+                 selectables[i].controllerBackground.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1f);
+                 selectables[i].arrowBackground.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1f);
+
+                if (selectableY == i)
+                {
+                    if (selectableX == 0 && selectables[i].status == "opened")
+                    {
+                        selectables[i].nameBackground.GetComponent<SpriteRenderer>().color = new Color(0.7f, 0.7f, 0.7f, 1f);
+                    }
+                    else if (selectableX == 1 && selectables[i].status == "opened")
+                    {
+                        selectables[i].controllerBackground.GetComponent<SpriteRenderer>().color = new Color(0.7f, 0.7f, 0.7f, 1f);
+                    }
+                    else if (selectableX == 2 || selectables[i].status == "closed")
+                    {
+                        selectables[i].arrowBackground.GetComponent<SpriteRenderer>().color = new Color(0.7f, 0.7f, 0.7f, 1f);
+                    }
+                }
 
                 if (ClickedOn(selectables[i].arrowBackground))
                 {
