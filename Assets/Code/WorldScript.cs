@@ -16,11 +16,25 @@ public class WorldScript : MonoBehaviour {
 
     private const int numRings = 3;
 
-	// Use this for initialization
-	void Start () {
+    private int phase = 0;
+    private float transition = 0f;
+    private GameObject fading;
+    private AudioSource musicWorld;
+
+
+    // Use this for initialization
+    void Start () {
         // GlobalData.Start();
 
         //boardCells = new BoardCell[37];
+
+        musicWorld = gameObject.AddComponent<AudioSource>();
+        musicWorld.clip = Resources.Load("Music/World") as AudioClip;
+        musicWorld.volume = 1f;
+        musicWorld.loop = true;
+        musicWorld.Play();
+
+        fading = GameObject.Find("Fading");
 
         int numCells = 1;
         
@@ -47,6 +61,21 @@ public class WorldScript : MonoBehaviour {
 
         //Debug.Log(boardCells[1].south);
         //boardCells[1].south.root.transform.position = boardCells[1].south.root.transform.position + new Vector3(0f, 0.02f, 0f);
+
+        if (phase == 0)
+        {
+            transition += Time.deltaTime;
+            if (transition >= 1f)
+            {
+                transition = 1f;
+                fading.SetActive(false);
+                phase = 1;
+            }
+
+            musicWorld.volume = transition;
+            fading.GetComponent<SpriteRenderer>().color = new Color(fading.GetComponent<SpriteRenderer>().color.r, fading.GetComponent<SpriteRenderer>().color.g, fading.GetComponent<SpriteRenderer>().color.b, 1f - transition);
+
+        }
 
         for (int i = 0; i < boardCells.Length; i++)
         {

@@ -3,6 +3,8 @@ using System.Collections;
 
 public class MenuScript : MonoBehaviour {
 
+    private GameObject fading;
+
     public GameObject logo;
     private float radius = 0f;
     private Vector3 logoPosition;
@@ -13,13 +15,19 @@ public class MenuScript : MonoBehaviour {
     public GameObject button2;
     private AudioSource intro;
     private AudioSource preparation;
-    private float transition = 1f;
-    private float phase = 0f;
+    private float transition = 0f;
+    private int phase = 0;
     private selectableAgent[] selectables = new selectableAgent[6];
     private Vector3 lastMousePosition;
+    public GameObject playBackground;
+    public GameObject playText;
+    public GameObject playText2;
 
     // Use this for initialization
     void Start () {
+
+        fading = GameObject.Find("Fading");
+        fading.GetComponent<SpriteRenderer>().color = new Color(fading.GetComponent<SpriteRenderer>().color.r, fading.GetComponent<SpriteRenderer>().color.g, fading.GetComponent<SpriteRenderer>().color.g, 1f);
 
         intro = gameObject.AddComponent<AudioSource>();
         intro.clip = Resources.Load("Music/Intro") as AudioClip;
@@ -34,53 +42,31 @@ public class MenuScript : MonoBehaviour {
         
 
         logoPosition = logo.transform.position;
-        logo.GetComponent<SpriteRenderer>().color = new Color(logo.GetComponent<SpriteRenderer>().color.r, logo.GetComponent<SpriteRenderer>().color.g, logo.GetComponent<SpriteRenderer>().color.b, 0f);
+        //logo.GetComponent<SpriteRenderer>().color = new Color(logo.GetComponent<SpriteRenderer>().color.r, logo.GetComponent<SpriteRenderer>().color.g, logo.GetComponent<SpriteRenderer>().color.b, 0f);
 
-        for (int i = 0; i < selectables.Length; i++)
-        {
-            selectables[i] = new selectableAgent(i);
-        }
+        playBackground.SetActive(false);
+        playText.SetActive(false);
+        playText2.SetActive(false);
+
 
 	}
 	
 	// Update is called once per frame
 	void Update () {
 
-        if (phase == 0f)
+        if (phase == 0)
         {
             if (transition < 1f)
             {
-                transition -= Time.deltaTime;
+                transition += Time.deltaTime;
 
-                logo.GetComponent<SpriteRenderer>().color = new Color(logo.GetComponent<SpriteRenderer>().color.r, logo.GetComponent<SpriteRenderer>().color.g, logo.GetComponent<SpriteRenderer>().color.b, transition);
-
-                startText.GetComponent<TextMesh>().color = new Color(startText.GetComponent<TextMesh>().color.r, startText.GetComponent<TextMesh>().color.g, startText.GetComponent<TextMesh>().color.b, transition);
-                startText2.GetComponent<TextMesh>().color = new Color(startText2.GetComponent<TextMesh>().color.r, startText2.GetComponent<TextMesh>().color.g, startText2.GetComponent<TextMesh>().color.b, transition);
-
-                button1.GetComponent<SpriteRenderer>().color = new Color(button1.GetComponent<SpriteRenderer>().color.r, button1.GetComponent<SpriteRenderer>().color.g, button1.GetComponent<SpriteRenderer>().color.b, transition);
-                button2.GetComponent<SpriteRenderer>().color = new Color(button2.GetComponent<SpriteRenderer>().color.r, button2.GetComponent<SpriteRenderer>().color.g, button2.GetComponent<SpriteRenderer>().color.b, transition);
-
-                intro.volume = transition;
-
-            }
-
-            else
-            {
-
-                if (logo.GetComponent<SpriteRenderer>().color.a < 0.99f)
+                if (transition >= 1f)
                 {
-                    logo.GetComponent<SpriteRenderer>().color = new Color(logo.GetComponent<SpriteRenderer>().color.r, logo.GetComponent<SpriteRenderer>().color.g, logo.GetComponent<SpriteRenderer>().color.b, Mathf.Lerp(logo.GetComponent<SpriteRenderer>().color.a, 1f, Time.deltaTime));
+                    transition = 1f;
                 }
-
-                radius2 += Time.deltaTime * 100f;
-                if (radius2 > 360f) { radius2 -= 360f; }
-
-                startText.GetComponent<TextMesh>().color = new Color(startText.GetComponent<TextMesh>().color.r, startText.GetComponent<TextMesh>().color.g, startText.GetComponent<TextMesh>().color.b, Mathf.Abs(Mathf.Sin(radius2 * Mathf.PI / 180)));
-                startText2.GetComponent<TextMesh>().color = new Color(startText2.GetComponent<TextMesh>().color.r, startText2.GetComponent<TextMesh>().color.g, startText2.GetComponent<TextMesh>().color.b, Mathf.Abs(Mathf.Sin(radius2 * Mathf.PI / 180)));
-
-                button1.GetComponent<SpriteRenderer>().color = new Color(button1.GetComponent<SpriteRenderer>().color.r, button1.GetComponent<SpriteRenderer>().color.g, button1.GetComponent<SpriteRenderer>().color.b, Mathf.Abs(Mathf.Sin(radius2 * Mathf.PI / 180)));
-                button2.GetComponent<SpriteRenderer>().color = new Color(button2.GetComponent<SpriteRenderer>().color.r, button2.GetComponent<SpriteRenderer>().color.g, button2.GetComponent<SpriteRenderer>().color.b, Mathf.Abs(Mathf.Sin(radius2 * Mathf.PI / 180)));
-
+               
+                intro.volume = transition;
+                fading.GetComponent<SpriteRenderer>().color = new Color(fading.GetComponent<SpriteRenderer>().color.r, fading.GetComponent<SpriteRenderer>().color.g, fading.GetComponent<SpriteRenderer>().color.g, 1f -transition);
 
             }
 
@@ -88,6 +74,15 @@ public class MenuScript : MonoBehaviour {
             if (radius > 360f) { radius -= 360f; }
 
             logo.transform.localPosition = logoPosition + new Vector3(0f, Mathf.Sin(radius * Mathf.PI / 180) * 0.25f, 0f);
+
+            radius2 += Time.deltaTime * 100f;
+            if (radius2 > 360f) { radius2 -= 360f; }
+
+            startText.GetComponent<TextMesh>().color = new Color(startText.GetComponent<TextMesh>().color.r, startText.GetComponent<TextMesh>().color.g, startText.GetComponent<TextMesh>().color.b, Mathf.Abs(Mathf.Sin(radius2 * Mathf.PI / 180)));
+            startText2.GetComponent<TextMesh>().color = new Color(startText2.GetComponent<TextMesh>().color.r, startText2.GetComponent<TextMesh>().color.g, startText2.GetComponent<TextMesh>().color.b, Mathf.Abs(Mathf.Sin(radius2 * Mathf.PI / 180)));
+
+            button1.GetComponent<SpriteRenderer>().color = new Color(button1.GetComponent<SpriteRenderer>().color.r, button1.GetComponent<SpriteRenderer>().color.g, button1.GetComponent<SpriteRenderer>().color.b, Mathf.Abs(Mathf.Sin(radius2 * Mathf.PI / 180)));
+            button2.GetComponent<SpriteRenderer>().color = new Color(button2.GetComponent<SpriteRenderer>().color.r, button2.GetComponent<SpriteRenderer>().color.g, button2.GetComponent<SpriteRenderer>().color.b, Mathf.Abs(Mathf.Sin(radius2 * Mathf.PI / 180)));
 
 
             int controllerConnected = -1;
@@ -111,7 +106,8 @@ public class MenuScript : MonoBehaviour {
                     // WINDOWS
                     if (Input.GetKeyDown("joystick button 0"))
                     {
-                        transition -= Time.deltaTime;
+                        transition = 0f;
+                        phase = 1;
                     }
                 }
                 if (Application.platform == RuntimePlatform.OSXDashboardPlayer || Application.platform == RuntimePlatform.OSXEditor || Application.platform == RuntimePlatform.OSXPlayer || Application.platform == RuntimePlatform.OSXWebPlayer)
@@ -119,7 +115,8 @@ public class MenuScript : MonoBehaviour {
                     // MAC
                     if (Input.GetKeyDown("joystick button 16"))
                     {
-                        transition -= Time.deltaTime;
+                        transition = 0f;
+                        phase = 1;
                     }
                 }
                 if (Application.platform == RuntimePlatform.LinuxPlayer)
@@ -127,7 +124,8 @@ public class MenuScript : MonoBehaviour {
                     // LINUX
                     if (Input.GetKeyDown("joystick button 0"))
                     {
-                        transition -= Time.deltaTime;
+                        transition = 0f;
+                        phase = 1;
                     }
                 }
             }
@@ -139,31 +137,49 @@ public class MenuScript : MonoBehaviour {
 
                 if (Input.GetKeyDown(KeyCode.Return))
                 {
-                    transition -= Time.deltaTime;
+                    transition = 0f;
+                    phase = 1;
                 }
 
             }
 
+        }
+        else if (phase == 1)
+        {
 
-            if (transition < 0f)
+            if (transition < 1f)
             {
-                phase = 1f;
-                logo.SetActive(false);
-                startText.SetActive(false);
-                startText2.SetActive(false);
-                button1.SetActive(false);
-                button2.SetActive(false);
-                transition = 0f;
+                transition += Time.deltaTime;
+                fading.GetComponent<SpriteRenderer>().color = new Color(fading.GetComponent<SpriteRenderer>().color.r, fading.GetComponent<SpriteRenderer>().color.g, fading.GetComponent<SpriteRenderer>().color.b, transition);
 
-                intro.Stop();
-                preparation.Play();
+                if (transition >= 1f)
+                {
+                    phase = 2;
 
-                //agent1_pictureHolder.SetActive(true);
-                //agent1_pictureHolder.GetComponent<SpriteRenderer>().color = new Color(agent1_pictureHolder.GetComponent<SpriteRenderer>().color.r, agent1_pictureHolder.GetComponent<SpriteRenderer>().color.g, agent1_pictureHolder.GetComponent<SpriteRenderer>().color.b, 0f);
+                    logo.SetActive(false);
+                    startText.SetActive(false);
+                    startText2.SetActive(false);
+                    button1.SetActive(false);
+                    button2.SetActive(false);
+                    transition = 0f;
+
+                    playBackground.SetActive(true);
+                    playText.SetActive(true);
+                    playText2.SetActive(true);
+
+                    intro.Stop();
+                    preparation.Play();
+
+                    for (int i = 0; i < selectables.Length; i++)
+                    {
+                        selectables[i] = new selectableAgent(i);
+                    }
+
+                }
             }
 
         }
-        else if (phase == 1f)
+        else if (phase == 2)
         {
             if (transition < 1f)
             {
@@ -175,11 +191,13 @@ public class MenuScript : MonoBehaviour {
                 //agent1_pictureHolder.GetComponent<SpriteRenderer>().color = new Color(agent1_pictureHolder.GetComponent<SpriteRenderer>().color.r, agent1_pictureHolder.GetComponent<SpriteRenderer>().color.g, agent1_pictureHolder.GetComponent<SpriteRenderer>().color.b, transition);
                 preparation.volume = transition;
 
-                for (int i = 0; i < selectables.Length; i++)
-                {
-                    selectables[i].changeAlpha(transition);
-                }
+                fading.GetComponent<SpriteRenderer>().color = new Color(fading.GetComponent<SpriteRenderer>().color.r, fading.GetComponent<SpriteRenderer>().color.g, fading.GetComponent<SpriteRenderer>().color.b, 1f - transition);
 
+            }
+            else if (ClickedOn(playBackground))
+            {
+                phase = 3;
+                transition = 0f;
             }
 
             for (int i = 0; i < selectables.Length; i++)
@@ -227,6 +245,20 @@ public class MenuScript : MonoBehaviour {
             }
 
         }
+        else if (phase == 3)
+        {
+
+            transition += Time.deltaTime;
+            if (transition >= 1f)
+            {
+                transition = 1f;
+                Application.LoadLevel("World");
+            }
+
+            preparation.volume = 1f - transition;
+            fading.GetComponent<SpriteRenderer>().color = new Color(fading.GetComponent<SpriteRenderer>().color.r, fading.GetComponent<SpriteRenderer>().color.g, fading.GetComponent<SpriteRenderer>().color.b, transition);
+
+        }
 
 
 
@@ -257,7 +289,7 @@ public class MenuScript : MonoBehaviour {
         {
             root = Instantiate(Resources.Load("Prefabs/SelectableAgent") as GameObject);
             root.name = "Agent" + number;
-            root.transform.localPosition = new Vector3(root.transform.localPosition.x, (+2.5f -number)*2.7f, 0.1f);
+            root.transform.localPosition = new Vector3(root.transform.localPosition.x, (+2.5f -number +0.5f)*2.7f, 0.1f);
             pictureHolder = root.transform.FindChild("PictureHolder").gameObject;
             icon = root.transform.FindChild("Icon").gameObject;
             arrowBackground = root.transform.FindChild("ArrowBackground").gameObject;
@@ -275,15 +307,15 @@ public class MenuScript : MonoBehaviour {
             controllerText.GetComponent<TextMesh>().color = new Color(controllerText.GetComponent<TextMesh>().color.r, controllerText.GetComponent<TextMesh>().color.g, controllerText.GetComponent<TextMesh>().color.b, 0f);
             controllerText2.GetComponent<TextMesh>().color = new Color(controllerText2.GetComponent<TextMesh>().color.r, controllerText2.GetComponent<TextMesh>().color.g, controllerText2.GetComponent<TextMesh>().color.b, 0f);
 
-            changeAlpha(0f);
-
             if (number == 0)
             {
                 changeLegend("barbarian");
+                status = "opened";
             }
             if (number == 1)
             {
                 changeLegend("pilumantic");
+                status = "opened";
             }
 
         }
@@ -296,6 +328,13 @@ public class MenuScript : MonoBehaviour {
             arrow.GetComponent<SpriteRenderer>().color = new Color(arrow.GetComponent<SpriteRenderer>().color.r, arrow.GetComponent<SpriteRenderer>().color.g, arrow.GetComponent<SpriteRenderer>().color.b, amount);
             nameBackground.GetComponent<SpriteRenderer>().color = new Color(nameBackground.GetComponent<SpriteRenderer>().color.r, nameBackground.GetComponent<SpriteRenderer>().color.g, nameBackground.GetComponent<SpriteRenderer>().color.b, amount);
             controllerBackground.GetComponent<SpriteRenderer>().color = new Color(controllerBackground.GetComponent<SpriteRenderer>().color.r, controllerBackground.GetComponent<SpriteRenderer>().color.g, controllerBackground.GetComponent<SpriteRenderer>().color.b, amount);
+            if (status == "opened")
+            {
+                nameText.GetComponent<TextMesh>().color = new Color(nameText.GetComponent<TextMesh>().color.r, nameText.GetComponent<TextMesh>().color.g, nameText.GetComponent<TextMesh>().color.b, amount);
+                nameText2.GetComponent<TextMesh>().color = new Color(nameText2.GetComponent<TextMesh>().color.r, nameText2.GetComponent<TextMesh>().color.g, nameText2.GetComponent<TextMesh>().color.b, amount);
+                controllerText.GetComponent<TextMesh>().color = new Color(controllerText.GetComponent<TextMesh>().color.r, controllerText.GetComponent<TextMesh>().color.g, controllerText.GetComponent<TextMesh>().color.b, amount);
+                controllerText2.GetComponent<TextMesh>().color = new Color(controllerText2.GetComponent<TextMesh>().color.r, controllerText2.GetComponent<TextMesh>().color.g, controllerText2.GetComponent<TextMesh>().color.b, amount);
+            }
         }
 
         public void changeLegend(string newLegend)
