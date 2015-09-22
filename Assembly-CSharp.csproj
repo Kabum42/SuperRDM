@@ -46,8 +46,12 @@
   </ItemGroup>
   <ItemGroup>
      <Compile Include="Assets\Code\Agent.cs" />
+     <Compile Include="Assets\Code\Biome.cs" />
      <Compile Include="Assets\Code\BoardCell.cs" />
+     <Compile Include="Assets\Code\Character.cs" />
+     <Compile Include="Assets\Code\EventCharacter.cs" />
      <Compile Include="Assets\Code\GlobalData.cs" />
+     <Compile Include="Assets\Code\MainCharacter.cs" />
      <Compile Include="Assets\Code\WorldScript.cs" />
  <Reference Include="UnityEngine.UI">
  <HintPath>F:/Unity3/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
