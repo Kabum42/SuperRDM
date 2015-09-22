@@ -22,6 +22,7 @@ public class MenuScript : MonoBehaviour {
     public GameObject playBackground;
     public GameObject playText;
     public GameObject playText2;
+    private GameObject star;
     private GameObject support;
     private AudioSource selectEffect;
     private AudioSource acceptEffect;
@@ -42,6 +43,9 @@ public class MenuScript : MonoBehaviour {
 
         fading = GameObject.Find("Fading");
         fading.GetComponent<SpriteRenderer>().color = new Color(fading.GetComponent<SpriteRenderer>().color.r, fading.GetComponent<SpriteRenderer>().color.g, fading.GetComponent<SpriteRenderer>().color.b, 1f);
+
+        star = GameObject.Find("Star");
+        star.GetComponent<SpriteRenderer>().color = new Color(star.GetComponent<SpriteRenderer>().color.r, star.GetComponent<SpriteRenderer>().color.g, star.GetComponent<SpriteRenderer>().color.b, 0f);
 
         support = GameObject.Find("Support");
         support.GetComponent<SpriteRenderer>().color = new Color(support.GetComponent<SpriteRenderer>().color.r, support.GetComponent<SpriteRenderer>().color.g, support.GetComponent<SpriteRenderer>().color.b, 0f);
@@ -125,6 +129,7 @@ public class MenuScript : MonoBehaviour {
             if (controllerConnected != -1)
             {
                 // CONTROLLER PLUGGED
+                star.GetComponent<SpriteRenderer>().color = new Color(star.GetComponent<SpriteRenderer>().color.r, star.GetComponent<SpriteRenderer>().color.g, star.GetComponent<SpriteRenderer>().color.b, Mathf.Lerp(star.GetComponent<SpriteRenderer>().color.a, 0f, Time.deltaTime * 2.5f));
                 support.GetComponent<SpriteRenderer>().color = new Color(support.GetComponent<SpriteRenderer>().color.r, support.GetComponent<SpriteRenderer>().color.g, support.GetComponent<SpriteRenderer>().color.b, Mathf.Lerp(support.GetComponent<SpriteRenderer>().color.a, 0f, Time.deltaTime * 2.5f));
                 if (button1.activeInHierarchy) { button1.SetActive(false); }
                 if (!button2.activeInHierarchy) { button2.SetActive(true); }
@@ -160,6 +165,7 @@ public class MenuScript : MonoBehaviour {
             else
             {
                 // CONTROLLER NOT PLUGGED
+                star.GetComponent<SpriteRenderer>().color = new Color(star.GetComponent<SpriteRenderer>().color.r, star.GetComponent<SpriteRenderer>().color.g, star.GetComponent<SpriteRenderer>().color.b, Mathf.Lerp(star.GetComponent<SpriteRenderer>().color.a, 1f, Time.deltaTime * 2.5f));
                 support.GetComponent<SpriteRenderer>().color = new Color(support.GetComponent<SpriteRenderer>().color.r, support.GetComponent<SpriteRenderer>().color.g, support.GetComponent<SpriteRenderer>().color.b, Mathf.Lerp(support.GetComponent<SpriteRenderer>().color.a, 1f, Time.deltaTime * 2.5f));
                 if (button2.activeInHierarchy) { button2.SetActive(false); }
                 if (!button1.activeInHierarchy) { button1.SetActive(true); }
@@ -244,6 +250,7 @@ public class MenuScript : MonoBehaviour {
             if (controllerConnected != -1)
             {
                 // CONTROLLER PLUGGED
+                star.GetComponent<SpriteRenderer>().color = new Color(star.GetComponent<SpriteRenderer>().color.r, star.GetComponent<SpriteRenderer>().color.g, star.GetComponent<SpriteRenderer>().color.b, Mathf.Lerp(star.GetComponent<SpriteRenderer>().color.a, 0f, Time.deltaTime * 2.5f));
                 support.GetComponent<SpriteRenderer>().color = new Color(support.GetComponent<SpriteRenderer>().color.r, support.GetComponent<SpriteRenderer>().color.g, support.GetComponent<SpriteRenderer>().color.b, Mathf.Lerp(support.GetComponent<SpriteRenderer>().color.a, 0f, Time.deltaTime * 2.5f));
 
                 if (GlobalData.OS == "Windows")
@@ -321,6 +328,7 @@ public class MenuScript : MonoBehaviour {
             }
             else
             {
+                star.GetComponent<SpriteRenderer>().color = new Color(star.GetComponent<SpriteRenderer>().color.r, star.GetComponent<SpriteRenderer>().color.g, star.GetComponent<SpriteRenderer>().color.b, Mathf.Lerp(star.GetComponent<SpriteRenderer>().color.a, 1f, Time.deltaTime * 2.5f));
                 support.GetComponent<SpriteRenderer>().color = new Color(support.GetComponent<SpriteRenderer>().color.r, support.GetComponent<SpriteRenderer>().color.g, support.GetComponent<SpriteRenderer>().color.b, Mathf.Lerp(support.GetComponent<SpriteRenderer>().color.a, 1f, Time.deltaTime * 2.5f));
             }
 
@@ -410,7 +418,7 @@ public class MenuScript : MonoBehaviour {
 
         }
 
-
+        star.transform.eulerAngles = new Vector3(star.transform.eulerAngles.x, star.transform.eulerAngles.y, star.transform.eulerAngles.z - Time.deltaTime * 50f);
 
 
     }
