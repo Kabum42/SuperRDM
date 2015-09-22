@@ -20,11 +20,23 @@ public class WorldScript : MonoBehaviour {
     private float transition = 0f;
     private GameObject fading;
     private AudioSource musicWorld;
+    private GameObject selectedSprite;
+
+    private float lastDPadX = 0f;
+    private float lastDPadY = 0f;
+    private string lastHorizontal = "down";
+
+    private AudioSource selectCellEffect;
 
 
     // Use this for initialization
     void Start () {
-        // GlobalData.Start();
+
+        if (!GlobalData.started)
+        {
+            GlobalData.Start();
+        }
+       
 
         //boardCells = new BoardCell[37];
 
@@ -34,7 +46,15 @@ public class WorldScript : MonoBehaviour {
         musicWorld.loop = true;
         musicWorld.Play();
 
+        selectCellEffect = gameObject.AddComponent<AudioSource>();
+        selectCellEffect.clip = Resources.Load("Sounds/SelectCell") as AudioClip;
+        selectCellEffect.volume = 1f;
+        selectCellEffect.playOnAwake = false;
+
         fading = GameObject.Find("Fading");
+
+        selectedSprite = GameObject.Find("SelectedSprite");
+        
 
         int numCells = 1;
         
@@ -77,48 +97,182 @@ public class WorldScript : MonoBehaviour {
 
         }
 
-        for (int i = 0; i < boardCells.Length; i++)
+
+
+        int controllerConnected = -1;
+        for (int i = 0; i < Input.GetJoystickNames().Length; i++)
         {
-            boardCells[i].root.GetComponent<SpriteRenderer>().material.color = new Color(0.5f, 0.5f, 0.5f, 1f);
-            if (ClickedOn(boardCells[i].root))
+            if (Input.GetJoystickNames()[i] != "")
             {
-                selected = boardCells[i];
+                controllerConnected = i;
+                break;
             }
         }
+
+        if (controllerConnected != -1)
+        {
+            // CONTROLLER PLUGGED
+
+            if (GlobalData.OS == "Windows")
+            {
+                // WINDOWS
+                if (lastDPadX != Input.GetAxis("DPad1") && Input.GetAxis("DPad1") != 0)
+                {
+                    if (Input.GetAxis("DPad1") == -1)
+                    {
+                        // REGISTRADO INPUT DPAD-X -1
+                        if (lastHorizontal == "down")
+                        {
+                            if (selected.northWest != null)
+                            {
+                                selected = selected.northWest;
+                                lastHorizontal = "up";
+                                selectCellEffect.Play();
+                            }
+                            else if (selected.southWest != null)
+                            {
+                                selected = selected.southWest;
+                                selectCellEffect.Play();
+                            }
+                        }
+                        else
+                        {
+                            if (selected.southWest != null)
+                            {
+                                selected = selected.southWest;
+                                lastHorizontal = "down";
+                                selectCellEffect.Play();
+                            }
+                            else if (selected.northWest != null)
+                            {
+                                selected = selected.northWest;
+                                selectCellEffect.Play();
+                            }
+                        }
+                    }
+                    else if (Input.GetAxis("DPad1") == 1)
+                    {
+                        // REGISTRADO INPUT DPAD-X +1
+                        if (lastHorizontal == "down")
+                        {
+                            if (selected.northEast != null)
+                            {
+                                selected = selected.northEast;
+                                lastHorizontal = "up";
+                                selectCellEffect.Play();
+                            }
+                            else if (selected.southEast != null)
+                            {
+                                selected = selected.southEast;
+                                selectCellEffect.Play();
+                            }
+                        }
+                        else
+                        {
+                            if (selected.southEast != null)
+                            {
+                                selected = selected.southEast;
+                                lastHorizontal = "down";
+                                selectCellEffect.Play();
+                            }
+                            else if (selected.northEast != null)
+                            {
+                                selected = selected.northEast;
+                                selectCellEffect.Play();
+                            }
+                        }
+                    }
+                }
+                if (lastDPadY != Input.GetAxis("DPad2") && Input.GetAxis("DPad2") != 0)
+                {
+                    if (Input.GetAxis("DPad2") == -1)
+                    {
+                        // REGISTRADO INPUT DPAD-Y -1
+                        if (selected.south != null)
+                        {
+                            selected = selected.south;
+                            selectCellEffect.Play();
+                        }
+                        else if (selected.southEast != null)
+                        {
+                            selected = selected.southEast;
+                            selectCellEffect.Play();
+                        }
+                        else if (selected.southWest != null)
+                        {
+                            selected = selected.southWest;
+                            selectCellEffect.Play();
+                        }
+                    }
+                    else if (Input.GetAxis("DPad2") == 1)
+                    {
+                        // REGISTRADO INPUT DPAD-Y +1
+                        if (selected.north != null)
+                        {
+                            selected = selected.north;
+                            selectCellEffect.Play();
+                        }
+                        else if (selected.northEast != null)
+                        {
+                            selected = selected.northEast;
+                            selectCellEffect.Play();
+                        }
+                        else if (selected.northWest != null)
+                        {
+                            selected = selected.northWest;
+                            selectCellEffect.Play();
+                        }
+                    }
+                }
+
+                lastDPadX = Input.GetAxis("DPad1");
+                lastDPadY = Input.GetAxis("DPad2");
+            }
+            /*
+            if (GlobalData.OS == "Mac")
+            {
+                // MAC
+                // NOT IMPLEMENTED
+            }
+            if (GlobalData.OS == "Linux")
+            {
+                // LINUX
+                DPadX = Input.GetAxis("DPad2");
+                DPadY = Input.GetAxis("DPad3");
+            }
+            */
+
+                
+
+        }
+        else
+        {
+            // CONTROLLER NOT PLUGGED
+            selectedSprite.SetActive(false);
+
+            for (int i = 0; i < boardCells.Length; i++)
+            {
+                if (isOver(boardCells[i].root))
+                {
+                    selectedSprite.SetActive(true);
+                    selected = boardCells[i];
+                }
+            }
+
+            if (ClickedOn(selected.root))
+            {
+                // MOVE TO THE CELL??
+            }
+
+        }
+
 
         if (selected != null)
         {
-
-            selected.root.GetComponent<SpriteRenderer>().material.color = new Color(0.2f, 0.2f, 0.2f, 1f);
-
-            if (selected.northWest != null)
-            {
-                selected.northWest.root.GetComponent<SpriteRenderer>().material.color = new Color(1f, 1f, 1f, 1f);
-            }
-            if (selected.north != null)
-            {
-                selected.north.root.GetComponent<SpriteRenderer>().material.color = new Color(1f, 1f, 1f, 1f);
-            }
-            if (selected.northEast != null)
-            {
-                selected.northEast.root.GetComponent<SpriteRenderer>().material.color = new Color(1f, 1f, 1f, 1f);
-            }
-            if (selected.southEast != null)
-            {
-                selected.southEast.root.GetComponent<SpriteRenderer>().material.color = new Color(1f, 1f, 1f, 1f);
-            }
-            if (selected.south != null)
-            {
-                selected.south.root.GetComponent<SpriteRenderer>().material.color = new Color(1f, 1f, 1f, 1f);
-            }
-            if (selected.southWest != null)
-            {
-                selected.southWest.root.GetComponent<SpriteRenderer>().material.color = new Color(1f, 1f, 1f, 1f);
-            }
-
+            selectedSprite.transform.position = new Vector3(selected.root.transform.position.x, selected.root.transform.position.y, selectedSprite.transform.position.z);
         }
 
-	}
+    }
 
     void GenerateBoard()
     {
@@ -412,5 +566,28 @@ public class WorldScript : MonoBehaviour {
         return false;
 
     }
+
+    private bool isOver(GameObject target)
+    {
+
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+        // CLICKABLE MASK
+        RaycastHit2D[] hits = Physics2D.RaycastAll(new Vector2(ray.origin.x, ray.origin.y), Vector2.zero, 0f, LayerMask.GetMask("Clickable"));
+
+        for (int i = 0; i < hits.Length; i++)
+        {
+
+            if (i < hits.Length)
+            {
+                if (hits[i].collider.gameObject == hits[i].collider.gameObject && hits[i].collider.gameObject == target) { return true; }
+            }
+
+        }
+
+        return false;
+
+    }
+    
 
 }

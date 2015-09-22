@@ -26,6 +26,11 @@ public class MenuScript : MonoBehaviour {
     // Use this for initialization
     void Start () {
 
+        if (!GlobalData.started)
+        {
+            GlobalData.Start();
+        }
+
         fading = GameObject.Find("Fading");
         fading.GetComponent<SpriteRenderer>().color = new Color(fading.GetComponent<SpriteRenderer>().color.r, fading.GetComponent<SpriteRenderer>().color.g, fading.GetComponent<SpriteRenderer>().color.g, 1f);
 
@@ -101,7 +106,7 @@ public class MenuScript : MonoBehaviour {
                 if (button1.activeInHierarchy) { button1.SetActive(false); }
                 if (!button2.activeInHierarchy) { button2.SetActive(true); }
 
-                if (Application.platform == RuntimePlatform.WindowsEditor || Application.platform == RuntimePlatform.WindowsPlayer || Application.platform == RuntimePlatform.WindowsWebPlayer)
+                if (GlobalData.OS == "Windows")
                 {
                     // WINDOWS
                     if (Input.GetKeyDown("joystick button 0"))
@@ -110,7 +115,7 @@ public class MenuScript : MonoBehaviour {
                         phase = 1;
                     }
                 }
-                if (Application.platform == RuntimePlatform.OSXDashboardPlayer || Application.platform == RuntimePlatform.OSXEditor || Application.platform == RuntimePlatform.OSXPlayer || Application.platform == RuntimePlatform.OSXWebPlayer)
+                if (GlobalData.OS == "Mac")
                 {
                     // MAC
                     if (Input.GetKeyDown("joystick button 16"))
@@ -119,7 +124,7 @@ public class MenuScript : MonoBehaviour {
                         phase = 1;
                     }
                 }
-                if (Application.platform == RuntimePlatform.LinuxPlayer)
+                if (GlobalData.OS == "Linux")
                 {
                     // LINUX
                     if (Input.GetKeyDown("joystick button 0"))
