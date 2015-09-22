@@ -22,6 +22,9 @@ public class MenuScript : MonoBehaviour {
     public GameObject playBackground;
     public GameObject playText;
     public GameObject playText2;
+    private GameObject support;
+    private AudioSource selectEffect;
+    private AudioSource acceptEffect;
 
     private int selectableX = 0;
     private int selectableY = 0;
@@ -38,7 +41,20 @@ public class MenuScript : MonoBehaviour {
         }
 
         fading = GameObject.Find("Fading");
-        fading.GetComponent<SpriteRenderer>().color = new Color(fading.GetComponent<SpriteRenderer>().color.r, fading.GetComponent<SpriteRenderer>().color.g, fading.GetComponent<SpriteRenderer>().color.g, 1f);
+        fading.GetComponent<SpriteRenderer>().color = new Color(fading.GetComponent<SpriteRenderer>().color.r, fading.GetComponent<SpriteRenderer>().color.g, fading.GetComponent<SpriteRenderer>().color.b, 1f);
+
+        support = GameObject.Find("Support");
+        support.GetComponent<SpriteRenderer>().color = new Color(support.GetComponent<SpriteRenderer>().color.r, support.GetComponent<SpriteRenderer>().color.g, support.GetComponent<SpriteRenderer>().color.b, 0f);
+
+        selectEffect = gameObject.AddComponent<AudioSource>();
+        selectEffect.clip = Resources.Load("Sounds/SelectCell") as AudioClip;
+        selectEffect.volume = 1f;
+        selectEffect.playOnAwake = false;
+
+        acceptEffect = gameObject.AddComponent<AudioSource>();
+        acceptEffect.clip = Resources.Load("Sounds/whip_01") as AudioClip;
+        acceptEffect.volume = 1f;
+        acceptEffect.playOnAwake = false;
 
         intro = gameObject.AddComponent<AudioSource>();
         intro.clip = Resources.Load("Music/Intro") as AudioClip;
@@ -109,6 +125,7 @@ public class MenuScript : MonoBehaviour {
             if (controllerConnected != -1)
             {
                 // CONTROLLER PLUGGED
+                support.GetComponent<SpriteRenderer>().color = new Color(support.GetComponent<SpriteRenderer>().color.r, support.GetComponent<SpriteRenderer>().color.g, support.GetComponent<SpriteRenderer>().color.b, Mathf.Lerp(support.GetComponent<SpriteRenderer>().color.a, 0f, Time.deltaTime * 2.5f));
                 if (button1.activeInHierarchy) { button1.SetActive(false); }
                 if (!button2.activeInHierarchy) { button2.SetActive(true); }
 
@@ -143,6 +160,7 @@ public class MenuScript : MonoBehaviour {
             else
             {
                 // CONTROLLER NOT PLUGGED
+                support.GetComponent<SpriteRenderer>().color = new Color(support.GetComponent<SpriteRenderer>().color.r, support.GetComponent<SpriteRenderer>().color.g, support.GetComponent<SpriteRenderer>().color.b, Mathf.Lerp(support.GetComponent<SpriteRenderer>().color.a, 1f, Time.deltaTime * 2.5f));
                 if (button2.activeInHierarchy) { button2.SetActive(false); }
                 if (!button1.activeInHierarchy) { button1.SetActive(true); }
 
@@ -226,6 +244,7 @@ public class MenuScript : MonoBehaviour {
             if (controllerConnected != -1)
             {
                 // CONTROLLER PLUGGED
+                support.GetComponent<SpriteRenderer>().color = new Color(support.GetComponent<SpriteRenderer>().color.r, support.GetComponent<SpriteRenderer>().color.g, support.GetComponent<SpriteRenderer>().color.b, Mathf.Lerp(support.GetComponent<SpriteRenderer>().color.a, 0f, Time.deltaTime * 2.5f));
 
                 if (GlobalData.OS == "Windows")
                 {
@@ -238,6 +257,7 @@ public class MenuScript : MonoBehaviour {
                             if (selectableX > 2) { selectableX = 0; }
                             // TEMPORARY (?)
                             if (selectableX == 1) { selectableX = 2; }
+                            selectEffect.Play();
                         }
                         else if (Input.GetAxis("DPad1") == -1)
                         {
@@ -245,6 +265,7 @@ public class MenuScript : MonoBehaviour {
                             if (selectableX < 0) { selectableX = 2; }
                             // TEMPORARY (?)
                             if (selectableX == 1) { selectableX = 0; }
+                            selectEffect.Play();
                         }
                     }
                     if (lastDPadY != Input.GetAxis("DPad2") && Input.GetAxis("DPad2") != 0)
@@ -253,11 +274,13 @@ public class MenuScript : MonoBehaviour {
                         {
                             selectableY -= 1;
                             if (selectableY < 0) { selectableY = 6; }
+                            selectEffect.Play();
                         }
                         else if (Input.GetAxis("DPad2") == -1)
                         {
                             selectableY += 1;
                             if (selectableY > 6) { selectableY = 0; }
+                            selectEffect.Play();
                         }
                     }
 
@@ -272,6 +295,7 @@ public class MenuScript : MonoBehaviour {
                             if (selectables[selectableY].status == "closed")
                             {
                                 selectables[selectableY].status = "opened";
+                                acceptEffect.Play();
                             } else
                             {
                                 if (selectableX == 0)
@@ -281,6 +305,7 @@ public class MenuScript : MonoBehaviour {
                                 else if (selectableX == 2)
                                 {
                                     selectables[selectableY].status = "closed";
+                                    acceptEffect.Play();
                                 }
                             }
                         }
@@ -293,6 +318,10 @@ public class MenuScript : MonoBehaviour {
 
                 }
 
+            }
+            else
+            {
+                support.GetComponent<SpriteRenderer>().color = new Color(support.GetComponent<SpriteRenderer>().color.r, support.GetComponent<SpriteRenderer>().color.g, support.GetComponent<SpriteRenderer>().color.b, Mathf.Lerp(support.GetComponent<SpriteRenderer>().color.a, 1f, Time.deltaTime * 2.5f));
             }
 
             playBackground.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1f);
@@ -333,6 +362,7 @@ public class MenuScript : MonoBehaviour {
                     {
                         selectables[i].status = "closed";
                     }
+                    acceptEffect.Play();
                 }
 
                 if (selectables[i].status == "closed")
