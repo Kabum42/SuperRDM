@@ -333,7 +333,7 @@ public class MenuScript : MonoBehaviour {
             }
 
             playBackground.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1f);
-            if (selectableY == 6)
+            if (selectableY == 6 && controllerConnected != -1)
             {
                 playBackground.GetComponent<SpriteRenderer>().color = new Color(0.7f, 0.7f, 0.7f, 0.7f);
             }
@@ -344,7 +344,7 @@ public class MenuScript : MonoBehaviour {
                  selectables[i].controllerBackground.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1f);
                  selectables[i].arrowBackground.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1f);
 
-                if (selectableY == i)
+                if (selectableY == i && controllerConnected != -1)
                 {
                     if (selectableX == 0 && selectables[i].status == "opened")
                     {
