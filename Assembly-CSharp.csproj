@@ -38,28 +38,32 @@
 	<Reference Include="System.Core" />
 	<Reference Include="System.Xml.Linq" />
 	<Reference Include="UnityEngine">
-	  <HintPath>E:/Programas/Unity2/Editor/Data/Managed/UnityEngine.dll</HintPath>
+	  <HintPath>F:/Unity3/Editor/Data/Managed/UnityEngine.dll</HintPath>
 	</Reference>
 	<Reference Include="UnityEditor">
-	  <HintPath>E:/Programas/Unity2/Editor/Data/Managed/UnityEditor.dll</HintPath>
+	  <HintPath>F:/Unity3/Editor/Data/Managed/UnityEditor.dll</HintPath>
 	</Reference>
   </ItemGroup>
   <ItemGroup>
      <Compile Include="Assets\Code\Agent.cs" />
+     <Compile Include="Assets\Code\Biome.cs" />
      <Compile Include="Assets\Code\BoardCell.cs" />
+     <Compile Include="Assets\Code\Character.cs" />
+     <Compile Include="Assets\Code\EventCharacter.cs" />
      <Compile Include="Assets\Code\GlobalData.cs" />
+     <Compile Include="Assets\Code\MainCharacter.cs" />
      <Compile Include="Assets\Code\WorldScript.cs" />
  <Reference Include="UnityEngine.UI">
- <HintPath>E:/Programas/Unity2/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
+ <HintPath>F:/Unity3/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
  </Reference>
  <Reference Include="UnityEngine.Networking">
- <HintPath>E:/Programas/Unity2/Editor/Data/UnityExtensions/Unity/Networking/UnityEngine.Networking.dll</HintPath>
+ <HintPath>F:/Unity3/Editor/Data/UnityExtensions/Unity/Networking/UnityEngine.Networking.dll</HintPath>
  </Reference>
  <Reference Include="Mono.Cecil">
- <HintPath>E:/Programas/Unity2/Editor/Data/Managed/Mono.Cecil.dll</HintPath>
+ <HintPath>F:/Unity3/Editor/Data/Managed/Mono.Cecil.dll</HintPath>
  </Reference>
  <Reference Include="UnityEditor.iOS.Extensions.Xcode">
- <HintPath>E:/Programas/Unity2/Editor/Data/PlaybackEngines/iOSSupport/UnityEditor.iOS.Extensions.Xcode.dll</HintPath>
+ <HintPath>F:/Unity3/Editor/Data/PlaybackEngines/iOSSupport/UnityEditor.iOS.Extensions.Xcode.dll</HintPath>
  </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
