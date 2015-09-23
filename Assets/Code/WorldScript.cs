@@ -8,22 +8,66 @@ public class WorldScript : MonoBehaviour {
     private int currentCell = 0;
     private int[] cellsPerRing;
 
-    private float cellWidth = 1.48f;
+    private float cellWidth = 1.30f;
     private float cellHeight = 1.51f;
 
     private Vector3 lastMousePosition;
     private BoardCell selected;
 
-	// Use this for initialization
-	void Start () {
-        // GlobalData.Start();
+    private const int numRings = 3;
 
-        boardCells = new BoardCell[37];
-        cellsPerRing = new int[4];
+    private int phase = 0;
+    private float transition = 0f;
+    private GameObject fading;
+    private AudioSource musicWorld;
+    private GameObject selectedSprite;
+
+    private float lastDPadX = 0f;
+    private float lastDPadY = 0f;
+    private string lastHorizontal = "down";
+
+    private AudioSource selectCellEffect;
+
+
+    // Use this for initialization
+    void Start () {
+
+        if (!GlobalData.started)
+        {
+            GlobalData.Start();
+        }
+       
+
+        //boardCells = new BoardCell[37];
+
+        musicWorld = gameObject.AddComponent<AudioSource>();
+        musicWorld.clip = Resources.Load("Music/World") as AudioClip;
+        musicWorld.volume = 1f;
+        musicWorld.loop = true;
+        musicWorld.Play();
+
+        selectCellEffect = gameObject.AddComponent<AudioSource>();
+        selectCellEffect.clip = Resources.Load("Sounds/SelectCell") as AudioClip;
+        selectCellEffect.volume = 1f;
+        selectCellEffect.playOnAwake = false;
+
+        fading = GameObject.Find("Fading");
+
+        selectedSprite = GameObject.Find("SelectedSprite");
+        
+
+        int numCells = 1;
+        
+        cellsPerRing = new int[numRings+1];
         cellsPerRing[0] = 1;
-        cellsPerRing[1] = 6;
-        cellsPerRing[2] = 12;
-        cellsPerRing[3] = 18;
+
+        for (int i = 1; i <= numRings; i++)
+        {
+            cellsPerRing[i] = 6 * i;
+            numCells += 6 * i;
+        }
+
+        boardCells = new BoardCell[numCells];
 
         board = new GameObject();
         board.name = "Board";
@@ -38,57 +82,211 @@ public class WorldScript : MonoBehaviour {
         //Debug.Log(boardCells[1].south);
         //boardCells[1].south.root.transform.position = boardCells[1].south.root.transform.position + new Vector3(0f, 0.02f, 0f);
 
-        for (int i = 0; i < boardCells.Length; i++)
+        if (phase == 0)
         {
-            boardCells[i].root.GetComponent<SpriteRenderer>().material.color = new Color(0.5f, 0.5f, 0.5f, 1f);
-            if (ClickedOn(boardCells[i].root))
+            transition += Time.deltaTime;
+            if (transition >= 1f)
             {
-                selected = boardCells[i];
+                transition = 1f;
+                fading.SetActive(false);
+                phase = 1;
+            }
+
+            musicWorld.volume = transition;
+            fading.GetComponent<SpriteRenderer>().color = new Color(fading.GetComponent<SpriteRenderer>().color.r, fading.GetComponent<SpriteRenderer>().color.g, fading.GetComponent<SpriteRenderer>().color.b, 1f - transition);
+
+        }
+
+
+
+        int controllerConnected = -1;
+        for (int i = 0; i < Input.GetJoystickNames().Length; i++)
+        {
+            if (Input.GetJoystickNames()[i] != "")
+            {
+                controllerConnected = i;
+                break;
             }
         }
+
+        if (controllerConnected != -1)
+        {
+            // CONTROLLER PLUGGED
+            if (!selectedSprite.activeInHierarchy)
+            {
+                selected = boardCells[0];
+                selectedSprite.SetActive(true);
+            }
+
+            if (GlobalData.OS == "Windows")
+            {
+                // WINDOWS
+                if (lastDPadX != Input.GetAxis("DPad1") && Input.GetAxis("DPad1") != 0)
+                {
+                    if (Input.GetAxis("DPad1") == -1)
+                    {
+                        // REGISTRADO INPUT DPAD-X -1
+                        if (lastHorizontal == "down")
+                        {
+                            if (selected.northWest != null)
+                            {
+                                selected = selected.northWest;
+                                lastHorizontal = "up";
+                                selectCellEffect.Play();
+                            }
+                            else if (selected.southWest != null)
+                            {
+                                selected = selected.southWest;
+                                selectCellEffect.Play();
+                            }
+                        }
+                        else
+                        {
+                            if (selected.southWest != null)
+                            {
+                                selected = selected.southWest;
+                                lastHorizontal = "down";
+                                selectCellEffect.Play();
+                            }
+                            else if (selected.northWest != null)
+                            {
+                                selected = selected.northWest;
+                                selectCellEffect.Play();
+                            }
+                        }
+                    }
+                    else if (Input.GetAxis("DPad1") == 1)
+                    {
+                        // REGISTRADO INPUT DPAD-X +1
+                        if (lastHorizontal == "down")
+                        {
+                            if (selected.northEast != null)
+                            {
+                                selected = selected.northEast;
+                                lastHorizontal = "up";
+                                selectCellEffect.Play();
+                            }
+                            else if (selected.southEast != null)
+                            {
+                                selected = selected.southEast;
+                                selectCellEffect.Play();
+                            }
+                        }
+                        else
+                        {
+                            if (selected.southEast != null)
+                            {
+                                selected = selected.southEast;
+                                lastHorizontal = "down";
+                                selectCellEffect.Play();
+                            }
+                            else if (selected.northEast != null)
+                            {
+                                selected = selected.northEast;
+                                selectCellEffect.Play();
+                            }
+                        }
+                    }
+                }
+                if (lastDPadY != Input.GetAxis("DPad2") && Input.GetAxis("DPad2") != 0)
+                {
+                    if (Input.GetAxis("DPad2") == -1)
+                    {
+                        // REGISTRADO INPUT DPAD-Y -1
+                        if (selected.south != null)
+                        {
+                            selected = selected.south;
+                            selectCellEffect.Play();
+                        }
+                        else if (selected.southEast != null)
+                        {
+                            selected = selected.southEast;
+                            selectCellEffect.Play();
+                        }
+                        else if (selected.southWest != null)
+                        {
+                            selected = selected.southWest;
+                            selectCellEffect.Play();
+                        }
+                    }
+                    else if (Input.GetAxis("DPad2") == 1)
+                    {
+                        // REGISTRADO INPUT DPAD-Y +1
+                        if (selected.north != null)
+                        {
+                            selected = selected.north;
+                            selectCellEffect.Play();
+                        }
+                        else if (selected.northEast != null)
+                        {
+                            selected = selected.northEast;
+                            selectCellEffect.Play();
+                        }
+                        else if (selected.northWest != null)
+                        {
+                            selected = selected.northWest;
+                            selectCellEffect.Play();
+                        }
+                    }
+                }
+
+                lastDPadX = Input.GetAxis("DPad1");
+                lastDPadY = Input.GetAxis("DPad2");
+            }
+            /*
+            if (GlobalData.OS == "Mac")
+            {
+                // MAC
+                // NOT IMPLEMENTED
+            }
+            if (GlobalData.OS == "Linux")
+            {
+                // LINUX
+                DPadX = Input.GetAxis("DPad2");
+                DPadY = Input.GetAxis("DPad3");
+            }
+            */
+
+                
+
+        }
+        else
+        {
+            // CONTROLLER NOT PLUGGED
+            selectedSprite.SetActive(false);
+
+            for (int i = 0; i < boardCells.Length; i++)
+            {
+                if (isOver(boardCells[i].root))
+                {
+                    selectedSprite.SetActive(true);
+                    selected = boardCells[i];
+                }
+            }
+
+            if (ClickedOn(selected.root))
+            {
+                // MOVE TO THE CELL??
+            }
+
+        }
+
 
         if (selected != null)
         {
-
-            selected.root.GetComponent<SpriteRenderer>().material.color = new Color(0.2f, 0.2f, 0.2f, 1f);
-
-            if (selected.northWest != null)
-            {
-                selected.northWest.root.GetComponent<SpriteRenderer>().material.color = new Color(1f, 1f, 1f, 1f);
-            }
-            if (selected.north != null)
-            {
-                selected.north.root.GetComponent<SpriteRenderer>().material.color = new Color(1f, 1f, 1f, 1f);
-            }
-            if (selected.northEast != null)
-            {
-                selected.northEast.root.GetComponent<SpriteRenderer>().material.color = new Color(1f, 1f, 1f, 1f);
-            }
-            if (selected.southEast != null)
-            {
-                selected.southEast.root.GetComponent<SpriteRenderer>().material.color = new Color(1f, 1f, 1f, 1f);
-            }
-            if (selected.south != null)
-            {
-                selected.south.root.GetComponent<SpriteRenderer>().material.color = new Color(1f, 1f, 1f, 1f);
-            }
-            if (selected.southWest != null)
-            {
-                selected.southWest.root.GetComponent<SpriteRenderer>().material.color = new Color(1f, 1f, 1f, 1f);
-            }
-
+            selectedSprite.transform.position = new Vector3(selected.root.transform.position.x, selected.root.transform.position.y, selectedSprite.transform.position.z);
         }
 
-	}
+    }
 
     void GenerateBoard()
     {
 
         // RINGS
-        makeRing(0);
-        makeRing(1);
-        makeRing(2);
-        makeRing(3);
+        for (int i = 0; i <= numRings; i++)
+        {
+            makeRing(i);
+        }
 
         selected = boardCells[0];
 
@@ -105,6 +303,7 @@ public class WorldScript : MonoBehaviour {
         //INITIAL CELL
         b = new BoardCell();
         b.root = Instantiate(Resources.Load("Prefabs/BoardCell")) as GameObject;
+        b.ring = number;
         b.randomBiome();
         b.root.transform.parent = board.transform;
         b.root.name = "Cell_" + number + "_" + currentCounter;
@@ -125,6 +324,7 @@ public class WorldScript : MonoBehaviour {
 
             b = new BoardCell();
             b.root = Instantiate(Resources.Load("Prefabs/BoardCell")) as GameObject;
+            b.ring = number;
             b.randomBiome();
             b.root.transform.parent = board.transform;
             b.root.name = "Cell_" + number + "_" + currentCounter;
@@ -150,6 +350,7 @@ public class WorldScript : MonoBehaviour {
 
             b = new BoardCell();
             b.root = Instantiate(Resources.Load("Prefabs/BoardCell")) as GameObject;
+            b.ring = number;
             b.randomBiome();
             b.root.transform.parent = board.transform;
             b.root.name = "Cell_" + number + "_" + currentCounter;
@@ -175,6 +376,7 @@ public class WorldScript : MonoBehaviour {
 
             b = new BoardCell();
             b.root = Instantiate(Resources.Load("Prefabs/BoardCell")) as GameObject;
+            b.ring = number;
             b.randomBiome();
             b.root.transform.parent = board.transform;
             b.root.name = "Cell_" + number + "_" + currentCounter;
@@ -200,6 +402,7 @@ public class WorldScript : MonoBehaviour {
 
             b = new BoardCell();
             b.root = Instantiate(Resources.Load("Prefabs/BoardCell")) as GameObject;
+            b.ring = number;
             b.randomBiome();
             b.root.transform.parent = board.transform;
             b.root.name = "Cell_" + number + "_" + currentCounter;
@@ -224,6 +427,7 @@ public class WorldScript : MonoBehaviour {
 
             b = new BoardCell();
             b.root = Instantiate(Resources.Load("Prefabs/BoardCell")) as GameObject;
+            b.ring = number;
             b.randomBiome();
             b.root.transform.parent = board.transform;
             b.root.name = "Cell_" + number + "_" + currentCounter;
@@ -254,6 +458,7 @@ public class WorldScript : MonoBehaviour {
 
             b = new BoardCell();
             b.root = Instantiate(Resources.Load("Prefabs/BoardCell")) as GameObject;
+            b.ring = number;
             b.randomBiome();
             b.root.transform.parent = board.transform;
             b.root.name = "Cell_" + number + "_" + currentCounter;
@@ -366,5 +571,28 @@ public class WorldScript : MonoBehaviour {
         return false;
 
     }
+
+    private bool isOver(GameObject target)
+    {
+
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+        // CLICKABLE MASK
+        RaycastHit2D[] hits = Physics2D.RaycastAll(new Vector2(ray.origin.x, ray.origin.y), Vector2.zero, 0f, LayerMask.GetMask("Clickable"));
+
+        for (int i = 0; i < hits.Length; i++)
+        {
+
+            if (i < hits.Length)
+            {
+                if (hits[i].collider.gameObject == hits[i].collider.gameObject && hits[i].collider.gameObject == target) { return true; }
+            }
+
+        }
+
+        return false;
+
+    }
+    
 
 }
