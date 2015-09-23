@@ -236,6 +236,7 @@ public class MenuScript : MonoBehaviour {
                 transition = 0f;
             }
 
+            playBackground.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1f);
 
             int controllerConnected = -1;
             for (int i = 0; i < Input.GetJoystickNames().Length; i++)
@@ -328,11 +329,17 @@ public class MenuScript : MonoBehaviour {
             }
             else
             {
+                // CONTROLLER NOT PLUGGED
                 star.GetComponent<SpriteRenderer>().color = new Color(star.GetComponent<SpriteRenderer>().color.r, star.GetComponent<SpriteRenderer>().color.g, star.GetComponent<SpriteRenderer>().color.b, Mathf.Lerp(star.GetComponent<SpriteRenderer>().color.a, 1f, Time.deltaTime * 2.5f));
                 support.GetComponent<SpriteRenderer>().color = new Color(support.GetComponent<SpriteRenderer>().color.r, support.GetComponent<SpriteRenderer>().color.g, support.GetComponent<SpriteRenderer>().color.b, Mathf.Lerp(support.GetComponent<SpriteRenderer>().color.a, 1f, Time.deltaTime * 2.5f));
+
+                if (isOver(playBackground))
+                {
+                    playBackground.GetComponent<SpriteRenderer>().color = new Color(0.7f, 0.7f, 0.7f, 1f);
+                }
+
             }
 
-            playBackground.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1f);
             if (selectableY == 6 && controllerConnected != -1)
             {
                 playBackground.GetComponent<SpriteRenderer>().color = new Color(0.7f, 0.7f, 0.7f, 0.7f);
@@ -363,18 +370,30 @@ public class MenuScript : MonoBehaviour {
                         selectables[i].arrowBackground.GetComponent<SpriteRenderer>().color = new Color(0.7f, 0.7f, 0.7f, 1f);
                     }
                 }
+                else if (controllerConnected == -1)
+                {
+                    if (isOver(selectables[i].nameBackground))
+                    {
+                        selectables[i].nameBackground.GetComponent<SpriteRenderer>().color = new Color(0.7f, 0.7f, 0.7f, 1f);
+                    }
+                    else if (isOver(selectables[i].arrowBackground) && i >= 2)
+                    {
+                        selectables[i].arrowBackground.GetComponent<SpriteRenderer>().color = new Color(0.7f, 0.7f, 0.7f, 1f);
+                    }
+                }
 
                 if (ClickedOn(selectables[i].arrowBackground))
                 {
                     if (selectables[i].status == "closed")
                     {
                         selectables[i].status = "opened";
+                        acceptEffect.Play();
                     }
-                    else if (selectables[i].status == "opened")
+                    else if (selectables[i].status == "opened" && i >= 2)
                     {
                         selectables[i].status = "closed";
+                        acceptEffect.Play();
                     }
-                    acceptEffect.Play();
                 }
 
                 if (selectables[i].status == "closed")
@@ -552,6 +571,28 @@ public class MenuScript : MonoBehaviour {
 
             }
 
+
+        }
+
+        return false;
+
+    }
+
+    private bool isOver(GameObject target)
+    {
+
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+        // CLICKABLE MASK
+        RaycastHit2D[] hits = Physics2D.RaycastAll(new Vector2(ray.origin.x, ray.origin.y), Vector2.zero, 0f, LayerMask.GetMask("Clickable"));
+
+        for (int i = 0; i < hits.Length; i++)
+        {
+
+            if (i < hits.Length)
+            {
+                if (hits[i].collider.gameObject == hits[i].collider.gameObject && hits[i].collider.gameObject == target) { return true; }
+            }
 
         }
 
