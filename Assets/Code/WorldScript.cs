@@ -37,6 +37,18 @@ public class WorldScript : MonoBehaviour {
             GlobalData.Start();
         }
        
+        for (int i = 1; i < GlobalData.activeAgents; i++)
+        {
+            if (GlobalData.agents[i] != null)
+            {
+                Debug.Log(i);
+                GameObject g = Instantiate(Resources.Load("Prefabs/UIAgent") as GameObject);
+                g.name = "UIAgent" + i;
+                g.transform.parent = GameObject.Find("UIAgents").transform;
+                g.transform.localPosition = new Vector3(-8.7f, 5.8f -i*2f, 0f);
+                g.transform.FindChild("PictureHolder").gameObject.GetComponent<SpriteRenderer>().color = GlobalData.colorCharacters[i];
+            }
+        }
 
         //boardCells = new BoardCell[37];
 
@@ -67,13 +79,19 @@ public class WorldScript : MonoBehaviour {
             numCells += 6 * i;
         }
 
-        boardCells = new BoardCell[numCells];
+        boardCells = new BoardCell[numCells + GlobalData.activeAgents];
 
         board = new GameObject();
         board.name = "Board";
         board.transform.position = new Vector3(0f, 0f, 0f);
 
         GenerateBoard();
+        
+        for (int i = 0; i < GlobalData.activeAgents; i++)
+        {
+            AddSanctuary(i, i);
+        }
+
 	}
 	
 	// Update is called once per frame
@@ -276,6 +294,42 @@ public class WorldScript : MonoBehaviour {
         {
             selectedSprite.transform.position = new Vector3(selected.root.transform.position.x, selected.root.transform.position.y, selectedSprite.transform.position.z);
         }
+
+    }
+
+    void AddSanctuary(int agent, int num)
+    {
+        BoardCell b = new BoardCell();
+        b.root = Instantiate(Resources.Load("Prefabs/BoardCell")) as GameObject;
+        b.ring = 4;
+        b.changeBiome("sanctuary");
+        b.root.GetComponent<SpriteRenderer>().color = GlobalData.colorCharacters[agent];
+        b.root.transform.parent = board.transform;
+        b.root.name = "Cell_" + 4 + "_" + num;
+
+        if (num == 0) {
+            positionCell(b, 2, 3);
+        }
+        else if (num == 1) {
+            positionCell(b, 4, 0);
+        }
+        else if (num == 2)
+        {
+            positionCell(b, 2, -3);
+        }
+        else if (num == 3)
+        {
+            positionCell(b, -2, -3);
+        }
+        else if (num == 4)
+        {
+            positionCell(b, -4, 0);
+        }
+        else if (num == 5)
+        {
+            positionCell(b, -2, 3);
+        }
+
 
     }
 

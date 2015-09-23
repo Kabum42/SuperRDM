@@ -7,6 +7,7 @@ public class MainCharacter : Character {
 	// private Item EquippedItem;
 	// private Class OwnClass;
 	private int ID;
+    public bool CPU = true;
 
 	public MainCharacter()
 	{

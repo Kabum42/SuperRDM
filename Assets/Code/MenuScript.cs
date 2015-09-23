@@ -433,7 +433,7 @@ public class MenuScript : MonoBehaviour {
             if (transition >= 1f)
             {
                 transition = 1f;
-                Application.LoadLevel("World");
+                startMatch();
             }
 
             preparation.volume = 1f - transition;
@@ -532,6 +532,34 @@ public class MenuScript : MonoBehaviour {
             if (currentLegend == "pilumantic") { currentName = "X, the Pilumantic"; }
             icon.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Legends/"+currentLegend);
         }
+
+    }
+
+    private void startMatch()
+    {
+
+        int aux = 0;
+
+        for (int i = 0; i < selectables.Length; i++)
+        {
+            if (selectables[i].status == "opened")
+            {
+                GlobalData.agents[aux] = new MainCharacter();
+                if (selectables[i].controller == "CPU")
+                {
+                    GlobalData.agents[aux].CPU = true;
+                }
+                else
+                {
+                    GlobalData.agents[aux].CPU = false;
+                }
+                
+                aux++;
+            }
+        }
+
+        GlobalData.activeAgents = aux;
+        Application.LoadLevel("World");
 
     }
 
