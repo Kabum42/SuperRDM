@@ -256,7 +256,7 @@ public class MenuScript : MonoBehaviour {
                 if (GlobalData.OS == "Windows")
                 {
                     // WINDOWS
-                    if (lastDPadX != Input.GetAxis("DPad1") && Input.GetAxis("DPad1") != 0 && selectableY != 6 && selectables[selectableY].status == "opened")
+                    if (lastDPadX != Input.GetAxis("DPad1") && Input.GetAxis("DPad1") != 0 && selectableY != 6 && selectableY >= 2 && selectables[selectableY].status == "opened")
                     {
                         if (Input.GetAxis("DPad1") == 1)
                         {
@@ -305,7 +305,7 @@ public class MenuScript : MonoBehaviour {
                                 acceptEffect.Play();
                             } else
                             {
-                                if (selectableX == 0)
+                                if (selectableX == 0 || selectableY <= 1)
                                 {
                                     // CHANGE CHAMPION
                                 }
@@ -346,7 +346,11 @@ public class MenuScript : MonoBehaviour {
 
                 if (selectableY == i && controllerConnected != -1)
                 {
-                    if (selectableX == 0 && selectables[i].status == "opened")
+                    if (i <= 1)
+                    {
+                        selectables[i].nameBackground.GetComponent<SpriteRenderer>().color = new Color(0.7f, 0.7f, 0.7f, 1f);
+                    }
+                    else if (selectableX == 0 && selectables[i].status == "opened")
                     {
                         selectables[i].nameBackground.GetComponent<SpriteRenderer>().color = new Color(0.7f, 0.7f, 0.7f, 1f);
                     }
@@ -431,6 +435,7 @@ public class MenuScript : MonoBehaviour {
         public string status = "closed";
         public string currentLegend = "barbarian";
         public string currentName = "Retired Barbarian";
+        public string controller = "CPU";
 
         public GameObject pictureHolder;
         public GameObject icon;
@@ -467,14 +472,20 @@ public class MenuScript : MonoBehaviour {
 
             if (number == 0)
             {
+                controller = "Player";
                 changeLegend("barbarian");
                 status = "opened";
+                arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Lock");
             }
             if (number == 1)
             {
                 changeLegend("pilumantic");
                 status = "opened";
+                arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Lock");
             }
+
+            controllerText.GetComponent<TextMesh>().text = controller;
+            controllerText2.GetComponent<TextMesh>().text = controller;
 
         }
 

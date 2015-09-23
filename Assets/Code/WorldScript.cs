@@ -42,7 +42,7 @@ public class WorldScript : MonoBehaviour {
 
         musicWorld = gameObject.AddComponent<AudioSource>();
         musicWorld.clip = Resources.Load("Music/World") as AudioClip;
-        musicWorld.volume = 1f;
+        musicWorld.volume = 0f;
         musicWorld.loop = true;
         musicWorld.Play();
 
@@ -92,7 +92,7 @@ public class WorldScript : MonoBehaviour {
                 phase = 1;
             }
 
-            musicWorld.volume = transition;
+            musicWorld.volume = transition*0.7f;
             fading.GetComponent<SpriteRenderer>().color = new Color(fading.GetComponent<SpriteRenderer>().color.r, fading.GetComponent<SpriteRenderer>().color.g, fading.GetComponent<SpriteRenderer>().color.b, 1f - transition);
 
         }
