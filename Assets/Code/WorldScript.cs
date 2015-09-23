@@ -112,6 +112,11 @@ public class WorldScript : MonoBehaviour {
         if (controllerConnected != -1)
         {
             // CONTROLLER PLUGGED
+            if (!selectedSprite.activeInHierarchy)
+            {
+                selected = boardCells[0];
+                selectedSprite.SetActive(true);
+            }
 
             if (GlobalData.OS == "Windows")
             {
