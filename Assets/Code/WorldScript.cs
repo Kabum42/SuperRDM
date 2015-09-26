@@ -79,7 +79,8 @@ public class WorldScript : MonoBehaviour {
             numCells += 6 * i;
         }
 
-        boardCells = new BoardCell[numCells + GlobalData.activeAgents];
+        boardCells = new BoardCell[numCells];
+        //boardCells = new BoardCell[numCells + GlobalData.activeAgents];
 
         board = new GameObject();
         board.name = "Board";

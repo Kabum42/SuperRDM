@@ -50,8 +50,10 @@
      <Compile Include="Assets\Code\Character.cs" />
      <Compile Include="Assets\Code\EventCharacter.cs" />
      <Compile Include="Assets\Code\GlobalData.cs" />
+     <Compile Include="Assets\Code\Hacks.cs" />
      <Compile Include="Assets\Code\MainCharacter.cs" />
      <Compile Include="Assets\Code\MenuScript.cs" />
+     <Compile Include="Assets\Code\NetworkManager.cs" />
      <Compile Include="Assets\Code\WorldScript.cs" />
  <Reference Include="UnityEngine.UI">
  <HintPath>E:/Programas/Unity2/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>

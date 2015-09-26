@@ -26,6 +26,12 @@ public class MenuScript : MonoBehaviour {
     private GameObject support;
     private AudioSource selectEffect;
     private AudioSource acceptEffect;
+    private GameObject pointer;
+    private GameObject offline1;
+    private GameObject offline2;
+    private GameObject online1;
+    private GameObject online2;
+    private int playOption = 0;
 
     private int selectableX = 0;
     private int selectableY = 0;
@@ -41,14 +47,31 @@ public class MenuScript : MonoBehaviour {
             GlobalData.Start();
         }
 
+        //NetworkManager.StartServer();
+
         fading = GameObject.Find("Fading");
-        fading.GetComponent<SpriteRenderer>().color = new Color(fading.GetComponent<SpriteRenderer>().color.r, fading.GetComponent<SpriteRenderer>().color.g, fading.GetComponent<SpriteRenderer>().color.b, 1f);
+        Hacks.SpriteRendererAlpha(fading, 1f); 
 
         star = GameObject.Find("Star");
-        star.GetComponent<SpriteRenderer>().color = new Color(star.GetComponent<SpriteRenderer>().color.r, star.GetComponent<SpriteRenderer>().color.g, star.GetComponent<SpriteRenderer>().color.b, 0f);
+        Hacks.SpriteRendererAlpha(star, 0f);
 
         support = GameObject.Find("Support");
-        support.GetComponent<SpriteRenderer>().color = new Color(support.GetComponent<SpriteRenderer>().color.r, support.GetComponent<SpriteRenderer>().color.g, support.GetComponent<SpriteRenderer>().color.b, 0f);
+        Hacks.SpriteRendererAlpha(support, 0f);
+
+        pointer = GameObject.Find("Pointer");
+        pointer.SetActive(false);
+
+        offline1 = GameObject.Find("Offline1");
+        offline1.SetActive(false);
+
+        offline2 = GameObject.Find("Offline2");
+        offline2.SetActive(false);
+
+        online1 = GameObject.Find("Online1");
+        online1.SetActive(false);
+
+        online2 = GameObject.Find("Online2");
+        online2.SetActive(false);
 
         selectEffect = gameObject.AddComponent<AudioSource>();
         selectEffect.clip = Resources.Load("Sounds/SelectCell") as AudioClip;
@@ -71,19 +94,59 @@ public class MenuScript : MonoBehaviour {
         preparation.volume = 1f;
         preparation.loop = true;
         
-
         logoPosition = logo.transform.position;
-        //logo.GetComponent<SpriteRenderer>().color = new Color(logo.GetComponent<SpriteRenderer>().color.r, logo.GetComponent<SpriteRenderer>().color.g, logo.GetComponent<SpriteRenderer>().color.b, 0f);
 
         playBackground.SetActive(false);
         playText.SetActive(false);
         playText2.SetActive(false);
 
-
 	}
-	
-	// Update is called once per frame
-	void Update () {
+
+    void OnServerInitialized()
+    {
+        Debug.Log("Server Initializied");
+    }
+
+    void OnMasterServerEvent(MasterServerEvent msEvent)
+    {
+        if (msEvent == MasterServerEvent.HostListReceived)
+            NetworkManager.hostList = MasterServer.PollHostList();
+    }
+
+    // Update is called once per frame
+    void Update () {
+
+
+        radius += Time.deltaTime * 100f;
+        if (radius > 360f) { radius -= 360f; }
+
+        logo.transform.localPosition = logoPosition + new Vector3(0f, Mathf.Sin(radius * Mathf.PI / 180) * 0.25f, 0f);
+
+        radius2 += Time.deltaTime * 100f;
+        if (radius2 > 360f) { radius2 -= 360f; }
+
+        Hacks.TextAlpha(startText, Mathf.Abs(Mathf.Sin(radius2 * Mathf.PI / 180)));
+        Hacks.TextAlpha(startText2, Mathf.Abs(Mathf.Sin(radius2 * Mathf.PI / 180)));
+
+        Hacks.SpriteRendererAlpha(button1, Mathf.Abs(Mathf.Sin(radius2 * Mathf.PI / 180)));
+        Hacks.SpriteRendererAlpha(button2, Mathf.Abs(Mathf.Sin(radius2 * Mathf.PI / 180)));
+
+        Hacks.SpriteRendererAlpha(pointer, Mathf.Abs(Mathf.Sin(radius2 * Mathf.PI / 180)));
+
+        star.transform.eulerAngles = new Vector3(star.transform.eulerAngles.x, star.transform.eulerAngles.y, star.transform.eulerAngles.z - Time.deltaTime * 50f);
+
+        if (Hacks.ControllerAnyConnected())
+        {
+            // CONTROLLER PLUGGED
+            Hacks.SpriteRendererAlpha(support, Mathf.Lerp(support.GetComponent<SpriteRenderer>().color.a, 0f, Time.deltaTime * 2.5f));
+            Hacks.SpriteRendererAlpha(star, Mathf.Lerp(star.GetComponent<SpriteRenderer>().color.a, 0f, Time.deltaTime * 2.5f));
+        }
+        else
+        {
+            // CONTROLLER NOT PLUGGED
+            Hacks.SpriteRendererAlpha(support, Mathf.Lerp(support.GetComponent<SpriteRenderer>().color.a, 1f, Time.deltaTime * 2.5f));
+            Hacks.SpriteRendererAlpha(star, Mathf.Lerp(star.GetComponent<SpriteRenderer>().color.a, 1f, Time.deltaTime * 2.5f));
+        }
 
         if (phase == 0)
         {
@@ -97,23 +160,9 @@ public class MenuScript : MonoBehaviour {
                 }
                
                 intro.volume = transition;
-                fading.GetComponent<SpriteRenderer>().color = new Color(fading.GetComponent<SpriteRenderer>().color.r, fading.GetComponent<SpriteRenderer>().color.g, fading.GetComponent<SpriteRenderer>().color.g, 1f -transition);
+                Hacks.SpriteRendererAlpha(fading, 1f - transition);
 
             }
-
-            radius += Time.deltaTime * 100f;
-            if (radius > 360f) { radius -= 360f; }
-
-            logo.transform.localPosition = logoPosition + new Vector3(0f, Mathf.Sin(radius * Mathf.PI / 180) * 0.25f, 0f);
-
-            radius2 += Time.deltaTime * 100f;
-            if (radius2 > 360f) { radius2 -= 360f; }
-
-            startText.GetComponent<TextMesh>().color = new Color(startText.GetComponent<TextMesh>().color.r, startText.GetComponent<TextMesh>().color.g, startText.GetComponent<TextMesh>().color.b, Mathf.Abs(Mathf.Sin(radius2 * Mathf.PI / 180)));
-            startText2.GetComponent<TextMesh>().color = new Color(startText2.GetComponent<TextMesh>().color.r, startText2.GetComponent<TextMesh>().color.g, startText2.GetComponent<TextMesh>().color.b, Mathf.Abs(Mathf.Sin(radius2 * Mathf.PI / 180)));
-
-            button1.GetComponent<SpriteRenderer>().color = new Color(button1.GetComponent<SpriteRenderer>().color.r, button1.GetComponent<SpriteRenderer>().color.g, button1.GetComponent<SpriteRenderer>().color.b, Mathf.Abs(Mathf.Sin(radius2 * Mathf.PI / 180)));
-            button2.GetComponent<SpriteRenderer>().color = new Color(button2.GetComponent<SpriteRenderer>().color.r, button2.GetComponent<SpriteRenderer>().color.g, button2.GetComponent<SpriteRenderer>().color.b, Mathf.Abs(Mathf.Sin(radius2 * Mathf.PI / 180)));
 
 
             int controllerConnected = -1;
@@ -129,8 +178,6 @@ public class MenuScript : MonoBehaviour {
             if (controllerConnected != -1)
             {
                 // CONTROLLER PLUGGED
-                star.GetComponent<SpriteRenderer>().color = new Color(star.GetComponent<SpriteRenderer>().color.r, star.GetComponent<SpriteRenderer>().color.g, star.GetComponent<SpriteRenderer>().color.b, Mathf.Lerp(star.GetComponent<SpriteRenderer>().color.a, 0f, Time.deltaTime * 2.5f));
-                support.GetComponent<SpriteRenderer>().color = new Color(support.GetComponent<SpriteRenderer>().color.r, support.GetComponent<SpriteRenderer>().color.g, support.GetComponent<SpriteRenderer>().color.b, Mathf.Lerp(support.GetComponent<SpriteRenderer>().color.a, 0f, Time.deltaTime * 2.5f));
                 if (button1.activeInHierarchy) { button1.SetActive(false); }
                 if (!button2.activeInHierarchy) { button2.SetActive(true); }
 
@@ -165,8 +212,6 @@ public class MenuScript : MonoBehaviour {
             else
             {
                 // CONTROLLER NOT PLUGGED
-                star.GetComponent<SpriteRenderer>().color = new Color(star.GetComponent<SpriteRenderer>().color.r, star.GetComponent<SpriteRenderer>().color.g, star.GetComponent<SpriteRenderer>().color.b, Mathf.Lerp(star.GetComponent<SpriteRenderer>().color.a, 1f, Time.deltaTime * 2.5f));
-                support.GetComponent<SpriteRenderer>().color = new Color(support.GetComponent<SpriteRenderer>().color.r, support.GetComponent<SpriteRenderer>().color.g, support.GetComponent<SpriteRenderer>().color.b, Mathf.Lerp(support.GetComponent<SpriteRenderer>().color.a, 1f, Time.deltaTime * 2.5f));
                 if (button2.activeInHierarchy) { button2.SetActive(false); }
                 if (!button1.activeInHierarchy) { button1.SetActive(true); }
 
@@ -182,6 +227,127 @@ public class MenuScript : MonoBehaviour {
         else if (phase == 1)
         {
 
+            Hacks.SpriteRendererAlpha(fading, Mathf.Lerp(fading.GetComponent<SpriteRenderer>().color.a, 0f, Time.deltaTime*5f));
+
+            transition += Time.deltaTime;
+
+            startText.GetComponent<TextMesh>().color = new Color(startText.GetComponent<TextMesh>().color.r, startText.GetComponent<TextMesh>().color.g, startText.GetComponent<TextMesh>().color.b, startText.GetComponent<TextMesh>().color.a * (1f - transition));
+            startText2.GetComponent<TextMesh>().color = new Color(startText2.GetComponent<TextMesh>().color.r, startText2.GetComponent<TextMesh>().color.g, startText2.GetComponent<TextMesh>().color.b, startText2.GetComponent<TextMesh>().color.a * (1f - transition));
+
+            button1.GetComponent<SpriteRenderer>().color = new Color(button1.GetComponent<SpriteRenderer>().color.r, button1.GetComponent<SpriteRenderer>().color.g, button1.GetComponent<SpriteRenderer>().color.b, startText.GetComponent<TextMesh>().color.a);
+            button2.GetComponent<SpriteRenderer>().color = new Color(button2.GetComponent<SpriteRenderer>().color.r, button2.GetComponent<SpriteRenderer>().color.g, button2.GetComponent<SpriteRenderer>().color.b, startText.GetComponent<TextMesh>().color.a);
+
+            Debug.Log(Hacks.ControllerAnyConnected());
+
+            if (transition >= 1f)
+            {
+                phase = 2;
+
+                startText.SetActive(false);
+                startText2.SetActive(false);
+                button1.SetActive(false);
+                button2.SetActive(false);
+
+                Hacks.SpriteRendererAlpha(pointer, 0f);
+                pointer.SetActive(true);
+                Hacks.TextAlpha(offline1, 0f);
+                offline1.SetActive(true);
+                Hacks.TextAlpha(offline2, 0f);
+                offline2.SetActive(true);
+                Hacks.TextAlpha(online1, 0f);
+                online1.SetActive(true);
+                Hacks.TextAlpha(online2, 0f);
+                online2.SetActive(true);
+
+                transition = 0f;
+            }
+
+        }
+        else if (phase == 2)
+        {
+
+            if (transition < 1f)
+            {
+
+                transition += Time.deltaTime;
+
+                Hacks.SpriteRendererAlpha(pointer, transition * pointer.GetComponent<SpriteRenderer>().color.a);
+                Hacks.TextAlpha(offline1, transition);
+                Hacks.TextAlpha(offline2, transition);
+                Hacks.TextAlpha(online1, transition);
+                Hacks.TextAlpha(online2, transition);
+
+                if (transition >= 1f)
+                {
+                    transition = 1f;
+                }
+
+            }
+
+            if (Hacks.ControllerAnyConnected())
+            {
+                // CONTROLLER PLUGGED
+                if (lastDPadY != Input.GetAxis("DPad2") && Input.GetAxis("DPad2") != 0)
+                {
+                    if (Input.GetAxis("DPad2") == 1)
+                    {
+                        playOption--;
+                        if (playOption < 0) { playOption = 1; }
+                    }
+                    else if (Input.GetAxis("DPad2") == -1)
+                    {
+                        playOption++;
+                        if (playOption > 1) { playOption = 0; }
+                    }
+                }
+                lastDPadY = Input.GetAxis("DPad2");
+
+                if (Input.GetKeyDown("joystick button 0"))
+                {
+                    if (playOption == 0)
+                    {
+                        phase = 3;
+                        transition = 0f;
+                    }
+                }
+            }
+            else
+            {
+                // CONTROLLER NOT PLUGGED
+                if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow))
+                {
+                    playOption--;
+                    if (playOption < 0) { playOption = 1; }
+                }
+                if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow))
+                {
+                    playOption++;
+                    if (playOption > 1) { playOption = 0; }
+                }
+
+                if (Input.GetKeyDown(KeyCode.Return))
+                {
+                    if (playOption == 0)
+                    {
+                        phase = 3;
+                        transition = 0f;
+                    }
+                }
+            }
+
+            if (playOption == 0)
+            {
+                pointer.transform.position = new Vector3(-4.36f, Mathf.Lerp(pointer.transform.position.y, -3.58f, Time.deltaTime * 10f), 0f);
+            }
+            else if (playOption == 1)
+            {
+                pointer.transform.position = new Vector3(-4.36f, Mathf.Lerp(pointer.transform.position.y, -5.48f, Time.deltaTime * 10f), 0f);
+            }
+
+        }
+        else if (phase == 3)
+        {
+
             if (transition < 1f)
             {
                 transition += Time.deltaTime;
@@ -190,13 +356,18 @@ public class MenuScript : MonoBehaviour {
 
                 if (transition >= 1f)
                 {
-                    phase = 2;
+                    phase = 4;
 
                     logo.SetActive(false);
                     startText.SetActive(false);
                     startText2.SetActive(false);
                     button1.SetActive(false);
                     button2.SetActive(false);
+                    pointer.SetActive(false);
+                    offline1.SetActive(false);
+                    offline2.SetActive(false);
+                    online1.SetActive(false);
+                    online2.SetActive(false);
                     transition = 0f;
 
                     playBackground.SetActive(true);
@@ -215,7 +386,7 @@ public class MenuScript : MonoBehaviour {
             }
 
         }
-        else if (phase == 2)
+        else if (phase == 4)
         {
             if (transition < 1f)
             {
@@ -232,7 +403,7 @@ public class MenuScript : MonoBehaviour {
             }
             else if (ClickedOn(playBackground))
             {
-                phase = 3;
+                phase = 5;
                 transition = 0f;
             }
 
@@ -251,9 +422,6 @@ public class MenuScript : MonoBehaviour {
             if (controllerConnected != -1)
             {
                 // CONTROLLER PLUGGED
-                star.GetComponent<SpriteRenderer>().color = new Color(star.GetComponent<SpriteRenderer>().color.r, star.GetComponent<SpriteRenderer>().color.g, star.GetComponent<SpriteRenderer>().color.b, Mathf.Lerp(star.GetComponent<SpriteRenderer>().color.a, 0f, Time.deltaTime * 2.5f));
-                support.GetComponent<SpriteRenderer>().color = new Color(support.GetComponent<SpriteRenderer>().color.r, support.GetComponent<SpriteRenderer>().color.g, support.GetComponent<SpriteRenderer>().color.b, Mathf.Lerp(support.GetComponent<SpriteRenderer>().color.a, 0f, Time.deltaTime * 2.5f));
-
                 if (GlobalData.OS == "Windows")
                 {
                     // WINDOWS
@@ -319,7 +487,7 @@ public class MenuScript : MonoBehaviour {
                         }
                         else if (selectableY == 6)
                         {
-                            phase = 3;
+                            phase = 5;
                             transition = 0f;
                         }
                     }
@@ -330,9 +498,6 @@ public class MenuScript : MonoBehaviour {
             else
             {
                 // CONTROLLER NOT PLUGGED
-                star.GetComponent<SpriteRenderer>().color = new Color(star.GetComponent<SpriteRenderer>().color.r, star.GetComponent<SpriteRenderer>().color.g, star.GetComponent<SpriteRenderer>().color.b, Mathf.Lerp(star.GetComponent<SpriteRenderer>().color.a, 1f, Time.deltaTime * 2.5f));
-                support.GetComponent<SpriteRenderer>().color = new Color(support.GetComponent<SpriteRenderer>().color.r, support.GetComponent<SpriteRenderer>().color.g, support.GetComponent<SpriteRenderer>().color.b, Mathf.Lerp(support.GetComponent<SpriteRenderer>().color.a, 1f, Time.deltaTime * 2.5f));
-
                 if (isOver(playBackground))
                 {
                     playBackground.GetComponent<SpriteRenderer>().color = new Color(0.7f, 0.7f, 0.7f, 1f);
@@ -426,7 +591,7 @@ public class MenuScript : MonoBehaviour {
             }
 
         }
-        else if (phase == 3)
+        else if (phase == 5)
         {
 
             transition += Time.deltaTime;
@@ -440,9 +605,6 @@ public class MenuScript : MonoBehaviour {
             fading.GetComponent<SpriteRenderer>().color = new Color(fading.GetComponent<SpriteRenderer>().color.r, fading.GetComponent<SpriteRenderer>().color.g, fading.GetComponent<SpriteRenderer>().color.b, transition);
 
         }
-
-        star.transform.eulerAngles = new Vector3(star.transform.eulerAngles.x, star.transform.eulerAngles.y, star.transform.eulerAngles.z - Time.deltaTime * 50f);
-
 
     }
 
