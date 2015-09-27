@@ -32,6 +32,10 @@ public class MenuScript : MonoBehaviour {
     private GameObject online1;
     private GameObject online2;
     private int playOption = 0;
+    private GameObject host1;
+    private GameObject host2;
+    private GameObject join1;
+    private GameObject join2;
 
     private int selectableX = 0;
     private int selectableY = 0;
@@ -72,6 +76,18 @@ public class MenuScript : MonoBehaviour {
 
         online2 = GameObject.Find("Online2");
         online2.SetActive(false);
+
+        host1 = GameObject.Find("Host1");
+        host1.SetActive(false);
+
+        host2 = GameObject.Find("Host2");
+        host2.SetActive(false);
+
+        join1 = GameObject.Find("Join1");
+        join1.SetActive(false);
+
+        join2 = GameObject.Find("Join2");
+        join2.SetActive(false);
 
         selectEffect = gameObject.AddComponent<AudioSource>();
         selectEffect.clip = Resources.Load("Sounds/SelectCell") as AudioClip;
@@ -122,7 +138,10 @@ public class MenuScript : MonoBehaviour {
 
         logo.transform.localPosition = logoPosition + new Vector3(0f, Mathf.Sin(radius * Mathf.PI / 180) * 0.25f, 0f);
 
-        radius2 += Time.deltaTime * 100f;
+        if (phase != 1)
+        {
+            radius2 += Time.deltaTime * 100f;
+        }
         if (radius2 > 360f) { radius2 -= 360f; }
 
         Hacks.TextAlpha(startText, Mathf.Abs(Mathf.Sin(radius2 * Mathf.PI / 180)));
@@ -237,8 +256,6 @@ public class MenuScript : MonoBehaviour {
             button1.GetComponent<SpriteRenderer>().color = new Color(button1.GetComponent<SpriteRenderer>().color.r, button1.GetComponent<SpriteRenderer>().color.g, button1.GetComponent<SpriteRenderer>().color.b, startText.GetComponent<TextMesh>().color.a);
             button2.GetComponent<SpriteRenderer>().color = new Color(button2.GetComponent<SpriteRenderer>().color.r, button2.GetComponent<SpriteRenderer>().color.g, button2.GetComponent<SpriteRenderer>().color.b, startText.GetComponent<TextMesh>().color.a);
 
-            Debug.Log(Hacks.ControllerAnyConnected());
-
             if (transition >= 1f)
             {
                 phase = 2;
@@ -309,6 +326,11 @@ public class MenuScript : MonoBehaviour {
                         phase = 3;
                         transition = 0f;
                     }
+                    else if (playOption == 1)
+                    {
+                        phase = 3;
+                        transition = 0f;
+                    }
                 }
             }
             else
@@ -328,6 +350,11 @@ public class MenuScript : MonoBehaviour {
                 if (Input.GetKeyDown(KeyCode.Return))
                 {
                     if (playOption == 0)
+                    {
+                        phase = 5;
+                        transition = 0f;
+                    }
+                    else if (playOption == 1)
                     {
                         phase = 3;
                         transition = 0f;
@@ -351,12 +378,143 @@ public class MenuScript : MonoBehaviour {
             if (transition < 1f)
             {
                 transition += Time.deltaTime;
+
+                Hacks.TextAlpha(offline1, 1f - transition);
+                Hacks.TextAlpha(offline2, 1f - transition);
+                Hacks.TextAlpha(online1, 1f - transition);
+                Hacks.TextAlpha(online2, 1f - transition);
+
+                if (transition >= 1f)
+                {
+                    offline1.SetActive(false);
+                    offline2.SetActive(false);
+                    online1.SetActive(false);
+                    online2.SetActive(false);
+
+                    Hacks.TextAlpha(host1, 0f);
+                    host1.SetActive(true);
+
+                    Hacks.TextAlpha(host2, 0f);
+                    host2.SetActive(true);
+
+                    Hacks.TextAlpha(join1, 0f);
+                    join1.SetActive(true);
+
+                    Hacks.TextAlpha(join2, 0f);
+                    join2.SetActive(true);
+
+                    phase = 4;
+                    transition = 0f;
+                    playOption = 0;
+                }
+            }
+
+            
+
+        }
+        else if (phase == 4)
+        {
+
+            if (transition < 1f)
+            {
+                transition += Time.deltaTime;
+
+                Hacks.TextAlpha(host1, transition);
+                Hacks.TextAlpha(host2, transition);
+                Hacks.TextAlpha(join1, transition);
+                Hacks.TextAlpha(join2, transition);
+
+                if (transition >= 1f)
+                {
+                    transition = 1f;
+                }
+            }
+
+                if (Hacks.ControllerAnyConnected())
+            {
+                // CONTROLLER PLUGGED
+                if (lastDPadY != Input.GetAxis("DPad2") && Input.GetAxis("DPad2") != 0)
+                {
+                    if (Input.GetAxis("DPad2") == 1)
+                    {
+                        playOption--;
+                        if (playOption < 0) { playOption = 1; }
+                    }
+                    else if (Input.GetAxis("DPad2") == -1)
+                    {
+                        playOption++;
+                        if (playOption > 1) { playOption = 0; }
+                    }
+                }
+                lastDPadY = Input.GetAxis("DPad2");
+
+                if (Input.GetKeyDown("joystick button 0"))
+                {
+                    if (playOption == 0)
+                    {
+                        
+                    }
+                    else if (playOption == 1)
+                    {
+                        
+                    }
+                    phase = 5;
+                    transition = 0f;
+                }
+            }
+            else
+            {
+                // CONTROLLER NOT PLUGGED
+                if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow))
+                {
+                    playOption--;
+                    if (playOption < 0) { playOption = 1; }
+                }
+                if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow))
+                {
+                    playOption++;
+                    if (playOption > 1) { playOption = 0; }
+                }
+
+                if (Input.GetKeyDown(KeyCode.Return))
+                {
+                    if (playOption == 0)
+                    {
+                        
+                    }
+                    else if (playOption == 1)
+                    {
+                        
+                    }
+                    phase = 5;
+                    transition = 0f;
+                }
+            }
+
+            if (playOption == 0)
+            {
+                pointer.transform.position = new Vector3(-4.36f, Mathf.Lerp(pointer.transform.position.y, -3.58f, Time.deltaTime * 10f), 0f);
+            }
+            else if (playOption == 1)
+            {
+                pointer.transform.position = new Vector3(-4.36f, Mathf.Lerp(pointer.transform.position.y, -5.48f, Time.deltaTime * 10f), 0f);
+            }
+
+        }
+        else if (phase == 5)
+        {
+
+            // CHARACTER SELECTION
+
+            if (transition < 1f)
+            {
+                transition += Time.deltaTime;
                 fading.GetComponent<SpriteRenderer>().color = new Color(fading.GetComponent<SpriteRenderer>().color.r, fading.GetComponent<SpriteRenderer>().color.g, fading.GetComponent<SpriteRenderer>().color.b, transition);
                 intro.volume = 1f - transition;
 
                 if (transition >= 1f)
                 {
-                    phase = 4;
+                    phase = 6;
 
                     logo.SetActive(false);
                     startText.SetActive(false);
@@ -368,6 +526,10 @@ public class MenuScript : MonoBehaviour {
                     offline2.SetActive(false);
                     online1.SetActive(false);
                     online2.SetActive(false);
+                    host1.SetActive(false);
+                    host2.SetActive(false);
+                    join1.SetActive(false);
+                    join2.SetActive(false);
                     transition = 0f;
 
                     playBackground.SetActive(true);
@@ -386,7 +548,7 @@ public class MenuScript : MonoBehaviour {
             }
 
         }
-        else if (phase == 4)
+        else if (phase == 6)
         {
             if (transition < 1f)
             {
@@ -403,7 +565,7 @@ public class MenuScript : MonoBehaviour {
             }
             else if (ClickedOn(playBackground))
             {
-                phase = 5;
+                phase = 7;
                 transition = 0f;
             }
 
@@ -487,7 +649,7 @@ public class MenuScript : MonoBehaviour {
                         }
                         else if (selectableY == 6)
                         {
-                            phase = 5;
+                            phase = 7;
                             transition = 0f;
                         }
                     }
@@ -591,7 +753,7 @@ public class MenuScript : MonoBehaviour {
             }
 
         }
-        else if (phase == 5)
+        else if (phase == 7)
         {
 
             transition += Time.deltaTime;

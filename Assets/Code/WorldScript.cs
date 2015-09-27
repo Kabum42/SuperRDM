@@ -41,7 +41,7 @@ public class WorldScript : MonoBehaviour {
         {
             if (GlobalData.agents[i] != null)
             {
-                Debug.Log(i);
+                //Debug.Log(i);
                 GameObject g = Instantiate(Resources.Load("Prefabs/UIAgent") as GameObject);
                 g.name = "UIAgent" + i;
                 g.transform.parent = GameObject.Find("UIAgents").transform;
