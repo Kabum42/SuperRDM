@@ -51,8 +51,6 @@ public class MenuScript : MonoBehaviour {
             GlobalData.Start();
         }
 
-        //NetworkManager.StartServer();
-
         fading = GameObject.Find("Fading");
         Hacks.SpriteRendererAlpha(fading, 1f); 
 
@@ -126,7 +124,15 @@ public class MenuScript : MonoBehaviour {
     void OnMasterServerEvent(MasterServerEvent msEvent)
     {
         if (msEvent == MasterServerEvent.HostListReceived)
+        {
             NetworkManager.hostList = MasterServer.PollHostList();
+            NetworkManager.JoinServer(NetworkManager.hostList[0]);
+        }  
+    }
+
+    void OnConnectedToServer()
+    {
+        Debug.Log("Server Joined");
     }
 
     // Update is called once per frame
@@ -452,11 +458,11 @@ public class MenuScript : MonoBehaviour {
                 {
                     if (playOption == 0)
                     {
-                        
+                        NetworkManager.RefreshHostList();
                     }
                     else if (playOption == 1)
                     {
-                        
+                        NetworkManager.StartServer("test");
                     }
                     phase = 5;
                     transition = 0f;
@@ -480,11 +486,11 @@ public class MenuScript : MonoBehaviour {
                 {
                     if (playOption == 0)
                     {
-                        
+                        NetworkManager.RefreshHostList();
                     }
                     else if (playOption == 1)
                     {
-                        
+                        NetworkManager.StartServer("test");
                     }
                     phase = 5;
                     transition = 0f;
