@@ -28,6 +28,14 @@ public class WorldScript : MonoBehaviour {
 
     private AudioSource selectCellEffect;
 
+    private int currentMountains = 0;
+    private int goalMountains = 0;
+
+    private int currentLakes = 0;
+    private int goalLakes = 0;
+
+    private int currentSwamps = 0;
+    private int goalSwamps = 0;
 
     // Use this for initialization
     void Start () {
@@ -86,6 +94,13 @@ public class WorldScript : MonoBehaviour {
         board.name = "Board";
         board.transform.position = new Vector3(0f, 0f, 0f);
 
+        for (int i = 0; i < numCells; i++)
+        {
+            BoardCell b = new BoardCell();
+            b.root = Instantiate(Resources.Load("Prefabs/BoardCell")) as GameObject;
+            boardCells[i] = b;
+        }
+
         GenerateBoard();
         
         for (int i = 0; i < GlobalData.activeAgents; i++)
@@ -97,6 +112,11 @@ public class WorldScript : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+
+        if (Input.GetKey(KeyCode.Return))
+        {
+            GenerateBoard();
+        }
 
         //Debug.Log(boardCells[1].south);
         //boardCells[1].south.root.transform.position = boardCells[1].south.root.transform.position + new Vector3(0f, 0.02f, 0f);
@@ -303,7 +323,7 @@ public class WorldScript : MonoBehaviour {
         BoardCell b = new BoardCell();
         b.root = Instantiate(Resources.Load("Prefabs/BoardCell")) as GameObject;
         b.ring = 4;
-        b.changeBiome("sanctuary");
+        b.changeBiome(Biome.Sanctuary);
         b.root.GetComponent<SpriteRenderer>().color = GlobalData.colorCharacters[agent];
         b.root.transform.parent = board.transform;
         b.root.name = "Cell_" + 4 + "_" + num;
@@ -337,10 +357,146 @@ public class WorldScript : MonoBehaviour {
     void GenerateBoard()
     {
 
+        currentCell = 0;
+        currentMountains = 0;
+        currentLakes = 0;
+        currentSwamps = 0;
+
+        goalMountains = Random.Range(1, GlobalData.activeAgents/2  + 1);
+        goalLakes = Random.Range(2, 4 + 1);
+        goalSwamps = Random.Range(5, 6 + 1);
+
         // RINGS
         for (int i = 0; i <= numRings; i++)
         {
-            makeRing(i);
+            if (i == 0) { makeRing(i); }
+            else if (i == 1)
+            {
+                makeRing(i);
+
+                while (currentMountains < goalMountains)
+                {
+
+                    int target = Random.Range(1, 6 + 1);
+                    if (boardCells[target].biome == Biome.Desert)
+                    {
+                        boardCells[target].changeBiome(Biome.Mountain);
+                        currentMountains++;
+                    }
+
+                }
+
+            }
+            else if (i == 2) 
+            { 
+                makeRing(i);
+
+                while (currentLakes < goalLakes)
+                {
+
+                    int target = Random.Range(7, 18 + 1);
+                    if (boardCells[target].biome == Biome.Forest)
+                    {
+                        boardCells[target].changeBiome(Biome.Lake);
+                        currentLakes++;
+                    }
+
+                }
+                
+            }
+            else if (i == 3) 
+            { 
+                makeRing(i);
+
+                float doublePrairie = 20f;
+
+                // NORTH-EAST SANCTUARY
+                if (Random.Range(0f, 100f) >= 50f)
+                {
+                    boardCells[20].changeBiome(Biome.Prairie);
+                    if (Random.Range(0f, 100f) <= doublePrairie) { boardCells[21].changeBiome(Biome.Prairie); }
+                }
+                else
+                {
+                    boardCells[21].changeBiome(Biome.Prairie);
+                    if (Random.Range(0f, 100f) <= doublePrairie) { boardCells[20].changeBiome(Biome.Prairie); }
+                }
+
+                // EAST SANCTUARY
+                if (Random.Range(0f, 100f) >= 50f)
+                {
+                    boardCells[23].changeBiome(Biome.Prairie);
+                    if (Random.Range(0f, 100f) <= doublePrairie) { boardCells[24].changeBiome(Biome.Prairie); }
+                }
+                else
+                {
+                    boardCells[24].changeBiome(Biome.Prairie);
+                    if (Random.Range(0f, 100f) <= doublePrairie) { boardCells[23].changeBiome(Biome.Prairie); }
+                }
+
+                // SOUTH-EAST SANCTUARY
+                if (Random.Range(0f, 100f) >= 50f)
+                {
+                    boardCells[26].changeBiome(Biome.Prairie);
+                    if (Random.Range(0f, 100f) <= doublePrairie) { boardCells[27].changeBiome(Biome.Prairie); }
+                }
+                else
+                {
+                    boardCells[27].changeBiome(Biome.Prairie);
+                    if (Random.Range(0f, 100f) <= doublePrairie) { boardCells[26].changeBiome(Biome.Prairie); }
+                }
+
+                // SOUTH-WEST SANCTUARY
+                if (Random.Range(0f, 100f) >= 50f)
+                {
+                    boardCells[29].changeBiome(Biome.Prairie);
+                    if (Random.Range(0f, 100f) <= doublePrairie) { boardCells[30].changeBiome(Biome.Prairie); }
+                }
+                else
+                {
+                    boardCells[30].changeBiome(Biome.Prairie);
+                    if (Random.Range(0f, 100f) <= doublePrairie) { boardCells[29].changeBiome(Biome.Prairie); }
+                }
+
+                // WEST SANCTUARY
+                if (Random.Range(0f, 100f) >= 50f)
+                {
+                    boardCells[32].changeBiome(Biome.Prairie);
+                    if (Random.Range(0f, 100f) <= doublePrairie) { boardCells[33].changeBiome(Biome.Prairie); }
+                }
+                else
+                {
+                    boardCells[33].changeBiome(Biome.Prairie);
+                    if (Random.Range(0f, 100f) <= doublePrairie) { boardCells[32].changeBiome(Biome.Prairie); }
+                }
+
+                // NORTH-WEST SANCTUARY
+                if (Random.Range(0f, 100f) >= 50f)
+                {
+                    boardCells[35].changeBiome(Biome.Prairie);
+                    if (Random.Range(0f, 100f) <= doublePrairie) { boardCells[36].changeBiome(Biome.Prairie); }
+                }
+                else
+                {
+                    boardCells[36].changeBiome(Biome.Prairie);
+                    if (Random.Range(0f, 100f) <= doublePrairie) { boardCells[35].changeBiome(Biome.Prairie); }
+                }
+            
+            }
+            
+        }
+
+        // OUT OF RINGS
+        while (currentSwamps < goalSwamps)
+        {
+
+            int target = Random.Range(7, 36 + 1);
+            if (boardCells[target].biome == Biome.Forest)
+            {
+                boardCells[target].changeBiome(Biome.Swamp);
+                currentSwamps++;
+            }
+
         }
 
         selected = boardCells[0];
@@ -356,8 +512,7 @@ public class WorldScript : MonoBehaviour {
         
 
         //INITIAL CELL
-        b = new BoardCell();
-        b.root = Instantiate(Resources.Load("Prefabs/BoardCell")) as GameObject;
+        b = boardCells[currentCell];
         b.ring = number;
         b.randomBiome();
         b.root.transform.parent = board.transform;
@@ -377,8 +532,7 @@ public class WorldScript : MonoBehaviour {
             currentWidth += 1f;
             currentHeight -= 0.5f;
 
-            b = new BoardCell();
-            b.root = Instantiate(Resources.Load("Prefabs/BoardCell")) as GameObject;
+            b = boardCells[currentCell];
             b.ring = number;
             b.randomBiome();
             b.root.transform.parent = board.transform;
@@ -403,8 +557,7 @@ public class WorldScript : MonoBehaviour {
         {
             currentHeight -= 1f;
 
-            b = new BoardCell();
-            b.root = Instantiate(Resources.Load("Prefabs/BoardCell")) as GameObject;
+            b = boardCells[currentCell];
             b.ring = number;
             b.randomBiome();
             b.root.transform.parent = board.transform;
@@ -429,8 +582,7 @@ public class WorldScript : MonoBehaviour {
             currentWidth -= 1f;
             currentHeight -= 0.5f;
 
-            b = new BoardCell();
-            b.root = Instantiate(Resources.Load("Prefabs/BoardCell")) as GameObject;
+            b = boardCells[currentCell];
             b.ring = number;
             b.randomBiome();
             b.root.transform.parent = board.transform;
@@ -455,8 +607,7 @@ public class WorldScript : MonoBehaviour {
             currentWidth -= 1f;
             currentHeight += 0.5f;
 
-            b = new BoardCell();
-            b.root = Instantiate(Resources.Load("Prefabs/BoardCell")) as GameObject;
+            b = boardCells[currentCell];
             b.ring = number;
             b.randomBiome();
             b.root.transform.parent = board.transform;
@@ -480,8 +631,7 @@ public class WorldScript : MonoBehaviour {
         {
             currentHeight += 1f;
 
-            b = new BoardCell();
-            b.root = Instantiate(Resources.Load("Prefabs/BoardCell")) as GameObject;
+            b = boardCells[currentCell];
             b.ring = number;
             b.randomBiome();
             b.root.transform.parent = board.transform;
@@ -511,8 +661,7 @@ public class WorldScript : MonoBehaviour {
             currentWidth += 1f;
             currentHeight += 0.5f;
 
-            b = new BoardCell();
-            b.root = Instantiate(Resources.Load("Prefabs/BoardCell")) as GameObject;
+            b = boardCells[currentCell];
             b.ring = number;
             b.randomBiome();
             b.root.transform.parent = board.transform;

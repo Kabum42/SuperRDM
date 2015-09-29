@@ -14,6 +14,7 @@ public static class GlobalData {
     public static Color color4 = new Color(1f, 0.62f, 1f);
     public static Color color5 = new Color(1f, 1f, 0.62f);
     public static Color[] colorCharacters = {color0, color1, color2, color3, color4, color5};
+    public static string[] biomeNames;
 
     // Use this for initialization
     public static void Start () {
@@ -32,6 +33,19 @@ public static class GlobalData {
         {
             OS = "Linux";
         }
+
+        biomeNames = new string[11];
+        biomeNames[Biome.Sanctuary] = "Sanctuary";
+        biomeNames[Biome.Prairie] = "Prairie";
+        biomeNames[Biome.Forest] = "Forest";
+        biomeNames[Biome.Swamp] = "Swamp";
+        biomeNames[Biome.Lake] = "Lake";
+        biomeNames[Biome.Desert] = "Desert";
+        biomeNames[Biome.Mountain] = "Mountain";
+        biomeNames[Biome.TheEvil] = "TheEvil";
+        biomeNames[Biome.Dock_1] = "Dock_1";
+        biomeNames[Biome.Dock_2] = "Dock_2";
+        biomeNames[Biome.Dock_3] = "Dock_3";
 
 	}
 	
