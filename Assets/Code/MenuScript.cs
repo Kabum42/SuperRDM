@@ -119,6 +119,7 @@ public class MenuScript : MonoBehaviour {
     void OnServerInitialized()
     {
         Debug.Log("Server Initializied");
+        GlobalData.connected = true;
     }
 
     void OnMasterServerEvent(MasterServerEvent msEvent)
@@ -133,6 +134,22 @@ public class MenuScript : MonoBehaviour {
     void OnConnectedToServer()
     {
         Debug.Log("Server Joined");
+        GlobalData.connected = true;
+    }
+
+
+    void OnPlayerConnected(NetworkPlayer player)
+    {
+        Debug.Log("Player connected from " + player.ipAddress + ":" + player.port);
+
+        for (int i = 0; i < selectables.Length; i++)
+        {
+            if (selectables[i].controller == "CPU")
+            {
+                selectables[i].controller = "Player";
+                break;
+            }
+        }
     }
 
     // Update is called once per frame
@@ -329,7 +346,7 @@ public class MenuScript : MonoBehaviour {
                 {
                     if (playOption == 0)
                     {
-                        phase = 3;
+                        phase = 5;
                         transition = 0f;
                     }
                     else if (playOption == 1)
@@ -464,6 +481,7 @@ public class MenuScript : MonoBehaviour {
                     {
                         NetworkManager.StartServer("test");
                     }
+                    GlobalData.online = true;
                     phase = 5;
                     transition = 0f;
                 }
@@ -492,6 +510,7 @@ public class MenuScript : MonoBehaviour {
                     {
                         NetworkManager.StartServer("test");
                     }
+                    GlobalData.online = true;
                     phase = 5;
                     transition = 0f;
                 }
@@ -554,7 +573,7 @@ public class MenuScript : MonoBehaviour {
             }
 
         }
-        else if (phase == 6)
+        else if (phase == 6 && (!GlobalData.online || (GlobalData.online && GlobalData.connected)))
         {
             if (transition < 1f)
             {
@@ -680,9 +699,13 @@ public class MenuScript : MonoBehaviour {
 
             for (int i = 0; i < selectables.Length; i++)
                 {
-                 selectables[i].nameBackground.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1f);
-                 selectables[i].controllerBackground.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1f);
-                 selectables[i].arrowBackground.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1f);
+                selectables[i].nameBackground.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1f);
+                selectables[i].controllerBackground.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1f);
+                selectables[i].arrowBackground.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1f);
+
+                selectables[i].controllerText.GetComponent<TextMesh>().text = selectables[i].controller;
+                selectables[i].controllerText2.GetComponent<TextMesh>().text = selectables[i].controller;
+
 
                 if (selectableY == i && controllerConnected != -1)
                 {

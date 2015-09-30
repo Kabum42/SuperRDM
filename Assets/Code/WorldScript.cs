@@ -87,6 +87,9 @@ public class WorldScript : MonoBehaviour {
             numCells += 6 * i;
         }
 
+        // POSIBLES SANTUARIOS
+        numCells += 6;
+
         boardCells = new BoardCell[numCells];
         //boardCells = new BoardCell[numCells + GlobalData.activeAgents];
 
@@ -320,7 +323,7 @@ public class WorldScript : MonoBehaviour {
 
     void AddSanctuary(int agent, int num)
     {
-        BoardCell b = new BoardCell();
+        BoardCell b = boardCells[currentCell];
         b.root = Instantiate(Resources.Load("Prefabs/BoardCell")) as GameObject;
         b.ring = 4;
         b.changeBiome(Biome.Sanctuary);
@@ -330,27 +333,40 @@ public class WorldScript : MonoBehaviour {
 
         if (num == 0) {
             positionCell(b, 2, 3);
+            connectCells(b, "southWest", boardCells[20]);
+            connectCells(b, "south", boardCells[21]);
         }
         else if (num == 1) {
             positionCell(b, 4, 0);
+            connectCells(b, "northWest", boardCells[23]);
+            connectCells(b, "southWest", boardCells[24]);
         }
         else if (num == 2)
         {
             positionCell(b, 2, -3);
+            connectCells(b, "north", boardCells[26]);
+            connectCells(b, "northWest", boardCells[27]);
         }
         else if (num == 3)
         {
             positionCell(b, -2, -3);
+            connectCells(b, "northEast", boardCells[29]);
+            connectCells(b, "north", boardCells[30]);
         }
         else if (num == 4)
         {
             positionCell(b, -4, 0);
+            connectCells(b, "southEast", boardCells[32]);
+            connectCells(b, "northEast", boardCells[33]);
         }
         else if (num == 5)
         {
             positionCell(b, -2, 3);
+            connectCells(b, "south", boardCells[35]);
+            connectCells(b, "southEast", boardCells[36]);
         }
-
+        
+        currentCell++;
 
     }
 

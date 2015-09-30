@@ -16,6 +16,9 @@ public static class GlobalData {
     public static Color[] colorCharacters = {color0, color1, color2, color3, color4, color5};
     public static string[] biomeNames;
 
+    public static bool online = false;
+    public static bool connected = false;
+
     // Use this for initialization
     public static void Start () {
 
