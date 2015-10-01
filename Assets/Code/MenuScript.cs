@@ -214,10 +214,14 @@ public class MenuScript : MonoBehaviour {
         if (int.Parse(Network.player.ToString()) == 0)
         {
             selectables[0].controller = "You";
+            selectables[0].controllerText.GetComponent<TextMesh>().color = new Color(1f, 0.35f, 0.35f, selectables[0].controllerText.GetComponent<TextMesh>().color.a);
+            selectables[0].controllerText2.GetComponent<TextMesh>().color = new Color(0.65f, 0f, 0f, selectables[0].controllerText2.GetComponent<TextMesh>().color.a);
         }
         else
         {
             selectables[0].controller = "Player";
+            selectables[0].controllerText.GetComponent<TextMesh>().color = new Color(0.35f, 1f, 0.35f, selectables[0].controllerText.GetComponent<TextMesh>().color.a);
+            selectables[0].controllerText2.GetComponent<TextMesh>().color = new Color(0f, 0.65f, 0f, selectables[0].controllerText2.GetComponent<TextMesh>().color.a);
         }
 
         for (int i = 1; i < selectables.Length; i++)
@@ -227,15 +231,21 @@ public class MenuScript : MonoBehaviour {
                 if (selectables[i].player.ToString() == Network.player.ToString())
                 {
                     selectables[i].controller = "You";
+                    selectables[i].controllerText.GetComponent<TextMesh>().color = new Color(1f, 0.35f, 0.35f, selectables[i].controllerText.GetComponent<TextMesh>().color.a);
+                    selectables[i].controllerText2.GetComponent<TextMesh>().color = new Color(0.65f, 0f, 0f, selectables[i].controllerText2.GetComponent<TextMesh>().color.a);
                 }
                 else
                 {
                     selectables[i].controller = "Player";
+                    selectables[i].controllerText.GetComponent<TextMesh>().color = new Color(0.35f, 1f, 0.35f, selectables[i].controllerText.GetComponent<TextMesh>().color.a);
+                    selectables[i].controllerText2.GetComponent<TextMesh>().color = new Color(0f, 0.65f, 0f, selectables[i].controllerText2.GetComponent<TextMesh>().color.a);
                 }
             }
             else
             {
                 selectables[i].controller = "CPU";
+                selectables[i].controllerText.GetComponent<TextMesh>().color = new Color(0.35f, 0.35f, 1f, selectables[i].controllerText.GetComponent<TextMesh>().color.a);
+                selectables[i].controllerText2.GetComponent<TextMesh>().color = new Color(0f, 0f, 0.65f, selectables[i].controllerText2.GetComponent<TextMesh>().color.a);
             }
         }
     }
@@ -1001,9 +1011,14 @@ public class MenuScript : MonoBehaviour {
             controllerText.GetComponent<TextMesh>().color = new Color(controllerText.GetComponent<TextMesh>().color.r, controllerText.GetComponent<TextMesh>().color.g, controllerText.GetComponent<TextMesh>().color.b, 0f);
             controllerText2.GetComponent<TextMesh>().color = new Color(controllerText2.GetComponent<TextMesh>().color.r, controllerText2.GetComponent<TextMesh>().color.g, controllerText2.GetComponent<TextMesh>().color.b, 0f);
 
+            controllerText.GetComponent<TextMesh>().color = new Color(0.35f, 0.35f, 1f, controllerText.GetComponent<TextMesh>().color.a);
+            controllerText2.GetComponent<TextMesh>().color = new Color(0f, 0f, 0.65f, controllerText2.GetComponent<TextMesh>().color.a);
+
             if (number == 0)
             {
                 controller = "You";
+                controllerText.GetComponent<TextMesh>().color = new Color(1f, 0.35f, 0.35f, controllerText.GetComponent<TextMesh>().color.a);
+                controllerText2.GetComponent<TextMesh>().color = new Color(0.65f, 0f, 0f, controllerText2.GetComponent<TextMesh>().color.a);
                 changeLegend("barbarian");
                 status = "opened";
                 arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Lock");
