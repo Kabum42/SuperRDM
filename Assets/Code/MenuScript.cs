@@ -43,6 +43,8 @@ public class MenuScript : MonoBehaviour {
     private float lastDPadX = 0f;
     private float lastDPadY = 0f;
 
+    private bool isServer = false;
+
     // Use this for initialization
     void Start () {
 
@@ -120,6 +122,7 @@ public class MenuScript : MonoBehaviour {
     {
         Debug.Log("Server Initializied");
         GlobalData.connected = true;
+        isServer = true;
     }
 
     void OnMasterServerEvent(MasterServerEvent msEvent)
@@ -147,7 +150,42 @@ public class MenuScript : MonoBehaviour {
             if (selectables[i].controller == "CPU")
             {
                 selectables[i].controller = "Player";
+                selectables[i].player = player;
                 break;
+            }
+        }
+
+        updatePlayers(selectables[0].player, selectables[1].player, selectables[2].player, selectables[3].player, selectables[4].player, selectables[5].player);
+
+    }
+
+    [RPC]
+    void updatePlayers(NetworkPlayer player1, NetworkPlayer player2, NetworkPlayer player3, NetworkPlayer player4, NetworkPlayer player5, NetworkPlayer player6)
+    {
+
+        selectables[0].player = player1;
+        selectables[1].player = player2;
+        selectables[2].player = player3;
+        selectables[3].player = player4;
+        selectables[4].player = player5;
+        selectables[5].player = player6;
+
+        for (int i = 0; i < selectables.Length; i++)
+        {
+            if (selectables[i].player != null)
+            {
+                if (selectables[i].player == Network.player)
+                {
+                    selectables[i].controller = "You";
+                }
+                else
+                {
+                    selectables[i].controller = "Player";
+                }
+            }
+            else
+            {
+                selectables[i].controller = "NPC";
             }
         }
     }
@@ -569,6 +607,8 @@ public class MenuScript : MonoBehaviour {
                         selectables[i] = new selectableAgent(i);
                     }
 
+                    if (isServer) { selectables[0].player = Network.player; }
+
                 }
             }
 
@@ -808,6 +848,7 @@ public class MenuScript : MonoBehaviour {
         public string currentLegend = "barbarian";
         public string currentName = "Retired Barbarian";
         public string controller = "CPU";
+        public NetworkPlayer player;
 
         public GameObject pictureHolder;
         public GameObject icon;
@@ -844,7 +885,7 @@ public class MenuScript : MonoBehaviour {
 
             if (number == 0)
             {
-                controller = "Player";
+                controller = "You";
                 changeLegend("barbarian");
                 status = "opened";
                 arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Lock");
@@ -900,11 +941,11 @@ public class MenuScript : MonoBehaviour {
                 GlobalData.agents[aux] = new MainCharacter();
                 if (selectables[i].controller == "CPU")
                 {
-                    GlobalData.agents[aux].CPU = true;
+                    //NADA QUE HACER, NO ES UN PLAYER
                 }
                 else
                 {
-                    GlobalData.agents[aux].CPU = false;
+                    GlobalData.agents[aux].player = selectables[i].player;
                 }
                 
                 aux++;
