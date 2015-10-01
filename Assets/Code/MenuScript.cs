@@ -145,6 +145,10 @@ public class MenuScript : MonoBehaviour {
         GlobalData.connected = true;
     }
 
+    void OnDisconnectedFromServer(NetworkDisconnection info)
+    {
+        Application.LoadLevel("Menu");
+    }
 
     void OnPlayerConnected(NetworkPlayer player)
     {
@@ -660,7 +664,7 @@ public class MenuScript : MonoBehaviour {
         else if (phase == 6 && (!GlobalData.online || (GlobalData.online && GlobalData.connected)))
         {
 
-            if (int.Parse(Network.player.ToString()) == 0)
+            if (int.Parse(Network.player.ToString()) == 0 || !GlobalData.online)
             {
                 bool allReady = true;
                 for (int i = 0; i < selectables.Length; i++)
@@ -672,7 +676,15 @@ public class MenuScript : MonoBehaviour {
                 }
                 if (allReady)
                 {
-                    GetComponent<NetworkView>().RPC("startMatch", RPCMode.All, Random.Range(0f, 9999999f));
+                    if (GlobalData.online)
+                    {
+                        GetComponent<NetworkView>().RPC("startMatch", RPCMode.All, Random.Range(0f, 9999999f));
+                    }
+                    else
+                    {
+                        GlobalData.boardSeed = Random.Range(0f, 9999999f);
+                        starting = true;
+                    }
                 }
             }
 
@@ -700,7 +712,7 @@ public class MenuScript : MonoBehaviour {
 
                 selectableAgent myAgent = null;
 
-                if (int.Parse(Network.player.ToString()) == 0)
+                if (int.Parse(Network.player.ToString()) == 0 || !GlobalData.online)
                 {
                     myAgent = selectables[0];
                 }
@@ -717,17 +729,23 @@ public class MenuScript : MonoBehaviour {
 
                 if (!myAgent.tick.activeInHierarchy)
                 {
-                    if (int.Parse(Network.player.ToString()) == 0)
+                    if (GlobalData.online)
                     {
-                        // ES EL SERVER
-                        selectables[0].tick.SetActive(true);
-                        GetComponent<NetworkView>().RPC("updatePlayers", RPCMode.All, selectables[0].player, selectables[1].player, selectables[2].player, selectables[3].player, selectables[4].player, selectables[5].player, selectables[0].tick.activeInHierarchy, selectables[1].tick.activeInHierarchy, selectables[2].tick.activeInHierarchy, selectables[3].tick.activeInHierarchy, selectables[4].tick.activeInHierarchy, selectables[5].tick.activeInHierarchy);
+                        if (int.Parse(Network.player.ToString()) == 0)
+                        {
+                            // ES EL SERVER
+                            selectables[0].tick.SetActive(true);
+                            GetComponent<NetworkView>().RPC("updatePlayers", RPCMode.All, selectables[0].player, selectables[1].player, selectables[2].player, selectables[3].player, selectables[4].player, selectables[5].player, selectables[0].tick.activeInHierarchy, selectables[1].tick.activeInHierarchy, selectables[2].tick.activeInHierarchy, selectables[3].tick.activeInHierarchy, selectables[4].tick.activeInHierarchy, selectables[5].tick.activeInHierarchy);
+                        }
+                        else
+                        {
+                            GetComponent<NetworkView>().RPC("readyRequest", RPCMode.Server, Network.player);
+                        }
                     }
                     else
                     {
-                        GetComponent<NetworkView>().RPC("readyRequest", RPCMode.Server, Network.player);
+                        selectables[0].tick.SetActive(true);
                     }
-                    
                 }
 
             }
