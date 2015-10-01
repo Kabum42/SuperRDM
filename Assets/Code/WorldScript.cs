@@ -118,6 +118,7 @@ public class WorldScript : MonoBehaviour {
 
         if (Input.GetKey(KeyCode.Return))
         {
+            GlobalData.boardSeed = Random.Range(0f, 100f);
             GenerateBoard();
         }
 
@@ -378,9 +379,14 @@ public class WorldScript : MonoBehaviour {
         currentLakes = 0;
         currentSwamps = 0;
 
-        goalMountains = Random.Range(1, GlobalData.activeAgents/2  + 1);
-        goalLakes = Random.Range(2, 4 + 1);
-        goalSwamps = Random.Range(5, 6 + 1);
+        // 2-3 PLAYERS : 1 MOUNTAIN
+        // 4-5 PLAYERS : 1-2 MOUNTAINS
+        // 6 PLAYERS : 1-3 MOUNTAINS
+        goalMountains = 1 + (int) Mathf.Floor((Mathf.PerlinNoise(0.1f, GlobalData.boardSeed) * (GlobalData.activeAgents / 2 )));
+        // 2-4 LAKES
+        goalLakes = 2 + (int)Mathf.Floor((Mathf.PerlinNoise(3.1f, GlobalData.boardSeed) * 3f));
+        // 5-6 SWAMPS
+        goalSwamps = 5 + (int)Mathf.Floor((Mathf.PerlinNoise(6.1f, GlobalData.boardSeed) * 2f));
 
         // RINGS
         for (int i = 0; i <= numRings; i++)
@@ -390,15 +396,19 @@ public class WorldScript : MonoBehaviour {
             {
                 makeRing(i);
 
+                float startingX = 10.2f;
+
                 while (currentMountains < goalMountains)
                 {
 
-                    int target = Random.Range(1, 6 + 1);
+                    int target = 1 + (int)Mathf.Floor((Mathf.PerlinNoise(startingX, GlobalData.boardSeed) * 6f));
                     if (boardCells[target].biome == Biome.Desert)
                     {
                         boardCells[target].changeBiome(Biome.Mountain);
                         currentMountains++;
                     }
+
+                    startingX += 1.103903918344755788f;
 
                 }
 
@@ -407,15 +417,19 @@ public class WorldScript : MonoBehaviour {
             { 
                 makeRing(i);
 
+                float startingX = 110.3f;
+
                 while (currentLakes < goalLakes)
                 {
 
-                    int target = Random.Range(7, 18 + 1);
+                    int target = 7 + (int)Mathf.Floor((Mathf.PerlinNoise(startingX, GlobalData.boardSeed) * 12f));
                     if (boardCells[target].biome == Biome.Forest)
                     {
                         boardCells[target].changeBiome(Biome.Lake);
                         currentLakes++;
                     }
+
+                    startingX += 1.21313843078579875f;
 
                 }
                 
@@ -427,75 +441,75 @@ public class WorldScript : MonoBehaviour {
                 float doublePrairie = 20f;
 
                 // NORTH-EAST SANCTUARY
-                if (Random.Range(0f, 100f) >= 50f)
+                if (Mathf.PerlinNoise(210.4f, GlobalData.boardSeed) * 100f >= 50f)
                 {
                     boardCells[20].changeBiome(Biome.Prairie);
-                    if (Random.Range(0f, 100f) <= doublePrairie) { boardCells[21].changeBiome(Biome.Prairie); }
+                    if (Mathf.PerlinNoise(213.4f, GlobalData.boardSeed) * 100f <= doublePrairie) { boardCells[21].changeBiome(Biome.Prairie); }
                 }
                 else
                 {
                     boardCells[21].changeBiome(Biome.Prairie);
-                    if (Random.Range(0f, 100f) <= doublePrairie) { boardCells[20].changeBiome(Biome.Prairie); }
+                    if (Mathf.PerlinNoise(216.4f, GlobalData.boardSeed) * 100f <= doublePrairie) { boardCells[20].changeBiome(Biome.Prairie); }
                 }
 
                 // EAST SANCTUARY
-                if (Random.Range(0f, 100f) >= 50f)
+                if (Mathf.PerlinNoise(220.4f, GlobalData.boardSeed) * 100f >= 50f)
                 {
                     boardCells[23].changeBiome(Biome.Prairie);
-                    if (Random.Range(0f, 100f) <= doublePrairie) { boardCells[24].changeBiome(Biome.Prairie); }
+                    if (Mathf.PerlinNoise(223.4f, GlobalData.boardSeed) * 100f <= doublePrairie) { boardCells[24].changeBiome(Biome.Prairie); }
                 }
                 else
                 {
                     boardCells[24].changeBiome(Biome.Prairie);
-                    if (Random.Range(0f, 100f) <= doublePrairie) { boardCells[23].changeBiome(Biome.Prairie); }
+                    if (Mathf.PerlinNoise(226.4f, GlobalData.boardSeed) * 100f <= doublePrairie) { boardCells[23].changeBiome(Biome.Prairie); }
                 }
 
                 // SOUTH-EAST SANCTUARY
-                if (Random.Range(0f, 100f) >= 50f)
+                if (Mathf.PerlinNoise(230.4f, GlobalData.boardSeed) * 100f >= 50f)
                 {
                     boardCells[26].changeBiome(Biome.Prairie);
-                    if (Random.Range(0f, 100f) <= doublePrairie) { boardCells[27].changeBiome(Biome.Prairie); }
+                    if (Mathf.PerlinNoise(233.4f, GlobalData.boardSeed) * 100f <= doublePrairie) { boardCells[27].changeBiome(Biome.Prairie); }
                 }
                 else
                 {
                     boardCells[27].changeBiome(Biome.Prairie);
-                    if (Random.Range(0f, 100f) <= doublePrairie) { boardCells[26].changeBiome(Biome.Prairie); }
+                    if (Mathf.PerlinNoise(236.4f, GlobalData.boardSeed) * 100f <= doublePrairie) { boardCells[26].changeBiome(Biome.Prairie); }
                 }
 
                 // SOUTH-WEST SANCTUARY
-                if (Random.Range(0f, 100f) >= 50f)
+                if (Mathf.PerlinNoise(240.4f, GlobalData.boardSeed) * 100f >= 50f)
                 {
                     boardCells[29].changeBiome(Biome.Prairie);
-                    if (Random.Range(0f, 100f) <= doublePrairie) { boardCells[30].changeBiome(Biome.Prairie); }
+                    if (Mathf.PerlinNoise(243.4f, GlobalData.boardSeed) * 100f <= doublePrairie) { boardCells[30].changeBiome(Biome.Prairie); }
                 }
                 else
                 {
                     boardCells[30].changeBiome(Biome.Prairie);
-                    if (Random.Range(0f, 100f) <= doublePrairie) { boardCells[29].changeBiome(Biome.Prairie); }
+                    if (Mathf.PerlinNoise(246.4f, GlobalData.boardSeed) * 100f <= doublePrairie) { boardCells[29].changeBiome(Biome.Prairie); }
                 }
 
                 // WEST SANCTUARY
-                if (Random.Range(0f, 100f) >= 50f)
+                if (Mathf.PerlinNoise(250.4f, GlobalData.boardSeed) * 100f >= 50f)
                 {
                     boardCells[32].changeBiome(Biome.Prairie);
-                    if (Random.Range(0f, 100f) <= doublePrairie) { boardCells[33].changeBiome(Biome.Prairie); }
+                    if (Mathf.PerlinNoise(253.4f, GlobalData.boardSeed) * 100f <= doublePrairie) { boardCells[33].changeBiome(Biome.Prairie); }
                 }
                 else
                 {
                     boardCells[33].changeBiome(Biome.Prairie);
-                    if (Random.Range(0f, 100f) <= doublePrairie) { boardCells[32].changeBiome(Biome.Prairie); }
+                    if (Mathf.PerlinNoise(256.4f, GlobalData.boardSeed) * 100f <= doublePrairie) { boardCells[32].changeBiome(Biome.Prairie); }
                 }
 
                 // NORTH-WEST SANCTUARY
-                if (Random.Range(0f, 100f) >= 50f)
+                if (Mathf.PerlinNoise(260.4f, GlobalData.boardSeed) * 100f >= 50f)
                 {
                     boardCells[35].changeBiome(Biome.Prairie);
-                    if (Random.Range(0f, 100f) <= doublePrairie) { boardCells[36].changeBiome(Biome.Prairie); }
+                    if (Mathf.PerlinNoise(263.4f, GlobalData.boardSeed) * 100f <= doublePrairie) { boardCells[36].changeBiome(Biome.Prairie); }
                 }
                 else
                 {
                     boardCells[36].changeBiome(Biome.Prairie);
-                    if (Random.Range(0f, 100f) <= doublePrairie) { boardCells[35].changeBiome(Biome.Prairie); }
+                    if (Mathf.PerlinNoise(266.4f, GlobalData.boardSeed) * 100f <= doublePrairie) { boardCells[35].changeBiome(Biome.Prairie); }
                 }
             
             }
@@ -503,15 +517,21 @@ public class WorldScript : MonoBehaviour {
         }
 
         // OUT OF RINGS
+
+        float startingX_2 = 310.5f;
+
         while (currentSwamps < goalSwamps)
         {
 
-            int target = Random.Range(7, 36 + 1);
+            int target = 7 + (int)Mathf.Floor((Mathf.PerlinNoise(startingX_2, GlobalData.boardSeed) * 30f));
+            //int target = Random.Range(7, 36 + 1);
             if (boardCells[target].biome == Biome.Forest)
             {
                 boardCells[target].changeBiome(Biome.Swamp);
                 currentSwamps++;
             }
+
+            startingX_2 += 1.4875785627462734674f;
 
         }
 

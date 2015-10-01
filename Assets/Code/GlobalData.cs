@@ -18,6 +18,7 @@ public static class GlobalData {
 
     public static bool online = false;
     public static bool connected = false;
+    public static float boardSeed = 42f;
 
     // Use this for initialization
     public static void Start () {
