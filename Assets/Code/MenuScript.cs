@@ -43,8 +43,6 @@ public class MenuScript : MonoBehaviour {
     private float lastDPadX = 0f;
     private float lastDPadY = 0f;
 
-    private bool isServer = false;
-
     // Use this for initialization
     void Start () {
 
@@ -116,13 +114,19 @@ public class MenuScript : MonoBehaviour {
         playText.SetActive(false);
         playText2.SetActive(false);
 
+        for (int i = 0; i < selectables.Length; i++)
+        {
+            selectables[i] = new selectableAgent(i);
+            selectables[i].root.SetActive(false);
+        }
+
 	}
 
     void OnServerInitialized()
     {
         Debug.Log("Server Initializied");
         GlobalData.connected = true;
-        isServer = true;
+        selectables[0].player = Network.player;
     }
 
     void OnMasterServerEvent(MasterServerEvent msEvent)
@@ -149,13 +153,14 @@ public class MenuScript : MonoBehaviour {
         {
             if (selectables[i].controller == "CPU")
             {
-                selectables[i].controller = "Player";
                 selectables[i].player = player;
                 break;
             }
         }
 
-        updatePlayers(selectables[0].player, selectables[1].player, selectables[2].player, selectables[3].player, selectables[4].player, selectables[5].player);
+        GetComponent<NetworkView>().RPC("updatePlayers", RPCMode.All, selectables[0].player, selectables[1].player, selectables[2].player, selectables[3].player, selectables[4].player, selectables[5].player);
+
+        //updatePlayers(selectables[0].player, selectables[1].player, selectables[2].player, selectables[3].player, selectables[4].player, selectables[5].player);
 
     }
 
@@ -170,11 +175,20 @@ public class MenuScript : MonoBehaviour {
         selectables[4].player = player5;
         selectables[5].player = player6;
 
-        for (int i = 0; i < selectables.Length; i++)
+        if (int.Parse(Network.player.ToString()) == 0)
         {
-            if (selectables[i].player != null)
+            selectables[0].controller = "You";
+        }
+        else
+        {
+            selectables[0].controller = "Player";
+        }
+
+        for (int i = 1; i < selectables.Length; i++)
+        {
+            if (int.Parse(selectables[i].player.ToString()) != 0)
             {
-                if (selectables[i].player == Network.player)
+                if (selectables[i].player.ToString() == Network.player.ToString())
                 {
                     selectables[i].controller = "You";
                 }
@@ -185,7 +199,7 @@ public class MenuScript : MonoBehaviour {
             }
             else
             {
-                selectables[i].controller = "NPC";
+                selectables[i].controller = "CPU";
             }
         }
     }
@@ -604,10 +618,8 @@ public class MenuScript : MonoBehaviour {
 
                     for (int i = 0; i < selectables.Length; i++)
                     {
-                        selectables[i] = new selectableAgent(i);
+                        selectables[i].root.SetActive(true);
                     }
-
-                    if (isServer) { selectables[0].player = Network.player; }
 
                 }
             }
