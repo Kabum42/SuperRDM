@@ -167,7 +167,6 @@ public class MenuScript : MonoBehaviour {
 
         GetComponent<NetworkView>().RPC("updatePlayers", RPCMode.All, selectables[0].player, selectables[1].player, selectables[2].player, selectables[3].player, selectables[4].player, selectables[5].player, selectables[0].tick.activeInHierarchy, selectables[1].tick.activeInHierarchy, selectables[2].tick.activeInHierarchy, selectables[3].tick.activeInHierarchy, selectables[4].tick.activeInHierarchy, selectables[5].tick.activeInHierarchy);
 
-        //updatePlayers(selectables[0].player, selectables[1].player, selectables[2].player, selectables[3].player, selectables[4].player, selectables[5].player);
     }
 
     [RPC]
@@ -216,12 +215,14 @@ public class MenuScript : MonoBehaviour {
             selectables[0].controller = "You";
             selectables[0].controllerText.GetComponent<TextMesh>().color = new Color(1f, 0.35f, 0.35f, selectables[0].controllerText.GetComponent<TextMesh>().color.a);
             selectables[0].controllerText2.GetComponent<TextMesh>().color = new Color(0.65f, 0f, 0f, selectables[0].controllerText2.GetComponent<TextMesh>().color.a);
+            selectables[0].arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Arrow");
         }
         else
         {
             selectables[0].controller = "Player";
             selectables[0].controllerText.GetComponent<TextMesh>().color = new Color(0.35f, 1f, 0.35f, selectables[0].controllerText.GetComponent<TextMesh>().color.a);
             selectables[0].controllerText2.GetComponent<TextMesh>().color = new Color(0f, 0.65f, 0f, selectables[0].controllerText2.GetComponent<TextMesh>().color.a);
+            selectables[0].arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Lock");
         }
 
         for (int i = 1; i < selectables.Length; i++)
@@ -233,12 +234,16 @@ public class MenuScript : MonoBehaviour {
                     selectables[i].controller = "You";
                     selectables[i].controllerText.GetComponent<TextMesh>().color = new Color(1f, 0.35f, 0.35f, selectables[i].controllerText.GetComponent<TextMesh>().color.a);
                     selectables[i].controllerText2.GetComponent<TextMesh>().color = new Color(0.65f, 0f, 0f, selectables[i].controllerText2.GetComponent<TextMesh>().color.a);
+                    selectables[i].arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Arrow");
                 }
                 else
                 {
                     selectables[i].controller = "Player";
                     selectables[i].controllerText.GetComponent<TextMesh>().color = new Color(0.35f, 1f, 0.35f, selectables[i].controllerText.GetComponent<TextMesh>().color.a);
                     selectables[i].controllerText2.GetComponent<TextMesh>().color = new Color(0f, 0.65f, 0f, selectables[i].controllerText2.GetComponent<TextMesh>().color.a);
+                    if (int.Parse(Network.player.ToString()) == 0) { selectables[0].arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Arrow"); }
+                    else { selectables[i].arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Lock"); }
+                    Debug.Log("Player" + i);
                 }
             }
             else
@@ -246,6 +251,9 @@ public class MenuScript : MonoBehaviour {
                 selectables[i].controller = "CPU";
                 selectables[i].controllerText.GetComponent<TextMesh>().color = new Color(0.35f, 0.35f, 1f, selectables[i].controllerText.GetComponent<TextMesh>().color.a);
                 selectables[i].controllerText2.GetComponent<TextMesh>().color = new Color(0f, 0f, 0.65f, selectables[i].controllerText2.GetComponent<TextMesh>().color.a);
+                if (int.Parse(Network.player.ToString()) == 0) { selectables[0].arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Arrow");}
+                else { selectables[i].arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Lock");}
+                
             }
         }
     }
@@ -720,43 +728,7 @@ public class MenuScript : MonoBehaviour {
             else if (ClickedOn(playBackground))
             {
 
-                selectableAgent myAgent = null;
-
-                if (int.Parse(Network.player.ToString()) == 0 || !GlobalData.online)
-                {
-                    myAgent = selectables[0];
-                }
-                else
-                {
-                    for (int i = 1; i < selectables.Length; i++)
-                    {
-                        if (int.Parse(selectables[i].player.ToString()) != 0 && selectables[i].player.ToString() == Network.player.ToString())
-                        {
-                                myAgent = selectables[i];
-                        }
-                    }
-                }
-
-                if (!myAgent.tick.activeInHierarchy)
-                {
-                    if (GlobalData.online)
-                    {
-                        if (int.Parse(Network.player.ToString()) == 0)
-                        {
-                            // ES EL SERVER
-                            selectables[0].tick.SetActive(true);
-                            GetComponent<NetworkView>().RPC("updatePlayers", RPCMode.All, selectables[0].player, selectables[1].player, selectables[2].player, selectables[3].player, selectables[4].player, selectables[5].player, selectables[0].tick.activeInHierarchy, selectables[1].tick.activeInHierarchy, selectables[2].tick.activeInHierarchy, selectables[3].tick.activeInHierarchy, selectables[4].tick.activeInHierarchy, selectables[5].tick.activeInHierarchy);
-                        }
-                        else
-                        {
-                            GetComponent<NetworkView>().RPC("readyRequest", RPCMode.Server, Network.player);
-                        }
-                    }
-                    else
-                    {
-                        selectables[0].tick.SetActive(true);
-                    }
-                }
+                clickOnReady();
 
             }
 
@@ -821,7 +793,7 @@ public class MenuScript : MonoBehaviour {
                     {
                         if (selectableY < 6)
                         {
-                            if (selectables[selectableY].status == "closed")
+                            if (selectables[selectableY].status == "closed" && selectables[selectableY].arrow.GetComponent<SpriteRenderer>().sprite == Resources.Load<Sprite>("Menu/Arrow"))
                             {
                                 selectables[selectableY].status = "opened";
                                 acceptEffect.Play();
@@ -831,7 +803,7 @@ public class MenuScript : MonoBehaviour {
                                 {
                                     // CHANGE CHAMPION
                                 }
-                                else if (selectableX == 2)
+                                else if (selectableX == 2 && selectables[selectableY].arrow.GetComponent<SpriteRenderer>().sprite == Resources.Load<Sprite>("Menu/Arrow"))
                                 {
                                     selectables[selectableY].status = "closed";
                                     acceptEffect.Play();
@@ -840,8 +812,7 @@ public class MenuScript : MonoBehaviour {
                         }
                         else if (selectableY == 6)
                         {
-                            phase = 7;
-                            transition = 0f;
+                            clickOnReady();
                         }
                     }
 
@@ -906,12 +877,12 @@ public class MenuScript : MonoBehaviour {
 
                 if (ClickedOn(selectables[i].arrowBackground))
                 {
-                    if (selectables[i].status == "closed")
+                    if (selectables[i].status == "closed" && selectables[i].arrow.GetComponent<SpriteRenderer>().sprite == Resources.Load<Sprite>("Menu/Arrow"))
                     {
                         selectables[i].status = "opened";
                         acceptEffect.Play();
                     }
-                    else if (selectables[i].status == "opened" && i >= 2)
+                    else if (selectables[i].status == "opened" && selectables[i].arrow.GetComponent<SpriteRenderer>().sprite == Resources.Load<Sprite>("Menu/Arrow"))
                     {
                         selectables[i].status = "closed";
                         acceptEffect.Play();
@@ -1021,14 +992,14 @@ public class MenuScript : MonoBehaviour {
                 controllerText2.GetComponent<TextMesh>().color = new Color(0.65f, 0f, 0f, controllerText2.GetComponent<TextMesh>().color.a);
                 changeLegend("barbarian");
                 status = "opened";
-                arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Lock");
+                //arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Lock");
                 tick.SetActive(false);
             }
             if (number == 1)
             {
                 changeLegend("pilumantic");
                 status = "opened";
-                arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Lock");
+                //arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Lock");
             }
 
             controllerText.GetComponent<TextMesh>().text = controller;
@@ -1089,6 +1060,47 @@ public class MenuScript : MonoBehaviour {
         GlobalData.activeAgents = aux;
         Application.LoadLevel("World");
 
+    }
+
+    private void clickOnReady()
+    {
+        selectableAgent myAgent = null;
+
+        if (int.Parse(Network.player.ToString()) == 0 || !GlobalData.online)
+        {
+            myAgent = selectables[0];
+        }
+        else
+        {
+            for (int i = 1; i < selectables.Length; i++)
+            {
+                if (int.Parse(selectables[i].player.ToString()) != 0 && selectables[i].player.ToString() == Network.player.ToString())
+                {
+                    myAgent = selectables[i];
+                }
+            }
+        }
+
+        if (!myAgent.tick.activeInHierarchy)
+        {
+            if (GlobalData.online)
+            {
+                if (int.Parse(Network.player.ToString()) == 0)
+                {
+                    // ES EL SERVER
+                    selectables[0].tick.SetActive(true);
+                    GetComponent<NetworkView>().RPC("updatePlayers", RPCMode.All, selectables[0].player, selectables[1].player, selectables[2].player, selectables[3].player, selectables[4].player, selectables[5].player, selectables[0].tick.activeInHierarchy, selectables[1].tick.activeInHierarchy, selectables[2].tick.activeInHierarchy, selectables[3].tick.activeInHierarchy, selectables[4].tick.activeInHierarchy, selectables[5].tick.activeInHierarchy);
+                }
+                else
+                {
+                    GetComponent<NetworkView>().RPC("readyRequest", RPCMode.Server, Network.player);
+                }
+            }
+            else
+            {
+                selectables[0].tick.SetActive(true);
+            }
+        }
     }
 
 
