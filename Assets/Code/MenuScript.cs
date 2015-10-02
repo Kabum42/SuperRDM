@@ -223,6 +223,7 @@ public class MenuScript : MonoBehaviour {
             selectables[0].controllerText.GetComponent<TextMesh>().color = new Color(0.35f, 1f, 0.35f, selectables[0].controllerText.GetComponent<TextMesh>().color.a);
             selectables[0].controllerText2.GetComponent<TextMesh>().color = new Color(0f, 0.65f, 0f, selectables[0].controllerText2.GetComponent<TextMesh>().color.a);
             selectables[0].arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Lock");
+            selectables[0].arrow.transform.localEulerAngles = new Vector3(0f, 0f, 180f);
         }
 
         for (int i = 1; i < selectables.Length; i++)
@@ -235,6 +236,7 @@ public class MenuScript : MonoBehaviour {
                     selectables[i].controllerText.GetComponent<TextMesh>().color = new Color(1f, 0.35f, 0.35f, selectables[i].controllerText.GetComponent<TextMesh>().color.a);
                     selectables[i].controllerText2.GetComponent<TextMesh>().color = new Color(0.65f, 0f, 0f, selectables[i].controllerText2.GetComponent<TextMesh>().color.a);
                     selectables[i].arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Arrow");
+                    selectables[i].status = "opened";
                 }
                 else
                 {
@@ -242,8 +244,8 @@ public class MenuScript : MonoBehaviour {
                     selectables[i].controllerText.GetComponent<TextMesh>().color = new Color(0.35f, 1f, 0.35f, selectables[i].controllerText.GetComponent<TextMesh>().color.a);
                     selectables[i].controllerText2.GetComponent<TextMesh>().color = new Color(0f, 0.65f, 0f, selectables[i].controllerText2.GetComponent<TextMesh>().color.a);
                     if (int.Parse(Network.player.ToString()) == 0) { selectables[0].arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Arrow"); }
-                    else { selectables[i].arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Lock"); }
-                    Debug.Log("Player" + i);
+                    else { selectables[i].arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Lock"); selectables[i].arrow.transform.localEulerAngles = new Vector3(0f, 0f, 180f); }
+                    selectables[i].status = "opened";
                 }
             }
             else
@@ -252,8 +254,7 @@ public class MenuScript : MonoBehaviour {
                 selectables[i].controllerText.GetComponent<TextMesh>().color = new Color(0.35f, 0.35f, 1f, selectables[i].controllerText.GetComponent<TextMesh>().color.a);
                 selectables[i].controllerText2.GetComponent<TextMesh>().color = new Color(0f, 0f, 0.65f, selectables[i].controllerText2.GetComponent<TextMesh>().color.a);
                 if (int.Parse(Network.player.ToString()) == 0) { selectables[0].arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Arrow");}
-                else { selectables[i].arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Lock");}
-                
+                else { selectables[i].arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Lock"); selectables[i].arrow.transform.localEulerAngles = new Vector3(0f, 0f, 180f); }
             }
         }
     }
@@ -687,7 +688,7 @@ public class MenuScript : MonoBehaviour {
                 bool allReady = true;
                 for (int i = 0; i < selectables.Length; i++)
                 {
-                    if (!selectables[i].tick.activeInHierarchy)
+                    if (!selectables[i].tick.activeInHierarchy && selectables[i].status == "opened")
                     {
                         allReady = false;
                     }
@@ -796,6 +797,7 @@ public class MenuScript : MonoBehaviour {
                             if (selectables[selectableY].status == "closed" && selectables[selectableY].arrow.GetComponent<SpriteRenderer>().sprite == Resources.Load<Sprite>("Menu/Arrow"))
                             {
                                 selectables[selectableY].status = "opened";
+                                selectables[selectableY].tick.SetActive(true);
                                 acceptEffect.Play();
                             } else
                             {
@@ -806,6 +808,7 @@ public class MenuScript : MonoBehaviour {
                                 else if (selectableX == 2 && selectables[selectableY].arrow.GetComponent<SpriteRenderer>().sprite == Resources.Load<Sprite>("Menu/Arrow"))
                                 {
                                     selectables[selectableY].status = "closed";
+                                    selectables[selectableY].tick.SetActive(false);
                                     acceptEffect.Play();
                                 }
                             }
@@ -880,24 +883,32 @@ public class MenuScript : MonoBehaviour {
                     if (selectables[i].status == "closed" && selectables[i].arrow.GetComponent<SpriteRenderer>().sprite == Resources.Load<Sprite>("Menu/Arrow"))
                     {
                         selectables[i].status = "opened";
+                        selectables[i].tick.SetActive(true);
                         acceptEffect.Play();
                     }
                     else if (selectables[i].status == "opened" && selectables[i].arrow.GetComponent<SpriteRenderer>().sprite == Resources.Load<Sprite>("Menu/Arrow"))
                     {
                         selectables[i].status = "closed";
+                        selectables[i].tick.SetActive(false);
                         acceptEffect.Play();
                     }
                 }
 
                 if (selectables[i].status == "closed")
                 {
-                    selectables[i].arrow.transform.localEulerAngles = new Vector3(0f, 0f, Mathf.LerpAngle(selectables[i].arrow.transform.localEulerAngles.z, 0f, Time.deltaTime * 10f));
+                    if (selectables[i].arrow.GetComponent<SpriteRenderer>().sprite == Resources.Load<Sprite>("Menu/Arrow"))
+                    {
+                        selectables[i].arrow.transform.localEulerAngles = new Vector3(0f, 0f, Mathf.LerpAngle(selectables[i].arrow.transform.localEulerAngles.z, 0f, Time.deltaTime * 10f));
+                    }
                     selectables[i].nameBackground.transform.localScale = new Vector3(Mathf.Lerp(selectables[i].nameBackground.transform.localScale.x, 0f, Time.deltaTime*10f), 1f, 1f);
                     selectables[i].controllerBackground.transform.localScale = new Vector3(Mathf.Lerp(selectables[i].controllerBackground.transform.localScale.x, 0f, Time.deltaTime * 10f), 1f, 1f);
                 }
                 else if (selectables[i].status == "opened")
                 {
-                    selectables[i].arrow.transform.localEulerAngles = new Vector3(0f, 0f, Mathf.LerpAngle(selectables[i].arrow.transform.localEulerAngles.z, 180f, Time.deltaTime * 10f));
+                    if (selectables[i].arrow.GetComponent<SpriteRenderer>().sprite == Resources.Load<Sprite>("Menu/Arrow"))
+                    {
+                        selectables[i].arrow.transform.localEulerAngles = new Vector3(0f, 0f, Mathf.LerpAngle(selectables[i].arrow.transform.localEulerAngles.z, 180f, Time.deltaTime * 10f));
+                    }
                     selectables[i].nameBackground.transform.localScale = new Vector3(Mathf.Lerp(selectables[i].nameBackground.transform.localScale.x, 1f, Time.deltaTime*10f), 1f, 1f);
                     selectables[i].controllerBackground.transform.localScale = new Vector3(Mathf.Lerp(selectables[i].controllerBackground.transform.localScale.x, 0.45f, Time.deltaTime * 10f), 1f, 1f);
                 }
@@ -975,6 +986,7 @@ public class MenuScript : MonoBehaviour {
             controllerText = root.transform.FindChild("ControllerText").gameObject;
             controllerText2 = root.transform.FindChild("ControllerText2").gameObject;
             tick = root.transform.FindChild("PictureHolder/Tick").gameObject;
+            tick.SetActive(false);
 
             nameText.GetComponent<TextMesh>().color = new Color(nameText.GetComponent<TextMesh>().color.r, nameText.GetComponent<TextMesh>().color.g, nameText.GetComponent<TextMesh>().color.b, 0f);
             nameText2.GetComponent<TextMesh>().color = new Color(nameText2.GetComponent<TextMesh>().color.r, nameText2.GetComponent<TextMesh>().color.g, nameText2.GetComponent<TextMesh>().color.b, 0f);
@@ -992,14 +1004,16 @@ public class MenuScript : MonoBehaviour {
                 controllerText2.GetComponent<TextMesh>().color = new Color(0.65f, 0f, 0f, controllerText2.GetComponent<TextMesh>().color.a);
                 changeLegend("barbarian");
                 status = "opened";
-                //arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Lock");
-                tick.SetActive(false);
+                arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Lock");
+                arrow.transform.localEulerAngles = new Vector3(0f, 0f, 180f);
             }
-            if (number == 1)
+            else if (number <= 2)
             {
                 changeLegend("pilumantic");
                 status = "opened";
-                //arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Lock");
+                arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Lock");
+                arrow.transform.localEulerAngles = new Vector3(0f, 0f, 180f);
+                tick.SetActive(true);
             }
 
             controllerText.GetComponent<TextMesh>().text = controller;
