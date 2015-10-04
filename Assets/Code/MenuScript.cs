@@ -196,6 +196,17 @@ public class MenuScript : MonoBehaviour {
 
     }
 
+    [RPC]
+    void disconnect(NetworkPlayer target)
+    {
+
+        if (Network.player.ToString() == target.ToString())
+        {
+            Network.Disconnect();
+        }
+
+    }
+
     void updatePlayer(int i)
     {
         GetComponent<NetworkView>().RPC("updatePlayerRPC", RPCMode.All, i, selectables[i].player, selectables[i].tick.activeInHierarchy, selectables[i].status, selectables[i].controller);
@@ -253,6 +264,8 @@ public class MenuScript : MonoBehaviour {
                 selectables[position].arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Lock");
                 selectables[position].arrow.transform.eulerAngles = new Vector3(0f, 0f, 180f);
             }
+            selectables[position].controllerText.GetComponent<TextMesh>().color = new Color(0.35f, 0.35f, 1f, selectables[position].controllerText.GetComponent<TextMesh>().color.a);
+            selectables[position].controllerText2.GetComponent<TextMesh>().color = new Color(0f, 0f, 0.65f, selectables[position].controllerText2.GetComponent<TextMesh>().color.a);
         }
 
         
@@ -343,13 +356,13 @@ public class MenuScript : MonoBehaviour {
         }
         if (radius2 > 360f) { radius2 -= 360f; }
 
-        Hacks.TextAlpha(startText, Mathf.Abs(Mathf.Sin(radius2 * Mathf.PI / 180)));
-        Hacks.TextAlpha(startText2, Mathf.Abs(Mathf.Sin(radius2 * Mathf.PI / 180)));
+        Hacks.TextAlpha(startText, 0.15f + Mathf.Abs(Mathf.Sin(radius2 * Mathf.PI / 180)));
+        Hacks.TextAlpha(startText2, 0.15f + Mathf.Abs(Mathf.Sin(radius2 * Mathf.PI / 180)));
 
-        Hacks.SpriteRendererAlpha(button1, Mathf.Abs(Mathf.Sin(radius2 * Mathf.PI / 180)));
-        Hacks.SpriteRendererAlpha(button2, Mathf.Abs(Mathf.Sin(radius2 * Mathf.PI / 180)));
+        Hacks.SpriteRendererAlpha(button1, 0.15f + Mathf.Abs(Mathf.Sin(radius2 * Mathf.PI / 180)));
+        Hacks.SpriteRendererAlpha(button2, 0.15f + Mathf.Abs(Mathf.Sin(radius2 * Mathf.PI / 180)));
 
-        Hacks.SpriteRendererAlpha(pointer, Mathf.Abs(Mathf.Sin(radius2 * Mathf.PI / 180)));
+        Hacks.SpriteRendererAlpha(pointer, 0.35f + Mathf.Abs(Mathf.Sin(radius2 * Mathf.PI / 180)));
 
         star.transform.eulerAngles = new Vector3(star.transform.eulerAngles.x, star.transform.eulerAngles.y, star.transform.eulerAngles.z - Time.deltaTime * 50f);
 
@@ -959,10 +972,19 @@ public class MenuScript : MonoBehaviour {
                         updatePlayer(i);
                         acceptEffect.Play();
                     }
-                    else if (selectables[i].status == "opened" && selectables[i].arrow.GetComponent<SpriteRenderer>().sprite == Resources.Load<Sprite>("Menu/Arrow"))
+                    else if (selectables[i].status == "opened" && (selectables[i].arrow.GetComponent<SpriteRenderer>().sprite == Resources.Load<Sprite>("Menu/Arrow") || selectables[i].arrow.GetComponent<SpriteRenderer>().sprite == Resources.Load<Sprite>("Menu/Door")))
                     {
-                        selectables[i].status = "closed";
-                        selectables[i].tick.SetActive(false);
+                        if (selectables[i].controller == "Player")
+                        {
+                            GetComponent<NetworkView>().RPC("disconnect", RPCMode.All, selectables[i].player);
+                            selectables[i].controller = "CPU";
+                            selectables[i].tick.SetActive(true);
+                        }
+                        if (i >= 3)
+                        {
+                            selectables[i].status = "closed";
+                            selectables[i].tick.SetActive(false);
+                        }
                         updatePlayer(i);
                         acceptEffect.Play();
                     }
