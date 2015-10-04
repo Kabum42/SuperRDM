@@ -36,6 +36,7 @@ public class MenuScript : MonoBehaviour {
     private GameObject host2;
     private GameObject join1;
     private GameObject join2;
+    private GameObject background;
     private bool starting = false;
 
     private int selectableX = 0;
@@ -88,6 +89,8 @@ public class MenuScript : MonoBehaviour {
         join2 = GameObject.Find("Join2");
         join2.SetActive(false);
 
+        background = GameObject.Find("Background");
+
         selectEffect = gameObject.AddComponent<AudioSource>();
         selectEffect.clip = Resources.Load("Sounds/SelectCell") as AudioClip;
         selectEffect.volume = 1f;
@@ -128,6 +131,7 @@ public class MenuScript : MonoBehaviour {
         Debug.Log("Server Initializied");
         GlobalData.connected = true;
         selectables[0].player = Network.player;
+        updatePlayer(0);
     }
 
     void OnMasterServerEvent(MasterServerEvent msEvent)
@@ -161,11 +165,12 @@ public class MenuScript : MonoBehaviour {
                 selectables[i].player = player;
                 selectables[i].tick.SetActive(false);
                 selectables[i].status = "opened";
+                selectables[i].controller = "Player";
                 break;
             }
         }
 
-        GetComponent<NetworkView>().RPC("updatePlayers", RPCMode.All, selectables[0].player, selectables[1].player, selectables[2].player, selectables[3].player, selectables[4].player, selectables[5].player, selectables[0].tick.activeInHierarchy, selectables[1].tick.activeInHierarchy, selectables[2].tick.activeInHierarchy, selectables[3].tick.activeInHierarchy, selectables[4].tick.activeInHierarchy, selectables[5].tick.activeInHierarchy);
+        updateAllPlayers();
 
     }
 
@@ -185,13 +190,76 @@ public class MenuScript : MonoBehaviour {
             if (int.Parse(selectables[i].player.ToString()) != 0 && selectables[i].player.ToString() == player.ToString())
             {
                 selectables[i].tick.SetActive(true);
+                updatePlayer(i);
             }
         }
 
-        GetComponent<NetworkView>().RPC("updatePlayers", RPCMode.All, selectables[0].player, selectables[1].player, selectables[2].player, selectables[3].player, selectables[4].player, selectables[5].player, selectables[0].tick.activeInHierarchy, selectables[1].tick.activeInHierarchy, selectables[2].tick.activeInHierarchy, selectables[3].tick.activeInHierarchy, selectables[4].tick.activeInHierarchy, selectables[5].tick.activeInHierarchy);
+    }
+
+    void updatePlayer(int i)
+    {
+        GetComponent<NetworkView>().RPC("updatePlayerRPC", RPCMode.All, i, selectables[i].player, selectables[i].tick.activeInHierarchy, selectables[i].status, selectables[i].controller);
+    }
+
+    void updateAllPlayers()
+    {
+        for (int i = 0; i < selectables.Length; i++)
+        {
+            updatePlayer(i);
+        }
+    }
+
+    [RPC]
+    void updatePlayerRPC(int position, NetworkPlayer nPlayer, bool bTick, string trueStatus, string subjectiveController)
+    {
+
+        selectables[position].player = nPlayer;
+        selectables[position].tick.SetActive(bTick);
+        selectables[position].status = trueStatus;
+        selectables[position].controller = subjectiveController;
+
+        bool isServer = false;
+        if (int.Parse(Network.player.ToString()) == 0) { isServer = true; }
+
+        if (subjectiveController == "You" || subjectiveController == "Player")
+        {
+            // IT'S TRULY SUBJECTIVE
+            if (selectables[position].player.ToString() == Network.player.ToString())
+            {
+                selectables[position].controller = "You";
+                selectables[position].controllerText.GetComponent<TextMesh>().color = new Color(1f, 0.35f, 0.35f, selectables[position].controllerText.GetComponent<TextMesh>().color.a);
+                selectables[position].controllerText2.GetComponent<TextMesh>().color = new Color(0.65f, 0f, 0f, selectables[position].controllerText2.GetComponent<TextMesh>().color.a);
+
+                selectables[position].arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Arrow");
+            }
+            else
+            {
+                selectables[position].controller = "Player";
+                selectables[position].controllerText.GetComponent<TextMesh>().color = new Color(0.35f, 1f, 0.35f, selectables[position].controllerText.GetComponent<TextMesh>().color.a);
+                selectables[position].controllerText2.GetComponent<TextMesh>().color = new Color(0f, 0.65f, 0f, selectables[position].controllerText2.GetComponent<TextMesh>().color.a);
+
+                if (isServer) { selectables[position].arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Door"); }
+                else { selectables[position].arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Lock"); }
+            }
+        }
+        else
+        {
+            if (isServer && position >= 3)
+            {
+                selectables[position].arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Arrow");
+            }
+            else
+            {
+                selectables[position].arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Lock");
+                selectables[position].arrow.transform.eulerAngles = new Vector3(0f, 0f, 180f);
+            }
+        }
+
+        
 
     }
 
+    /*
     [RPC]
     void updatePlayers(NetworkPlayer player1, NetworkPlayer player2, NetworkPlayer player3, NetworkPlayer player4, NetworkPlayer player5, NetworkPlayer player6, bool tick1, bool tick2, bool tick3, bool tick4, bool tick5, bool tick6)
     {
@@ -258,6 +326,7 @@ public class MenuScript : MonoBehaviour {
             }
         }
     }
+    */
 
     // Update is called once per frame
     void Update () {
@@ -662,6 +731,7 @@ public class MenuScript : MonoBehaviour {
                     host2.SetActive(false);
                     join1.SetActive(false);
                     join2.SetActive(false);
+                    background.SetActive(false);
                     transition = 0f;
 
                     playBackground.SetActive(true);
@@ -798,6 +868,7 @@ public class MenuScript : MonoBehaviour {
                             {
                                 selectables[selectableY].status = "opened";
                                 selectables[selectableY].tick.SetActive(true);
+                                updatePlayer(selectableY);
                                 acceptEffect.Play();
                             } else
                             {
@@ -809,6 +880,7 @@ public class MenuScript : MonoBehaviour {
                                 {
                                     selectables[selectableY].status = "closed";
                                     selectables[selectableY].tick.SetActive(false);
+                                    updatePlayer(selectableY);
                                     acceptEffect.Play();
                                 }
                             }
@@ -872,7 +944,7 @@ public class MenuScript : MonoBehaviour {
                     {
                         selectables[i].nameBackground.GetComponent<SpriteRenderer>().color = new Color(0.7f, 0.7f, 0.7f, 1f);
                     }
-                    else if (isOver(selectables[i].arrowBackground) && i >= 2)
+                    else if (isOver(selectables[i].arrowBackground) && (selectables[i].arrow.GetComponent<SpriteRenderer>().sprite == Resources.Load<Sprite>("Menu/Arrow") || selectables[i].arrow.GetComponent<SpriteRenderer>().sprite == Resources.Load<Sprite>("Menu/Door")))
                     {
                         selectables[i].arrowBackground.GetComponent<SpriteRenderer>().color = new Color(0.7f, 0.7f, 0.7f, 1f);
                     }
@@ -884,12 +956,14 @@ public class MenuScript : MonoBehaviour {
                     {
                         selectables[i].status = "opened";
                         selectables[i].tick.SetActive(true);
+                        updatePlayer(i);
                         acceptEffect.Play();
                     }
                     else if (selectables[i].status == "opened" && selectables[i].arrow.GetComponent<SpriteRenderer>().sprite == Resources.Load<Sprite>("Menu/Arrow"))
                     {
                         selectables[i].status = "closed";
                         selectables[i].tick.SetActive(false);
+                        updatePlayer(i);
                         acceptEffect.Play();
                     }
                 }
@@ -1103,7 +1177,7 @@ public class MenuScript : MonoBehaviour {
                 {
                     // ES EL SERVER
                     selectables[0].tick.SetActive(true);
-                    GetComponent<NetworkView>().RPC("updatePlayers", RPCMode.All, selectables[0].player, selectables[1].player, selectables[2].player, selectables[3].player, selectables[4].player, selectables[5].player, selectables[0].tick.activeInHierarchy, selectables[1].tick.activeInHierarchy, selectables[2].tick.activeInHierarchy, selectables[3].tick.activeInHierarchy, selectables[4].tick.activeInHierarchy, selectables[5].tick.activeInHierarchy);
+                    updatePlayer(0);
                 }
                 else
                 {
