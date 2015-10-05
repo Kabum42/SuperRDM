@@ -4,6 +4,9 @@ using System.Collections;
 public static class GlobalData {
 
     public static bool started = false;
+	// public static Events[] Event;
+	public static string[] NameItems;
+	public static int MaxEnemies;
     public static string OS;
     public static MainCharacter[] agents = new MainCharacter[6];
     public static int activeAgents = 0;
@@ -39,17 +42,17 @@ public static class GlobalData {
         }
 
         biomeNames = new string[11];
-        biomeNames[Biome.Sanctuary] = "Sanctuary";
-        biomeNames[Biome.Prairie] = "Prairie";
-        biomeNames[Biome.Forest] = "Forest";
-        biomeNames[Biome.Swamp] = "Swamp";
-        biomeNames[Biome.Lake] = "Lake";
-        biomeNames[Biome.Desert] = "Desert";
-        biomeNames[Biome.Mountain] = "Mountain";
-        biomeNames[Biome.TheEvil] = "TheEvil";
-        biomeNames[Biome.Dock_1] = "Dock_1";
-        biomeNames[Biome.Dock_2] = "Dock_2";
-        biomeNames[Biome.Dock_3] = "Dock_3";
+        biomeNames[(int) Biome.Sanctuary] = "Sanctuary";
+		biomeNames[(int) Biome.Prairie] = "Prairie";
+		biomeNames[(int) Biome.Forest] = "Forest";
+		biomeNames[(int) Biome.Swamp] = "Swamp";
+		biomeNames[(int) Biome.Lake] = "Lake";
+		biomeNames[(int) Biome.Desert] = "Desert";
+		biomeNames[(int) Biome.Mountain] = "Mountain";
+		biomeNames[(int) Biome.TheEvil] = "TheEvil";
+		biomeNames[(int) Biome.Harbour1] = "Dock_1";
+		biomeNames[(int) Biome.Harbour2] = "Dock_2";
+		biomeNames[(int) Biome.Harbour3] = "Dock_3";
 
 	}
 	

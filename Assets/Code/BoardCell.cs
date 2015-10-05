@@ -3,7 +3,7 @@ using System.Collections;
 
 public class BoardCell {
 
-    public int biome = -1;
+    public Biome biome;
     public GameObject root;
 
     public int ring = 0;
@@ -24,7 +24,6 @@ public class BoardCell {
 
     public void randomBiome()
     {
-
         if (ring == 0)
         {
             // OBVIOUSLY, THE BOSS
@@ -46,13 +45,15 @@ public class BoardCell {
             changeBiome(Biome.Forest);
         }
 
+		Debug.Log (Biome.Forest);
+
     }
 
-    public void changeBiome(int auxBiome)
+    public void changeBiome(Biome auxBiome)
     {
 
         biome = auxBiome;
-        root.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("BoardCells/" + GlobalData.biomeNames[biome]);
+        root.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("BoardCells/" + GlobalData.biomeNames[(int)biome]);
     
     }
 
