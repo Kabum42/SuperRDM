@@ -14,7 +14,7 @@ public class Effect {
 		Debug.Log("Effect created");
 	}
 	
-	public Update()
+	public void Update()
 	{
 	}
 }

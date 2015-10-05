@@ -3,7 +3,7 @@ using System.Collections;
 
 public class Board {
 	
-	private Cell[] Celss = new Cell[37];
+	private Cell[] Cells = new Cell[37];
 	private int Seeding;
 	private MainCharacter[] Players = new MainCharacter[6];
 	private Stack Missions;

@@ -9,6 +9,8 @@ public class MainCharacter : Character {
 	private int CurrentMP;
 	private int MaxMP;
 	private int Experience;
+	private int ID;
+    public NetworkPlayer player;
 
 	public MainCharacter()
 	{

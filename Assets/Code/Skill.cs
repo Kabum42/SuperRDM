@@ -8,7 +8,7 @@ public class Skill {
 	private float CostIP;
 	private float CostHeatlh;
 	private int TargetID;
-	private int[] AgentID = new AgentID[100];
+	private int[] AgentID = new int[100];
 	private float Damage;
 
 	public Skill()
@@ -16,7 +16,7 @@ public class Skill {
 		Debug.Log("Skill created");
 	}
 
-	public Activate()
+	public void Activate()
 	{
 	}
 }

@@ -1,17 +1,16 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public struct Biome {
-	int Prairie;
-	int Forest;
-	int Swamp;
-	int Lake;
-	int Desert;
-	int Mountain;
-	int Sanctuary;
-	int Harbour;
-	int The Evil;
-
-	public Biome();
-	
-}
+public enum Biome {
+	 Prairie,
+	 Forest,
+	 Swamp,
+	 Lake,
+	 Desert,
+	 Mountain,
+	 Sanctuary,
+	 Harbour1,
+  	 Harbour2,
+	 Harbour3,
+	 TheEvil
+};

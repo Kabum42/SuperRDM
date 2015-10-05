@@ -3,8 +3,10 @@ using System.Collections;
 
 public class BoardCell {
 
-    public string biome = "null";
+    public Biome biome;
     public GameObject root;
+
+    public int ring = 0;
 
     public BoardCell northWest;
     public BoardCell north;
@@ -22,22 +24,37 @@ public class BoardCell {
 
     public void randomBiome()
     {
-        float aux = Random.Range(0f, 1f);
+        if (ring == 0)
+        {
+            // OBVIOUSLY, THE BOSS
+            changeBiome(Biome.TheEvil);
+        }
+        else if (ring == 1)
+        {
+            // DESERT BY DEFAULT
+            changeBiome(Biome.Desert);
+        }
+        else if (ring == 2)
+        {
+            // FOREST BY DEFAULT
+            changeBiome(Biome.Forest);
+        }
+        else if (ring == 3)
+        {
+            // FOREST BY DEFAULT
+            changeBiome(Biome.Forest);
+        }
 
-        if (aux < 1f / 3f)
-        {
-            changeBiome("desert");
-        }
-        else if (aux < 2f / 3f)
-        {
-            changeBiome("mountain");
-        }
+		Debug.Log (Biome.Forest);
+
     }
 
-    public void changeBiome(string auxBiome)
+    public void changeBiome(Biome auxBiome)
     {
+
         biome = auxBiome;
-        root.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("BoardCells/" + biome);
+        root.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("BoardCells/" + GlobalData.biomeNames[(int)biome]);
+    
     }
 
 }
