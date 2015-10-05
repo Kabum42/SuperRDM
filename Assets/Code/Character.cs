@@ -2,17 +2,30 @@
 using System.Collections;
 
 public class Character {
-	
-	// private Skill[] Skills = new Skill[3];
+
+	private int ID;
 	private string Name;
 	private float CurrentHealth;
 	private float MaxHealth;
-	private float SpeedTurnBar;
-	private float ProgressTurnBar;
+	private float ProgressIPBar;
+	private float MaxIPBar;
+	private Stack CurrentEffects;
+	private bool Aerial;
+	private Class OwnClass;
 
 	public Character()
 	{
 		Debug.Log("Character created");
 	}
+
+	public void EndBattleTurn(){
+	}
+
+	public void StartBattleTurn(){
+	}
+
+	public void EndBattle(){
+	}
+
 	
 }

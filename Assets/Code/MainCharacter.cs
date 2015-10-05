@@ -2,15 +2,24 @@
 using System.Collections;
 
 public class MainCharacter : Character {
-	
-	// private Skill[] Skills = new Skill[3];
-	// private Item EquippedItem;
-	// private Class OwnClass;
-	private int ID;
+
+	private Item EquippedItem;
+	private Item MissionItem;
+	private Sprite Icon;
+	private int CurrentMP;
+	private int MaxMP;
+	private int Experience;
 
 	public MainCharacter()
 	{
 		Debug.Log("MainCharacter created");
+	}
+
+	public void Interact()
+	{
+	}
+
+	public void Death(){
 	}
 	
 }
