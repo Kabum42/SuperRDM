@@ -209,7 +209,10 @@ public class MenuScript : MonoBehaviour {
 
     void updatePlayer(int i)
     {
-        GetComponent<NetworkView>().RPC("updatePlayerRPC", RPCMode.All, i, selectables[i].player, selectables[i].tick.activeInHierarchy, selectables[i].status, selectables[i].controller);
+        if (GlobalData.online)
+        {
+            GetComponent<NetworkView>().RPC("updatePlayerRPC", RPCMode.All, i, selectables[i].player, selectables[i].tick.activeInHierarchy, selectables[i].status, selectables[i].controller);
+        }
     }
 
     void updateAllPlayers()

@@ -45,18 +45,7 @@ public class WorldScript : MonoBehaviour {
             GlobalData.Start();
         }
        
-        for (int i = 1; i < GlobalData.activeAgents; i++)
-        {
-            if (GlobalData.agents[i] != null)
-            {
-                //Debug.Log(i);
-                GameObject g = Instantiate(Resources.Load("Prefabs/UIAgent") as GameObject);
-                g.name = "UIAgent" + i;
-                g.transform.parent = GameObject.Find("UIAgents").transform;
-                g.transform.localPosition = new Vector3(-8.7f, 5.8f -i*2f, 0f);
-                g.transform.FindChild("PictureHolder").gameObject.GetComponent<SpriteRenderer>().color = GlobalData.colorCharacters[i];
-            }
-        }
+        
 
         //boardCells = new BoardCell[37];
 
@@ -88,7 +77,7 @@ public class WorldScript : MonoBehaviour {
         }
 
         // POSIBLES SANTUARIOS
-        numCells += 6;
+        numCells += GlobalData.activeAgents;
 
         boardCells = new BoardCell[numCells];
         //boardCells = new BoardCell[numCells + GlobalData.activeAgents];
@@ -105,6 +94,20 @@ public class WorldScript : MonoBehaviour {
         }
 
         GenerateBoard();
+        RandomizeTurns();
+
+        for (int i = 0; i < GlobalData.activeAgents; i++)
+        {
+            if (GlobalData.agents[i] != null)
+            {
+                //Debug.Log(i);
+                GameObject g = Instantiate(Resources.Load("Prefabs/UIAgent") as GameObject);
+                g.name = "UIAgent" + i;
+                g.transform.parent = GameObject.Find("UIAgents").transform;
+                g.transform.localPosition = new Vector3(9.64f, 1.5f * 2.5f - GlobalData.order[i] * 1.5f, 0f);
+                g.transform.FindChild("PictureHolder").gameObject.GetComponent<SpriteRenderer>().color = GlobalData.colorCharacters[i];
+            }
+        }
         
         for (int i = 0; i < GlobalData.activeAgents; i++)
         {
@@ -112,9 +115,40 @@ public class WorldScript : MonoBehaviour {
         }
 
 	}
-	
-	// Update is called once per frame
-	void Update () {
+
+    void RandomizeTurns()
+    {
+        GlobalData.order = new int[GlobalData.activeAgents];
+
+        for (int i = 0; i < GlobalData.order.Length; i++)
+        {
+            // DEFAULT ORDER
+            GlobalData.order[i] = i;
+        }
+
+        float startingPerlin = 0.2347234747f;
+
+        for (int i = 0; i < 10; i++)
+        {
+            // SWAPS
+            //int first_element = Random.Range(0, GlobalData.order.Length);
+            int first_element = (int) (Mathf.PerlinNoise(startingPerlin, GlobalData.boardSeed) * GlobalData.order.Length);
+            startingPerlin += 1.233427424f;
+            int second_element = (int) (Mathf.PerlinNoise(startingPerlin, GlobalData.boardSeed) * GlobalData.order.Length);
+            startingPerlin += 1.233427424f;
+            int aux = GlobalData.order[first_element];
+            GlobalData.order[first_element] = GlobalData.order[second_element];
+            GlobalData.order[second_element] = aux;
+        }
+
+        GlobalData.currentAgentTurn = (int)(Mathf.PerlinNoise(startingPerlin, GlobalData.boardSeed) * GlobalData.order.Length);
+        Debug.Log(GlobalData.currentAgentTurn);
+
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
 
         if (Input.GetKey(KeyCode.Return))
         {
@@ -127,6 +161,7 @@ public class WorldScript : MonoBehaviour {
 
         if (phase == 0)
         {
+            // QUITANDO EL FADING
             transition += Time.deltaTime;
             if (transition >= 1f)
             {
@@ -139,42 +174,114 @@ public class WorldScript : MonoBehaviour {
             fading.GetComponent<SpriteRenderer>().color = new Color(fading.GetComponent<SpriteRenderer>().color.r, fading.GetComponent<SpriteRenderer>().color.g, fading.GetComponent<SpriteRenderer>().color.b, 1f - transition);
 
         }
-
-
-
-        int controllerConnected = -1;
-        for (int i = 0; i < Input.GetJoystickNames().Length; i++)
+        else if (phase == 1)
         {
-            if (Input.GetJoystickNames()[i] != "")
-            {
-                controllerConnected = i;
-                break;
-            }
+            // TIME TO SELECT YOUR SANCTUARY
         }
-
-        if (controllerConnected != -1)
+        else
         {
-            // CONTROLLER PLUGGED
-            if (!selectedSprite.activeInHierarchy)
+            int controllerConnected = -1;
+            for (int i = 0; i < Input.GetJoystickNames().Length; i++)
             {
-                selected = boardCells[0];
-                selectedSprite.SetActive(true);
+                if (Input.GetJoystickNames()[i] != "")
+                {
+                    controllerConnected = i;
+                    break;
+                }
             }
 
-            if (GlobalData.OS == "Windows")
+            if (controllerConnected != -1)
             {
-                // WINDOWS
-                if (lastDPadX != Input.GetAxis("DPad1") && Input.GetAxis("DPad1") != 0)
+                // CONTROLLER PLUGGED
+                if (!selectedSprite.activeInHierarchy)
                 {
-                    if (Input.GetAxis("DPad1") == -1)
+                    selected = boardCells[0];
+                    selectedSprite.SetActive(true);
+                }
+
+                if (GlobalData.OS == "Windows")
+                {
+                    // WINDOWS
+                    if (lastDPadX != Input.GetAxis("DPad1") && Input.GetAxis("DPad1") != 0)
                     {
-                        // REGISTRADO INPUT DPAD-X -1
-                        if (lastHorizontal == "down")
+                        if (Input.GetAxis("DPad1") == -1)
                         {
-                            if (selected.northWest != null)
+                            // REGISTRADO INPUT DPAD-X -1
+                            if (lastHorizontal == "down")
                             {
-                                selected = selected.northWest;
-                                lastHorizontal = "up";
+                                if (selected.northWest != null)
+                                {
+                                    selected = selected.northWest;
+                                    lastHorizontal = "up";
+                                    selectCellEffect.Play();
+                                }
+                                else if (selected.southWest != null)
+                                {
+                                    selected = selected.southWest;
+                                    selectCellEffect.Play();
+                                }
+                            }
+                            else
+                            {
+                                if (selected.southWest != null)
+                                {
+                                    selected = selected.southWest;
+                                    lastHorizontal = "down";
+                                    selectCellEffect.Play();
+                                }
+                                else if (selected.northWest != null)
+                                {
+                                    selected = selected.northWest;
+                                    selectCellEffect.Play();
+                                }
+                            }
+                        }
+                        else if (Input.GetAxis("DPad1") == 1)
+                        {
+                            // REGISTRADO INPUT DPAD-X +1
+                            if (lastHorizontal == "down")
+                            {
+                                if (selected.northEast != null)
+                                {
+                                    selected = selected.northEast;
+                                    lastHorizontal = "up";
+                                    selectCellEffect.Play();
+                                }
+                                else if (selected.southEast != null)
+                                {
+                                    selected = selected.southEast;
+                                    selectCellEffect.Play();
+                                }
+                            }
+                            else
+                            {
+                                if (selected.southEast != null)
+                                {
+                                    selected = selected.southEast;
+                                    lastHorizontal = "down";
+                                    selectCellEffect.Play();
+                                }
+                                else if (selected.northEast != null)
+                                {
+                                    selected = selected.northEast;
+                                    selectCellEffect.Play();
+                                }
+                            }
+                        }
+                    }
+                    if (lastDPadY != Input.GetAxis("DPad2") && Input.GetAxis("DPad2") != 0)
+                    {
+                        if (Input.GetAxis("DPad2") == -1)
+                        {
+                            // REGISTRADO INPUT DPAD-Y -1
+                            if (selected.south != null)
+                            {
+                                selected = selected.south;
+                                selectCellEffect.Play();
+                            }
+                            else if (selected.southEast != null)
+                            {
+                                selected = selected.southEast;
                                 selectCellEffect.Play();
                             }
                             else if (selected.southWest != null)
@@ -183,12 +290,17 @@ public class WorldScript : MonoBehaviour {
                                 selectCellEffect.Play();
                             }
                         }
-                        else
+                        else if (Input.GetAxis("DPad2") == 1)
                         {
-                            if (selected.southWest != null)
+                            // REGISTRADO INPUT DPAD-Y +1
+                            if (selected.north != null)
                             {
-                                selected = selected.southWest;
-                                lastHorizontal = "down";
+                                selected = selected.north;
+                                selectCellEffect.Play();
+                            }
+                            else if (selected.northEast != null)
+                            {
+                                selected = selected.northEast;
                                 selectCellEffect.Play();
                             }
                             else if (selected.northWest != null)
@@ -198,127 +310,55 @@ public class WorldScript : MonoBehaviour {
                             }
                         }
                     }
-                    else if (Input.GetAxis("DPad1") == 1)
-                    {
-                        // REGISTRADO INPUT DPAD-X +1
-                        if (lastHorizontal == "down")
-                        {
-                            if (selected.northEast != null)
-                            {
-                                selected = selected.northEast;
-                                lastHorizontal = "up";
-                                selectCellEffect.Play();
-                            }
-                            else if (selected.southEast != null)
-                            {
-                                selected = selected.southEast;
-                                selectCellEffect.Play();
-                            }
-                        }
-                        else
-                        {
-                            if (selected.southEast != null)
-                            {
-                                selected = selected.southEast;
-                                lastHorizontal = "down";
-                                selectCellEffect.Play();
-                            }
-                            else if (selected.northEast != null)
-                            {
-                                selected = selected.northEast;
-                                selectCellEffect.Play();
-                            }
-                        }
-                    }
+
+                    lastDPadX = Input.GetAxis("DPad1");
+                    lastDPadY = Input.GetAxis("DPad2");
                 }
-                if (lastDPadY != Input.GetAxis("DPad2") && Input.GetAxis("DPad2") != 0)
+                /*
+                if (GlobalData.OS == "Mac")
                 {
-                    if (Input.GetAxis("DPad2") == -1)
-                    {
-                        // REGISTRADO INPUT DPAD-Y -1
-                        if (selected.south != null)
-                        {
-                            selected = selected.south;
-                            selectCellEffect.Play();
-                        }
-                        else if (selected.southEast != null)
-                        {
-                            selected = selected.southEast;
-                            selectCellEffect.Play();
-                        }
-                        else if (selected.southWest != null)
-                        {
-                            selected = selected.southWest;
-                            selectCellEffect.Play();
-                        }
-                    }
-                    else if (Input.GetAxis("DPad2") == 1)
-                    {
-                        // REGISTRADO INPUT DPAD-Y +1
-                        if (selected.north != null)
-                        {
-                            selected = selected.north;
-                            selectCellEffect.Play();
-                        }
-                        else if (selected.northEast != null)
-                        {
-                            selected = selected.northEast;
-                            selectCellEffect.Play();
-                        }
-                        else if (selected.northWest != null)
-                        {
-                            selected = selected.northWest;
-                            selectCellEffect.Play();
-                        }
-                    }
+                    // MAC
+                    // NOT IMPLEMENTED
                 }
-
-                lastDPadX = Input.GetAxis("DPad1");
-                lastDPadY = Input.GetAxis("DPad2");
-            }
-            /*
-            if (GlobalData.OS == "Mac")
-            {
-                // MAC
-                // NOT IMPLEMENTED
-            }
-            if (GlobalData.OS == "Linux")
-            {
-                // LINUX
-                DPadX = Input.GetAxis("DPad2");
-                DPadY = Input.GetAxis("DPad3");
-            }
-            */
-
-                
-
-        }
-        else
-        {
-            // CONTROLLER NOT PLUGGED
-            selectedSprite.SetActive(false);
-
-            for (int i = 0; i < boardCells.Length; i++)
-            {
-                if (isOver(boardCells[i].root))
+                if (GlobalData.OS == "Linux")
                 {
-                    selectedSprite.SetActive(true);
-                    selected = boardCells[i];
+                    // LINUX
+                    DPadX = Input.GetAxis("DPad2");
+                    DPadY = Input.GetAxis("DPad3");
                 }
-            }
+                */
 
-            if (ClickedOn(selected.root))
+
+
+            }
+            else
             {
-                // MOVE TO THE CELL??
+                // CONTROLLER NOT PLUGGED
+                selectedSprite.SetActive(false);
+
+                for (int i = 0; i < boardCells.Length; i++)
+                {
+                    if (isOver(boardCells[i].root))
+                    {
+                        selectedSprite.SetActive(true);
+                        selected = boardCells[i];
+                    }
+                }
+
+                if (ClickedOn(selected.root))
+                {
+                    // MOVE TO THE CELL??
+                }
+
+            }
+
+            if (selected != null)
+            {
+                selectedSprite.transform.position = new Vector3(selected.root.transform.position.x, selected.root.transform.position.y, selectedSprite.transform.position.z);
             }
 
         }
 
-
-        if (selected != null)
-        {
-            selectedSprite.transform.position = new Vector3(selected.root.transform.position.x, selected.root.transform.position.y, selectedSprite.transform.position.z);
-        }
 
     }
 
