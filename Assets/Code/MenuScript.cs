@@ -156,7 +156,6 @@ public class MenuScript : MonoBehaviour {
 
     void OnPlayerConnected(NetworkPlayer player)
     {
-        Debug.Log("Player connected from " + player.ipAddress + ":" + player.port);
 
         for (int i = 0; i < selectables.Length; i++)
         {
@@ -166,6 +165,23 @@ public class MenuScript : MonoBehaviour {
                 selectables[i].tick.SetActive(false);
                 selectables[i].status = "opened";
                 selectables[i].controller = "Player";
+                break;
+            }
+        }
+
+        updateAllPlayers();
+
+    }
+
+    void OnPlayerDisconnected(NetworkPlayer player)
+    {
+
+        for (int i = 0; i < selectables.Length; i++)
+        {
+            if (selectables[i].player.ToString() == player.ToString())
+            {
+                selectables[i].controller = "CPU";
+                selectables[i].tick.SetActive(true);
                 break;
             }
         }
@@ -244,7 +260,7 @@ public class MenuScript : MonoBehaviour {
                 selectables[position].controllerText.GetComponent<TextMesh>().color = new Color(1f, 0.35f, 0.35f, selectables[position].controllerText.GetComponent<TextMesh>().color.a);
                 selectables[position].controllerText2.GetComponent<TextMesh>().color = new Color(0.65f, 0f, 0f, selectables[position].controllerText2.GetComponent<TextMesh>().color.a);
 
-                selectables[position].arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Arrow");
+                selectables[position].arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Door");
             }
             else
             {
@@ -270,8 +286,6 @@ public class MenuScript : MonoBehaviour {
             selectables[position].controllerText.GetComponent<TextMesh>().color = new Color(0.35f, 0.35f, 1f, selectables[position].controllerText.GetComponent<TextMesh>().color.a);
             selectables[position].controllerText2.GetComponent<TextMesh>().color = new Color(0f, 0f, 0.65f, selectables[position].controllerText2.GetComponent<TextMesh>().color.a);
         }
-
-        
 
     }
 
@@ -762,6 +776,11 @@ public class MenuScript : MonoBehaviour {
                         selectables[i].root.SetActive(true);
                     }
 
+                    if ((GlobalData.online && int.Parse(Network.player.ToString()) == 0) || !GlobalData.online)
+                    {
+                        updateAllPlayers();
+                    }
+
                 }
             }
 
@@ -977,6 +996,11 @@ public class MenuScript : MonoBehaviour {
                     }
                     else if (selectables[i].status == "opened" && (selectables[i].arrow.GetComponent<SpriteRenderer>().sprite == Resources.Load<Sprite>("Menu/Arrow") || selectables[i].arrow.GetComponent<SpriteRenderer>().sprite == Resources.Load<Sprite>("Menu/Door")))
                     {
+                        if (selectables[i].controller == "You")
+                        {
+                            if (GlobalData.online) { Network.Disconnect(); }
+                            Application.LoadLevel("Menu");
+                        }
                         if (selectables[i].controller == "Player")
                         {
                             GetComponent<NetworkView>().RPC("disconnect", RPCMode.All, selectables[i].player);
@@ -1103,7 +1127,7 @@ public class MenuScript : MonoBehaviour {
                 controllerText2.GetComponent<TextMesh>().color = new Color(0.65f, 0f, 0f, controllerText2.GetComponent<TextMesh>().color.a);
                 changeLegend("barbarian");
                 status = "opened";
-                arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Lock");
+                arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Door");
                 arrow.transform.localEulerAngles = new Vector3(0f, 0f, 180f);
             }
             else if (number <= 2)
