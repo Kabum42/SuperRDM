@@ -26,6 +26,8 @@ public class WorldScript : MonoBehaviour {
     private float lastDPadY = 0f;
     private string lastHorizontal = "down";
 
+    private GameObject[] UIAgents;
+
     private AudioSource selectCellEffect;
 
     private int currentMountains = 0;
@@ -44,8 +46,6 @@ public class WorldScript : MonoBehaviour {
         {
             GlobalData.Start();
         }
-       
-        
 
         //boardCells = new BoardCell[37];
 
@@ -63,7 +63,8 @@ public class WorldScript : MonoBehaviour {
         fading = GameObject.Find("Fading");
 
         selectedSprite = GameObject.Find("SelectedSprite");
-        
+
+        UIAgents = new GameObject[GlobalData.activeAgents];
 
         int numCells = 1;
         
@@ -104,10 +105,11 @@ public class WorldScript : MonoBehaviour {
                 GameObject g = Instantiate(Resources.Load("Prefabs/UIAgent") as GameObject);
                 g.name = "UIAgent" + i;
                 g.transform.parent = GameObject.Find("UIAgents").transform;
-                g.transform.localPosition = new Vector3(9.64f, 1.5f * 2.5f - GlobalData.order[i] * 1.5f, 0f);
                 g.transform.FindChild("PictureHolder").gameObject.GetComponent<SpriteRenderer>().color = GlobalData.colorCharacters[i];
+                UIAgents[i] = g;
             }
         }
+
         
         for (int i = 0; i < GlobalData.activeAgents; i++)
         {
@@ -115,6 +117,7 @@ public class WorldScript : MonoBehaviour {
         }
 
 	}
+
 
     void RandomizeTurns()
     {
@@ -146,6 +149,20 @@ public class WorldScript : MonoBehaviour {
 
     }
 
+    void NextTurn()
+    {
+
+        int auxOrder = 0;
+        for (int i = 0; i < GlobalData.activeAgents; i++)
+        {
+            if (GlobalData.currentAgentTurn == GlobalData.order[i]) { auxOrder = i; }
+        }
+        auxOrder++;
+        if (auxOrder > GlobalData.activeAgents - 1) { auxOrder = 0; }
+        GlobalData.currentAgentTurn = GlobalData.order[auxOrder];
+
+    }
+
     // Update is called once per frame
     void Update()
     {
@@ -156,8 +173,55 @@ public class WorldScript : MonoBehaviour {
             GenerateBoard();
         }
 
+        if (Input.GetKeyDown(KeyCode.Space) && GlobalData.currentAgentTurn == GlobalData.myAgent)
+        {
+
+            NextTurn();
+            
+        }
+
+        // Place Champions
+        for (int i = 0; i < GlobalData.activeAgents; i++)
+        {
+            GlobalData.agents[i].cellChampion.transform.position = new Vector3(Mathf.Lerp(GlobalData.agents[i].cellChampion.transform.position.x, boardCells[GlobalData.agents[i].currentCell].root.transform.position.x, Time.deltaTime * 10f), Mathf.Lerp(GlobalData.agents[i].cellChampion.transform.position.y, boardCells[GlobalData.agents[i].currentCell].root.transform.position.y, Time.deltaTime * 10f), GlobalData.agents[i].cellChampion.transform.position.z);
+        }
+
+        // Place UI Agents
+        float default_y = 1.85f;
+        float total_y = (GlobalData.activeAgents-1) * default_y  +(default_y+1f);
+        float current_y = 0f;
+
+        for (int i = 0; i < GlobalData.order.Length; i++)
+        {
+            int j = GlobalData.order[i];
+
+            if (GlobalData.currentAgentTurn == GlobalData.order[i])
+            {
+                current_y += 0.5f;
+            }
+
+            UIAgents[j].transform.localPosition = new Vector3(9.64f, Mathf.Lerp(UIAgents[j].transform.localPosition.y, (total_y - 1) / 2f - current_y, Time.deltaTime*10f), 0f);
+
+            if (GlobalData.currentAgentTurn == GlobalData.order[i])
+            {
+                UIAgents[j].transform.localScale = new Vector3(Mathf.Lerp(UIAgents[j].transform.localScale.x, 1.62f, Time.deltaTime * 10f), Mathf.Lerp(UIAgents[j].transform.localScale.y, 1.62f, Time.deltaTime * 10f), Mathf.Lerp(UIAgents[j].transform.localScale.z, 1.62f, Time.deltaTime * 10f));
+                current_y += default_y + 0.5f;
+            }
+            else
+            {
+                UIAgents[j].transform.localScale = new Vector3(Mathf.Lerp(UIAgents[j].transform.localScale.x, 1f, Time.deltaTime * 10f), Mathf.Lerp(UIAgents[j].transform.localScale.y, 1f, Time.deltaTime * 10f), Mathf.Lerp(UIAgents[j].transform.localScale.z, 1f, Time.deltaTime * 10f));
+                current_y += default_y;
+            }
+            
+        }
+
         //Debug.Log(boardCells[1].south);
         //boardCells[1].south.root.transform.position = boardCells[1].south.root.transform.position + new Vector3(0f, 0.02f, 0f);
+
+        if (GlobalData.agents[GlobalData.currentAgentTurn].IA)
+        {
+            NextTurn();
+        }
 
         if (phase == 0)
         {
@@ -177,6 +241,7 @@ public class WorldScript : MonoBehaviour {
         else if (phase == 1)
         {
             // TIME TO SELECT YOUR SANCTUARY
+            phase = 2;
         }
         else
         {
@@ -345,9 +410,17 @@ public class WorldScript : MonoBehaviour {
                     }
                 }
 
-                if (ClickedOn(selected.root))
+                if (ClickedOn(selected.root) && GlobalData.currentAgentTurn == GlobalData.myAgent)
                 {
                     // MOVE TO THE CELL??
+                    for (int i = 0; i < boardCells.Length; i++)
+                    {
+                        if (ClickedOn(boardCells[i].root) && boardCells[GlobalData.agents[GlobalData.myAgent].currentCell].isConnected(boardCells[i]))
+                        {
+                            GlobalData.agents[GlobalData.myAgent].currentCell = i;
+                            NextTurn();
+                        }
+                    }
                 }
 
             }
@@ -371,6 +444,11 @@ public class WorldScript : MonoBehaviour {
         b.root.GetComponent<SpriteRenderer>().color = GlobalData.colorCharacters[agent];
         b.root.transform.parent = board.transform;
         b.root.name = "Cell_" + 4 + "_" + num;
+
+        GlobalData.agents[agent].currentCell = currentCell;
+        GlobalData.agents[agent].cellChampion = Instantiate(Resources.Load("Prefabs/Champion")) as GameObject;
+        GlobalData.agents[agent].cellChampion.name = "Champion_" + agent;
+        GlobalData.agents[agent].cellChampion.transform.parent = GameObject.Find("Champions").transform;
 
         if (num == 0) {
             positionCell(b, 2, 3);
@@ -406,7 +484,9 @@ public class WorldScript : MonoBehaviour {
             connectCells(b, "south", boardCells[35]);
             connectCells(b, "southEast", boardCells[36]);
         }
-        
+
+        GlobalData.agents[agent].cellChampion.transform.position = new Vector3(boardCells[GlobalData.agents[agent].currentCell].root.transform.position.x, boardCells[GlobalData.agents[agent].currentCell].root.transform.position.y, GlobalData.agents[agent].cellChampion.transform.position.z);
+
         currentCell++;
 
     }

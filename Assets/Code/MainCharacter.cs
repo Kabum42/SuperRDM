@@ -11,6 +11,9 @@ public class MainCharacter : Character {
 	private int Experience;
 	private int ID;
     public NetworkPlayer player;
+    public bool IA = false;
+    public int currentCell;
+    public GameObject cellChampion;
 
 	public MainCharacter()
 	{

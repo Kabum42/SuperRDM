@@ -1159,11 +1159,15 @@ public class MenuScript : MonoBehaviour {
                 GlobalData.agents[aux] = new MainCharacter();
                 if (selectables[i].controller == "CPU")
                 {
-                    //NADA QUE HACER, NO ES UN PLAYER
+                    GlobalData.agents[aux].IA = true;
                 }
                 else
                 {
                     GlobalData.agents[aux].player = selectables[i].player;
+                    if (GlobalData.agents[aux].player.ToString() == Network.player.ToString())
+                    {
+                        GlobalData.myAgent = aux;
+                    }
                 }
                 
                 aux++;

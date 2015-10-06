@@ -9,6 +9,7 @@ public static class GlobalData {
 	public static int MaxEnemies;
     public static string OS;
     public static MainCharacter[] agents = new MainCharacter[6];
+    public static int myAgent = 0;
     public static int[] order;
     public static int currentAgentTurn = 0;
     public static int activeAgents = 0;
