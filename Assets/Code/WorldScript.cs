@@ -118,6 +118,45 @@ public class WorldScript : MonoBehaviour {
 
 	}
 
+    void OnDisconnectedFromServer(NetworkDisconnection info)
+    {
+        Application.LoadLevel("Menu");
+    }
+
+    [RPC]
+    void moveRequest(NetworkPlayer player, int i)
+    {
+
+        if (GlobalData.agents[GlobalData.currentAgentTurn].player == player && boardCells[GlobalData.agents[GlobalData.currentAgentTurn].currentCell].isConnected(boardCells[i]))
+        {
+            GlobalData.agents[GlobalData.currentAgentTurn].currentCell = i;
+            NextTurn();
+            updateBoard();
+        }
+
+    }
+
+    void updateBoard()
+    {
+        GetComponent<NetworkView>().RPC("updateBoardRPC", RPCMode.Others, GlobalData.currentAgentTurn);
+        for (int i = 0; i < GlobalData.activeAgents; i++)
+        {
+            GetComponent<NetworkView>().RPC("updateAgentRPC", RPCMode.Others, i, GlobalData.agents[i].currentCell);
+        }
+    }
+
+    [RPC]
+    void updateBoardRPC(int currentAgentTurn)
+    {
+        GlobalData.currentAgentTurn = currentAgentTurn;
+    }
+
+    [RPC]
+    void updateAgentRPC(int position, int currentCell)
+    {
+        GlobalData.agents[position].currentCell = currentCell;
+    }
+
 
     void RandomizeTurns()
     {
@@ -176,7 +215,7 @@ public class WorldScript : MonoBehaviour {
         if (Input.GetKeyDown(KeyCode.Space) && GlobalData.currentAgentTurn == GlobalData.myAgent)
         {
 
-            NextTurn();
+            //NextTurn();
             
         }
 
@@ -218,9 +257,10 @@ public class WorldScript : MonoBehaviour {
         //Debug.Log(boardCells[1].south);
         //boardCells[1].south.root.transform.position = boardCells[1].south.root.transform.position + new Vector3(0f, 0.02f, 0f);
 
-        if (GlobalData.agents[GlobalData.currentAgentTurn].IA)
+        if (GlobalData.agents[GlobalData.currentAgentTurn].IA && (int.Parse(Network.player.ToString()) == 0 || !GlobalData.online))
         {
             NextTurn();
+            updateBoard();
         }
 
         if (phase == 0)
@@ -412,8 +452,26 @@ public class WorldScript : MonoBehaviour {
                     if (GlobalData.currentAgentTurn == GlobalData.myAgent && ClickedOn(boardCells[i].root) && boardCells[GlobalData.agents[GlobalData.myAgent].currentCell].isConnected(boardCells[i]))
                     {
                         // MOVE TO THE CELL??
-                        GlobalData.agents[GlobalData.myAgent].currentCell = i;
-                        NextTurn();
+                        if (GlobalData.online)
+                        {
+                            if (int.Parse(Network.player.ToString()) == 0)
+                            {
+                                // ES EL SERVER
+                                GlobalData.agents[GlobalData.myAgent].currentCell = i;
+                                NextTurn();
+                                updateBoard();
+                            }
+                            else
+                            {
+                                // ES UN CLIENTE
+                                GetComponent<NetworkView>().RPC("moveRequest", RPCMode.Server, Network.player, i);
+                            }
+                        }
+                        else
+                        {
+                            GlobalData.agents[GlobalData.myAgent].currentCell = i;
+                            NextTurn();
+                        }
                     }
                 }
 
