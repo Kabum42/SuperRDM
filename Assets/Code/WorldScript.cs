@@ -408,18 +408,12 @@ public class WorldScript : MonoBehaviour {
                         selectedSprite.SetActive(true);
                         selected = boardCells[i];
                     }
-                }
 
-                if (ClickedOn(selected.root) && GlobalData.currentAgentTurn == GlobalData.myAgent)
-                {
-                    // MOVE TO THE CELL??
-                    for (int i = 0; i < boardCells.Length; i++)
+                    if (GlobalData.currentAgentTurn == GlobalData.myAgent && ClickedOn(boardCells[i].root) && boardCells[GlobalData.agents[GlobalData.myAgent].currentCell].isConnected(boardCells[i]))
                     {
-                        if (ClickedOn(boardCells[i].root) && boardCells[GlobalData.agents[GlobalData.myAgent].currentCell].isConnected(boardCells[i]))
-                        {
-                            GlobalData.agents[GlobalData.myAgent].currentCell = i;
-                            NextTurn();
-                        }
+                        // MOVE TO THE CELL??
+                        GlobalData.agents[GlobalData.myAgent].currentCell = i;
+                        NextTurn();
                     }
                 }
 
