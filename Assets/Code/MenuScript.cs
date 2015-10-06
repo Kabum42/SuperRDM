@@ -37,6 +37,7 @@ public class MenuScript : MonoBehaviour {
     private GameObject join1;
     private GameObject join2;
     private GameObject background;
+    private GameObject background2;
     private bool starting = false;
 
     private int selectableX = 0;
@@ -90,6 +91,8 @@ public class MenuScript : MonoBehaviour {
         join2.SetActive(false);
 
         background = GameObject.Find("Background");
+        background2 = GameObject.Find("Background2");
+        background2.SetActive(false);
 
         selectEffect = gameObject.AddComponent<AudioSource>();
         selectEffect.clip = Resources.Load("Sounds/SelectCell") as AudioClip;
@@ -764,9 +767,11 @@ public class MenuScript : MonoBehaviour {
                     background.SetActive(false);
                     transition = 0f;
 
+                    
                     playBackground.SetActive(true);
                     playText.SetActive(true);
                     playText2.SetActive(true);
+                    background2.SetActive(true);
 
                     intro.Stop();
                     preparation.Play();

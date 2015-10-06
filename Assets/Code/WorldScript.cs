@@ -138,10 +138,13 @@ public class WorldScript : MonoBehaviour {
 
     void updateBoard()
     {
-        GetComponent<NetworkView>().RPC("updateBoardRPC", RPCMode.Others, GlobalData.currentAgentTurn);
-        for (int i = 0; i < GlobalData.activeAgents; i++)
+        if (GlobalData.online)
         {
-            GetComponent<NetworkView>().RPC("updateAgentRPC", RPCMode.Others, i, GlobalData.agents[i].currentCell);
+            GetComponent<NetworkView>().RPC("updateBoardRPC", RPCMode.Others, GlobalData.currentAgentTurn);
+            for (int i = 0; i < GlobalData.activeAgents; i++)
+            {
+                GetComponent<NetworkView>().RPC("updateAgentRPC", RPCMode.Others, i, GlobalData.agents[i].currentCell);
+            }
         }
     }
 
