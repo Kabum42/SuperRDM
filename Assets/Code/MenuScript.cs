@@ -27,6 +27,7 @@ public class MenuScript : MonoBehaviour {
     private AudioSource selectEffect;
     private AudioSource acceptEffect;
     private GameObject pointer;
+    private GameObject pointer2;
     private GameObject offline1;
     private GameObject offline2;
     private GameObject online1;
@@ -65,6 +66,9 @@ public class MenuScript : MonoBehaviour {
 
         pointer = GameObject.Find("Pointer");
         pointer.SetActive(false);
+
+        pointer2 = GameObject.Find("Pointer2");
+        pointer2.SetActive(false);
 
         offline1 = GameObject.Find("Offline1");
         offline1.SetActive(false);
@@ -383,6 +387,8 @@ public class MenuScript : MonoBehaviour {
         Hacks.SpriteRendererAlpha(button2, 0.15f + Mathf.Abs(Mathf.Sin(radius2 * Mathf.PI / 180)));
 
         Hacks.SpriteRendererAlpha(pointer, 0.35f + Mathf.Abs(Mathf.Sin(radius2 * Mathf.PI / 180)));
+        Hacks.SpriteRendererAlpha(pointer2, 1f);
+
 
         star.transform.eulerAngles = new Vector3(star.transform.eulerAngles.x, star.transform.eulerAngles.y, star.transform.eulerAngles.z - Time.deltaTime * 50f);
 
@@ -499,6 +505,8 @@ public class MenuScript : MonoBehaviour {
 
                 Hacks.SpriteRendererAlpha(pointer, 0f);
                 pointer.SetActive(true);
+                Hacks.SpriteRendererAlpha(pointer2, 0f);
+                pointer2.SetActive(true);
                 Hacks.TextAlpha(offline1, 0f);
                 offline1.SetActive(true);
                 Hacks.TextAlpha(offline2, 0f);
@@ -521,6 +529,7 @@ public class MenuScript : MonoBehaviour {
                 transition += Time.deltaTime;
 
                 Hacks.SpriteRendererAlpha(pointer, transition * pointer.GetComponent<SpriteRenderer>().color.a);
+                Hacks.SpriteRendererAlpha(pointer2, transition * pointer2.GetComponent<SpriteRenderer>().color.a);
                 Hacks.TextAlpha(offline1, transition);
                 Hacks.TextAlpha(offline2, transition);
                 Hacks.TextAlpha(online1, transition);
@@ -596,11 +605,13 @@ public class MenuScript : MonoBehaviour {
 
             if (playOption == 0)
             {
-                pointer.transform.position = new Vector3(-4.36f, Mathf.Lerp(pointer.transform.position.y, -3.58f, Time.deltaTime * 10f), 0f);
+                pointer.transform.position = new Vector3(-4.36f, Mathf.Lerp(pointer.transform.position.y, -3.56f, Time.deltaTime * 10f), 0f);
+                pointer2.transform.position = new Vector3(-4.36f, Mathf.Lerp(pointer2.transform.position.y, -3.6f, Time.deltaTime * 10f), 0f);
             }
             else if (playOption == 1)
             {
-                pointer.transform.position = new Vector3(-4.36f, Mathf.Lerp(pointer.transform.position.y, -5.48f, Time.deltaTime * 10f), 0f);
+                pointer.transform.position = new Vector3(-4.36f, Mathf.Lerp(pointer.transform.position.y, -5.46f, Time.deltaTime * 10f), 0f);
+                pointer2.transform.position = new Vector3(-4.36f, Mathf.Lerp(pointer2.transform.position.y, -5.5f, Time.deltaTime * 10f), 0f);
             }
 
         }
@@ -727,11 +738,13 @@ public class MenuScript : MonoBehaviour {
 
             if (playOption == 0)
             {
-                pointer.transform.position = new Vector3(-4.36f, Mathf.Lerp(pointer.transform.position.y, -3.58f, Time.deltaTime * 10f), 0f);
+                pointer.transform.position = new Vector3(-4.36f, Mathf.Lerp(pointer.transform.position.y, -3.56f, Time.deltaTime * 10f), 0f);
+                pointer2.transform.position = new Vector3(-4.36f, Mathf.Lerp(pointer2.transform.position.y, -3.6f, Time.deltaTime * 10f), 0f);
             }
             else if (playOption == 1)
             {
-                pointer.transform.position = new Vector3(-4.36f, Mathf.Lerp(pointer.transform.position.y, -5.48f, Time.deltaTime * 10f), 0f);
+                pointer.transform.position = new Vector3(-4.36f, Mathf.Lerp(pointer.transform.position.y, -5.46f, Time.deltaTime * 10f), 0f);
+                pointer2.transform.position = new Vector3(-4.36f, Mathf.Lerp(pointer2.transform.position.y, -5.5f, Time.deltaTime * 10f), 0f);
             }
 
         }
@@ -756,6 +769,7 @@ public class MenuScript : MonoBehaviour {
                     button1.SetActive(false);
                     button2.SetActive(false);
                     pointer.SetActive(false);
+                    pointer2.SetActive(false);
                     offline1.SetActive(false);
                     offline2.SetActive(false);
                     online1.SetActive(false);
