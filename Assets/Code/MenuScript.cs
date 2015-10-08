@@ -39,6 +39,8 @@ public class MenuScript : MonoBehaviour {
     private GameObject join2;
     private GameObject background;
     private GameObject background2;
+    private AudioSource menuOk;
+    private AudioSource menuBack;
     private bool starting = false;
 
     private int selectableX = 0;
@@ -109,15 +111,23 @@ public class MenuScript : MonoBehaviour {
         acceptEffect.playOnAwake = false;
 
         intro = gameObject.AddComponent<AudioSource>();
-        intro.clip = Resources.Load("Music/Intro") as AudioClip;
+        intro.clip = Resources.Load("Music/Menu/Intro") as AudioClip;
         intro.volume = 0f;
         intro.loop = true;
         intro.Play();
 
         preparation = gameObject.AddComponent<AudioSource>();
-        preparation.clip = Resources.Load("Music/Preparation") as AudioClip;
+        preparation.clip = Resources.Load("Music/Menu/Preparation") as AudioClip;
         preparation.volume = 1f;
         preparation.loop = true;
+
+        menuOk = gameObject.AddComponent<AudioSource>();
+        menuOk.clip = Resources.Load("Music/Menu/MenuOk") as AudioClip;
+        menuOk.volume = 0.85f;
+
+        menuBack = gameObject.AddComponent<AudioSource>();
+        menuBack.clip = Resources.Load("Music/Menu/MenuBack") as AudioClip;
+        menuBack.volume = 0.85f;
         
         logoPosition = logo.transform.position;
 
@@ -445,6 +455,7 @@ public class MenuScript : MonoBehaviour {
                     {
                         transition = 0f;
                         phase = 1;
+                        menuOk.Play();
                     }
                 }
                 if (GlobalData.OS == "Mac")
@@ -454,6 +465,7 @@ public class MenuScript : MonoBehaviour {
                     {
                         transition = 0f;
                         phase = 1;
+                        menuOk.Play();
                     }
                 }
                 if (GlobalData.OS == "Linux")
@@ -463,6 +475,7 @@ public class MenuScript : MonoBehaviour {
                     {
                         transition = 0f;
                         phase = 1;
+                        menuOk.Play();
                     }
                 }
             }
@@ -476,6 +489,7 @@ public class MenuScript : MonoBehaviour {
                 {
                     transition = 0f;
                     phase = 1;
+                    menuOk.Play();
                 }
 
             }
@@ -486,7 +500,7 @@ public class MenuScript : MonoBehaviour {
 
             Hacks.SpriteRendererAlpha(fading, Mathf.Lerp(fading.GetComponent<SpriteRenderer>().color.a, 0f, Time.deltaTime*5f));
 
-            transition += Time.deltaTime;
+            transition += Time.deltaTime*5f;
 
             startText.GetComponent<TextMesh>().color = new Color(startText.GetComponent<TextMesh>().color.r, startText.GetComponent<TextMesh>().color.g, startText.GetComponent<TextMesh>().color.b, startText.GetComponent<TextMesh>().color.a * (1f - transition));
             startText2.GetComponent<TextMesh>().color = new Color(startText2.GetComponent<TextMesh>().color.r, startText2.GetComponent<TextMesh>().color.g, startText2.GetComponent<TextMesh>().color.b, startText2.GetComponent<TextMesh>().color.a * (1f - transition));
@@ -526,7 +540,7 @@ public class MenuScript : MonoBehaviour {
             if (transition < 1f)
             {
 
-                transition += Time.deltaTime;
+                transition += Time.deltaTime*5f;
 
                 Hacks.SpriteRendererAlpha(pointer, transition * pointer.GetComponent<SpriteRenderer>().color.a);
                 Hacks.SpriteRendererAlpha(pointer2, transition * pointer2.GetComponent<SpriteRenderer>().color.a);
@@ -566,11 +580,13 @@ public class MenuScript : MonoBehaviour {
                     {
                         phase = 5;
                         transition = 0f;
+                        menuOk.Play();
                     }
                     else if (playOption == 1)
                     {
                         phase = 3;
                         transition = 0f;
+                        menuOk.Play();
                     }
                 }
             }
@@ -594,11 +610,13 @@ public class MenuScript : MonoBehaviour {
                     {
                         phase = 5;
                         transition = 0f;
+                        menuOk.Play();
                     }
                     else if (playOption == 1)
                     {
                         phase = 3;
                         transition = 0f;
+                        menuOk.Play();
                     }
                 }
             }
@@ -620,7 +638,7 @@ public class MenuScript : MonoBehaviour {
 
             if (transition < 1f)
             {
-                transition += Time.deltaTime;
+                transition += Time.deltaTime*5f;
 
                 Hacks.TextAlpha(offline1, 1f - transition);
                 Hacks.TextAlpha(offline2, 1f - transition);
@@ -660,7 +678,7 @@ public class MenuScript : MonoBehaviour {
 
             if (transition < 1f)
             {
-                transition += Time.deltaTime;
+                transition += Time.deltaTime*5f;
 
                 Hacks.TextAlpha(host1, transition);
                 Hacks.TextAlpha(host2, transition);
@@ -704,6 +722,7 @@ public class MenuScript : MonoBehaviour {
                     GlobalData.online = true;
                     phase = 5;
                     transition = 0f;
+                    menuOk.Play();
                 }
             }
             else
@@ -733,6 +752,16 @@ public class MenuScript : MonoBehaviour {
                     GlobalData.online = true;
                     phase = 5;
                     transition = 0f;
+                    menuOk.Play();
+                }
+                else if (Input.GetKeyDown(KeyCode.Escape))
+                {
+                    phase = 1;
+                    menuBack.Play();
+                    join1.SetActive(false);
+                    join2.SetActive(false);
+                    host1.SetActive(false);
+                    host2.SetActive(false);
                 }
             }
 
@@ -755,7 +784,7 @@ public class MenuScript : MonoBehaviour {
 
             if (transition < 1f)
             {
-                transition += Time.deltaTime;
+                transition += Time.deltaTime*2f;
                 fading.GetComponent<SpriteRenderer>().color = new Color(fading.GetComponent<SpriteRenderer>().color.r, fading.GetComponent<SpriteRenderer>().color.g, fading.GetComponent<SpriteRenderer>().color.b, transition);
                 intro.volume = 1f - transition;
 
@@ -839,7 +868,7 @@ public class MenuScript : MonoBehaviour {
 
             if (transition < 1f)
             {
-                transition += Time.deltaTime;
+                transition += Time.deltaTime*2f;
                 if (transition > 1f)
                 {
                     transition = 1f;
@@ -1075,7 +1104,7 @@ public class MenuScript : MonoBehaviour {
         else if (phase == 7)
         {
 
-            transition += Time.deltaTime;
+            transition += Time.deltaTime*2f;
             if (transition >= 1f)
             {
                 transition = 1f;
