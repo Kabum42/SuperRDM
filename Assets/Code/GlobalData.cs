@@ -23,6 +23,7 @@ public static class GlobalData {
     public static string[] biomeNames;
 
     public static bool online = false;
+    public static bool hosting = false;
     public static bool connected = false;
     public static float boardSeed = 42f;
 
