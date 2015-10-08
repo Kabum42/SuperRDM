@@ -242,6 +242,9 @@ public class MenuScript : MonoBehaviour {
             button1.GetComponent<SpriteRenderer>().color = new Color(button1.GetComponent<SpriteRenderer>().color.r, button1.GetComponent<SpriteRenderer>().color.g, button1.GetComponent<SpriteRenderer>().color.b, startText.GetComponent<TextMesh>().color.a);
             button2.GetComponent<SpriteRenderer>().color = new Color(button2.GetComponent<SpriteRenderer>().color.r, button2.GetComponent<SpriteRenderer>().color.g, button2.GetComponent<SpriteRenderer>().color.b, startText.GetComponent<TextMesh>().color.a);
 
+            //Camera.main.GetComponent<Camera>().orthographicSize = Mathf.Lerp(Camera.main.GetComponent<Camera>().orthographicSize, 40f, Time.deltaTime * 5f);
+            //Camera.main.transform.position = new Vector3(0, Mathf.Lerp(Camera.main.transform.position.y, -26f, Time.deltaTime*5f), -10);
+
             if (transition >= 1f)
             {
                 phase = 2;
@@ -270,6 +273,9 @@ public class MenuScript : MonoBehaviour {
         }
         else if (phase == 2)
         {
+
+            //Camera.main.GetComponent<Camera>().orthographicSize = Mathf.Lerp(Camera.main.GetComponent<Camera>().orthographicSize, 40f, Time.deltaTime * 5f);
+            //Camera.main.transform.position = new Vector3(0, Mathf.Lerp(Camera.main.transform.position.y, -26f, Time.deltaTime * 5f), -10);
 
             if (transition < 1f)
             {

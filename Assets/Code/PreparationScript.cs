@@ -81,15 +81,12 @@ public class PreparationScript : MonoBehaviour {
 
         if (GlobalData.online)
         {
-            Debug.Log("LOL1");
             if (GlobalData.hosting)
             {
-                Debug.Log("LOL2");
                 NetworkManager.StartServer("test");
             }
             else
             {
-                Debug.Log("LOL3");
                 NetworkManager.RefreshHostList();
             }
         }
