@@ -128,19 +128,29 @@ public class PreparationScript : MonoBehaviour {
     void OnPlayerConnected(NetworkPlayer player)
     {
 
+        bool welcome = false;
+
         for (int i = 0; i < selectables.Length; i++)
         {
-            if (selectables[i].controller == "CPU")
+            if (selectables[i].controller == "WaitingPlayer")
             {
                 selectables[i].player = player;
                 selectables[i].tick.SetActive(false);
                 selectables[i].status = "opened";
                 selectables[i].controller = "Player";
+                welcome = true;
                 break;
             }
         }
 
-        updateAllPlayers();
+        if (welcome)
+        {
+            updateAllPlayers();
+        }
+        else
+        {
+            GetComponent<NetworkView>().RPC("disconnect", RPCMode.All, player);
+        }
 
     }
 
@@ -240,6 +250,7 @@ public class PreparationScript : MonoBehaviour {
                 if (isServer) { selectables[position].interactIcon.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Remove"); }
                 else { selectables[position].interactIcon.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Lock"); }
             }
+            selectables[position].controllerIcon.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Player");
         }
         else
         {
@@ -261,8 +272,9 @@ public class PreparationScript : MonoBehaviour {
 
             if (selectables[position].controller == "CPU")
             {
+                if (selectables[position].status == "opened") { selectables[position].tick.SetActive(true); }
+                else { selectables[position].tick.SetActive(false); }
                 selectables[position].controllerIcon.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Cpu");
-                selectables[position].tick.SetActive(true);
             }
             else if (selectables[position].controller == "WaitingPlayer")
             {
