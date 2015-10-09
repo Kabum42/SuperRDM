@@ -258,6 +258,17 @@ public class PreparationScript : MonoBehaviour {
             {
                 selectables[position].interactIcon.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Lock");
             }
+
+            if (selectables[position].controller == "CPU")
+            {
+                selectables[position].controllerIcon.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Cpu");
+                selectables[position].tick.SetActive(true);
+            }
+            else if (selectables[position].controller == "WaitingPlayer")
+            {
+                selectables[position].controllerIcon.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/WaitingPlayer");
+                selectables[position].tick.SetActive(false);
+            }
         }
 
     }
@@ -486,7 +497,7 @@ public class PreparationScript : MonoBehaviour {
                 else if (controllerConnected == -1)
                 {
                     // COLORES OSCURECIDOS
-                    if (isOver(selectables[i].controllerBackground) && (!GlobalData.online || (GlobalData.online && int.Parse(Network.player.ToString()) == 0)))
+                    if (isOver(selectables[i].controllerBackground) && (GlobalData.online && int.Parse(Network.player.ToString()) == 0))
                     {
                         if (selectables[i].controller == "You")
                         {
@@ -542,6 +553,20 @@ public class PreparationScript : MonoBehaviour {
                         updatePlayer(i);
                         acceptEffect.Play();
                     }
+                }
+                else if (ClickedOn(selectables[i].controllerBackground) && GlobalData.online)
+                {
+                    if (selectables[i].controller == "CPU")
+                    {
+                        selectables[i].controller = "WaitingPlayer";
+                        //selectables[i].controllerIcon.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/WaitingPlayer");
+                    }
+                    else if (selectables[i].controller == "WaitingPlayer")
+                    {
+                        selectables[i].controller = "CPU";
+                        //selectables[i].controllerIcon.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Cpu");
+                    }
+                    updatePlayer(i);
                 }
 
                 if (selectables[i].status == "opened")
