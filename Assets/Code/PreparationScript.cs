@@ -9,6 +9,7 @@ public class PreparationScript : MonoBehaviour {
     private float transition = 0f;
     private int phase = 6;
     private selectableAgent[] selectables = new selectableAgent[6];
+    private characterScroll[] characters = new characterScroll[8];
     private Vector3 lastMousePosition;
     public GameObject playBackground;
     public GameObject playText;
@@ -81,6 +82,37 @@ public class PreparationScript : MonoBehaviour {
         {
             selectables[i] = new selectableAgent(i);
         }
+
+        int current_x = 0;
+        int current_y = 0;
+        int max_per_x = 4;
+        for (int i = 0; i < characters.Length; i++)
+        {
+            characters[i] = new characterScroll();
+            characters[i].root = Instantiate(Resources.Load("Prefabs/ScrollOption") as GameObject);
+            characters[i].root.transform.parent = GameObject.Find("Scroll").transform;
+            characters[i].root.transform.localPosition = new Vector3((-1.5f +current_x)*0.002f, -0.0018f + (-current_y*0.0018f), -0.2f);
+
+
+            if (i == 0) { characters[i].champion = "random"; }
+            else if (i == 1) { characters[i].champion = "barbarian"; }
+            else if (i == 2) { characters[i].champion = "pilumantic"; }
+            else if (i == 3) { characters[i].champion = "henmancer"; }
+            else if (i == 4) { characters[i].champion = "dreamwalker"; }
+            else if (i == 5) { characters[i].champion = "disembodied"; }
+            else if (i == 6) { characters[i].champion = "buckler"; }
+            else { characters[i].root.SetActive(false); }
+
+            characters[i].root.transform.FindChild("Icon").GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Legends/"+characters[i].champion);
+
+            current_x++;
+            if (current_x >= max_per_x)
+            {
+                current_x = 0;
+                current_y++;
+            }
+        }
+
 
         if (GlobalData.online)
         {
@@ -194,6 +226,21 @@ public class PreparationScript : MonoBehaviour {
     }
 
     [RPC]
+    void championRequest(NetworkPlayer player, string champion)
+    {
+
+        for (int i = 1; i < selectables.Length; i++)
+        {
+            if (int.Parse(selectables[i].player.ToString()) != 0 && selectables[i].player.ToString() == player.ToString())
+            {
+                selectables[i].changeLegend(champion);
+                updatePlayer(i);
+            }
+        }
+
+    }
+
+    [RPC]
     void disconnect(NetworkPlayer target)
     {
 
@@ -208,7 +255,7 @@ public class PreparationScript : MonoBehaviour {
     {
         if (GlobalData.online)
         {
-            GetComponent<NetworkView>().RPC("updatePlayerRPC", RPCMode.All, i, selectables[i].player, selectables[i].tick.activeInHierarchy, selectables[i].status, selectables[i].controller);
+            GetComponent<NetworkView>().RPC("updatePlayerRPC", RPCMode.All, i, selectables[i].player, selectables[i].tick.activeInHierarchy, selectables[i].status, selectables[i].controller, selectables[i].currentLegend);
         }
     }
 
@@ -221,13 +268,14 @@ public class PreparationScript : MonoBehaviour {
     }
 
     [RPC]
-    void updatePlayerRPC(int position, NetworkPlayer nPlayer, bool bTick, string trueStatus, string subjectiveController)
+    void updatePlayerRPC(int position, NetworkPlayer nPlayer, bool bTick, string trueStatus, string subjectiveController, string currentLegend)
     {
 
         selectables[position].player = nPlayer;
         selectables[position].tick.SetActive(bTick);
         selectables[position].status = trueStatus;
         selectables[position].controller = subjectiveController;
+        selectables[position].changeLegend(currentLegend);
 
         bool isServer = false;
         if (int.Parse(Network.player.ToString()) == 0 || !GlobalData.online) { isServer = true; }
@@ -471,7 +519,40 @@ public class PreparationScript : MonoBehaviour {
 
             }
 
-            
+            for (int i = 0; i < characters.Length; i++)
+            {
+                // RESET A COLOR DEFAULT
+                characters[i].root.transform.FindChild("Icon").GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1f);
+
+                if (isOver(characters[i].root))
+                {
+                    characters[i].root.transform.FindChild("Icon").GetComponent<SpriteRenderer>().color = new Color(0.7f, 0.7f, 0.7f, 1f);
+                }
+
+                if (ClickedOn(characters[i].root))
+                {
+                    if (!GlobalData.online) {
+                        selectables[0].changeLegend(characters[i].champion);
+                    }
+                    else {
+                        for (int j = 0; j < selectables.Length; j++) {
+                            if (selectables[j].player.ToString() == Network.player.ToString() && selectables[j].controller == "You")
+                            {
+                                if (int.Parse(Network.player.ToString()) == 0)
+                                {
+                                    selectables[j].changeLegend(characters[i].champion);
+                                    updatePlayer(j);
+                                }
+                                else
+                                {
+                                    GetComponent<NetworkView>().RPC("championRequest", RPCMode.Server, Network.player, characters[i].champion);
+                                }
+                                
+                            }
+                        }
+                    }
+                }
+            }
 
             for (int i = 0; i < selectables.Length; i++) 
             {
@@ -555,6 +636,7 @@ public class PreparationScript : MonoBehaviour {
                             GetComponent<NetworkView>().RPC("disconnect", RPCMode.All, selectables[i].player);
                             selectables[i].controller = "CPU";
                             selectables[i].tick.SetActive(true);
+                            selectables[i].changeLegend("random");
                         }
                         if (i >= 3)
                         {
@@ -624,6 +706,19 @@ public class PreparationScript : MonoBehaviour {
 
     }
 
+
+    private class characterScroll
+    {
+
+        public GameObject root;
+        public string champion;
+
+        public characterScroll()
+        {
+
+        }
+    }
+
     private class selectableAgent
     {
 
@@ -665,6 +760,7 @@ public class PreparationScript : MonoBehaviour {
             controllerBackground.GetComponent<SpriteRenderer>().color = new Color(otherColor.r, otherColor.g, otherColor.b, controllerBackground.GetComponent<SpriteRenderer>().color.a);
             interactBackground.GetComponent<SpriteRenderer>().color = new Color(otherColor.r, otherColor.g, otherColor.b, interactBackground.GetComponent<SpriteRenderer>().color.a);
 
+            changeLegend("random");
 
             if (number == 0)
             {
