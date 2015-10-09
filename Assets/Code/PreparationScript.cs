@@ -23,6 +23,9 @@ public class PreparationScript : MonoBehaviour {
     private AudioSource menuBack;
     private bool starting = false;
 
+    private static Color otherColor = new Color(123f / 255f, 150f / 255f, 229f / 255f);
+    private static Color youColor = new Color(144f / 255f, 229f / 255f, 123f / 255f);
+
     private float radius2 = 300f;
 
     private int selectableX = 0;
@@ -217,7 +220,7 @@ public class PreparationScript : MonoBehaviour {
         selectables[position].controller = subjectiveController;
 
         bool isServer = false;
-        if (int.Parse(Network.player.ToString()) == 0) { isServer = true; }
+        if (int.Parse(Network.player.ToString()) == 0 || !GlobalData.online) { isServer = true; }
 
         if (subjectiveController == "You" || subjectiveController == "Player")
         {
@@ -225,34 +228,36 @@ public class PreparationScript : MonoBehaviour {
             if (selectables[position].player.ToString() == Network.player.ToString())
             {
                 selectables[position].controller = "You";
-                selectables[position].controllerText.GetComponent<TextMesh>().color = new Color(1f, 0.35f, 0.35f, selectables[position].controllerText.GetComponent<TextMesh>().color.a);
-                selectables[position].controllerText2.GetComponent<TextMesh>().color = new Color(0.65f, 0f, 0f, selectables[position].controllerText2.GetComponent<TextMesh>().color.a);
-
-                selectables[position].arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Door");
+                selectables[position].controllerBackground.GetComponent<SpriteRenderer>().color = new Color(youColor.r, youColor.g, youColor.b, selectables[position].controllerBackground.GetComponent<SpriteRenderer>().color.a);
+                selectables[position].interactBackground.GetComponent<SpriteRenderer>().color = new Color(youColor.r, youColor.g, youColor.b, selectables[position].interactBackground.GetComponent<SpriteRenderer>().color.a);
+                selectables[position].interactIcon.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Remove");
             }
             else
             {
                 selectables[position].controller = "Player";
-                selectables[position].controllerText.GetComponent<TextMesh>().color = new Color(0.35f, 1f, 0.35f, selectables[position].controllerText.GetComponent<TextMesh>().color.a);
-                selectables[position].controllerText2.GetComponent<TextMesh>().color = new Color(0f, 0.65f, 0f, selectables[position].controllerText2.GetComponent<TextMesh>().color.a);
-
-                if (isServer) { selectables[position].arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Door"); }
-                else { selectables[position].arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Lock"); }
+                selectables[position].controllerBackground.GetComponent<SpriteRenderer>().color = new Color(otherColor.r, otherColor.g, otherColor.b, selectables[position].controllerBackground.GetComponent<SpriteRenderer>().color.a);
+                selectables[position].interactBackground.GetComponent<SpriteRenderer>().color = new Color(otherColor.r, otherColor.g, otherColor.b, selectables[position].interactBackground.GetComponent<SpriteRenderer>().color.a);
+                if (isServer) { selectables[position].interactIcon.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Remove"); }
+                else { selectables[position].interactIcon.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Lock"); }
             }
         }
         else
         {
             if (isServer && position >= 3)
             {
-                selectables[position].arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Arrow");
+                if (selectables[position].status == "opened")
+                {
+                    selectables[position].interactIcon.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Remove");
+                }
+                else
+                {
+                    selectables[position].interactIcon.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Add");
+                }
             }
             else
             {
-                selectables[position].arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Lock");
-                selectables[position].arrow.transform.eulerAngles = new Vector3(0f, 0f, 180f);
+                selectables[position].interactIcon.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Lock");
             }
-            selectables[position].controllerText.GetComponent<TextMesh>().color = new Color(0.35f, 0.35f, 1f, selectables[position].controllerText.GetComponent<TextMesh>().color.a);
-            selectables[position].controllerText2.GetComponent<TextMesh>().color = new Color(0f, 0f, 0.65f, selectables[position].controllerText2.GetComponent<TextMesh>().color.a);
         }
 
     }
@@ -263,10 +268,8 @@ public class PreparationScript : MonoBehaviour {
     void Update () {
 
 
-        if (phase != 1)
-        {
-            radius2 += Time.deltaTime * 100f;
-        }
+        radius2 += Time.deltaTime * 100f;
+
         if (radius2 > 360f) { radius2 -= 360f; }
 
         star.transform.eulerAngles = new Vector3(star.transform.eulerAngles.x, star.transform.eulerAngles.y, star.transform.eulerAngles.z - Time.deltaTime * 50f);
@@ -338,6 +341,7 @@ public class PreparationScript : MonoBehaviour {
 
             }
 
+            Hacks.SpriteRendererAlpha(playBackground, 1f);
             playBackground.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1f);
 
             int controllerConnected = -1;
@@ -399,7 +403,7 @@ public class PreparationScript : MonoBehaviour {
                     {
                         if (selectableY < 6)
                         {
-                            if (selectables[selectableY].status == "closed" && selectables[selectableY].arrow.GetComponent<SpriteRenderer>().sprite == Resources.Load<Sprite>("Menu/Arrow"))
+                            if (selectables[selectableY].status == "closed" && selectables[selectableY].interactIcon.GetComponent<SpriteRenderer>().sprite == Resources.Load<Sprite>("Menu/Arrow"))
                             {
                                 selectables[selectableY].status = "opened";
                                 selectables[selectableY].tick.SetActive(true);
@@ -411,7 +415,7 @@ public class PreparationScript : MonoBehaviour {
                                 {
                                     // CHANGE CHAMPION
                                 }
-                                else if (selectableX == 2 && selectables[selectableY].arrow.GetComponent<SpriteRenderer>().sprite == Resources.Load<Sprite>("Menu/Arrow"))
+                                else if (selectableX == 2 && selectables[selectableY].interactIcon.GetComponent<SpriteRenderer>().sprite == Resources.Load<Sprite>("Menu/Arrow"))
                                 {
                                     selectables[selectableY].status = "closed";
                                     selectables[selectableY].tick.SetActive(false);
@@ -428,6 +432,11 @@ public class PreparationScript : MonoBehaviour {
 
                 }
 
+                if (selectableY == 6)
+                {
+                    playBackground.GetComponent<SpriteRenderer>().color = new Color(0.7f, 0.7f, 0.7f, 0.7f);
+                }
+
             }
             else
             {
@@ -439,62 +448,79 @@ public class PreparationScript : MonoBehaviour {
 
             }
 
-            if (selectableY == 6 && controllerConnected != -1)
+            
+
+            for (int i = 0; i < selectables.Length; i++) 
             {
-                playBackground.GetComponent<SpriteRenderer>().color = new Color(0.7f, 0.7f, 0.7f, 0.7f);
-            }
-
-            for (int i = 0; i < selectables.Length; i++)
+                // RESET A COLOR DEFAULT
+                if (selectables[i].controller == "You")
                 {
-                selectables[i].nameBackground.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1f);
-                selectables[i].controllerBackground.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1f);
-                selectables[i].arrowBackground.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1f);
-
-                selectables[i].controllerText.GetComponent<TextMesh>().text = selectables[i].controller;
-                selectables[i].controllerText2.GetComponent<TextMesh>().text = selectables[i].controller;
-
+                    selectables[i].controllerBackground.GetComponent<SpriteRenderer>().color = new Color(youColor.r, youColor.g, youColor.b, 1f);
+                    selectables[i].interactBackground.GetComponent<SpriteRenderer>().color = new Color(youColor.r, youColor.g, youColor.b, 1f);
+                }
+                else
+                {
+                    selectables[i].controllerBackground.GetComponent<SpriteRenderer>().color = new Color(otherColor.r, otherColor.g, otherColor.b, 1f);
+                    selectables[i].interactBackground.GetComponent<SpriteRenderer>().color = new Color(otherColor.r, otherColor.g, otherColor.b, 1f);
+                }
 
                 if (selectableY == i && controllerConnected != -1)
                 {
                     if (i <= 1)
                     {
-                        selectables[i].nameBackground.GetComponent<SpriteRenderer>().color = new Color(0.7f, 0.7f, 0.7f, 1f);
+                        
                     }
                     else if (selectableX == 0 && selectables[i].status == "opened")
                     {
-                        selectables[i].nameBackground.GetComponent<SpriteRenderer>().color = new Color(0.7f, 0.7f, 0.7f, 1f);
+                        
                     }
                     else if (selectableX == 1 && selectables[i].status == "opened")
                     {
-                        selectables[i].controllerBackground.GetComponent<SpriteRenderer>().color = new Color(0.7f, 0.7f, 0.7f, 1f);
+                        //selectables[i].controllerBackground.GetComponent<SpriteRenderer>().color = new Color(0.7f, 0.7f, 0.7f, 1f);
                     }
                     else if (selectableX == 2 || selectables[i].status == "closed")
                     {
-                        selectables[i].arrowBackground.GetComponent<SpriteRenderer>().color = new Color(0.7f, 0.7f, 0.7f, 1f);
+                        //selectables[i].interactBackground.GetComponent<SpriteRenderer>().color = new Color(0.7f, 0.7f, 0.7f, 1f);
                     }
                 }
                 else if (controllerConnected == -1)
                 {
-                    if (isOver(selectables[i].nameBackground))
+                    // COLORES OSCURECIDOS
+                    if (isOver(selectables[i].controllerBackground) && (!GlobalData.online || (GlobalData.online && int.Parse(Network.player.ToString()) == 0)))
                     {
-                        selectables[i].nameBackground.GetComponent<SpriteRenderer>().color = new Color(0.7f, 0.7f, 0.7f, 1f);
+                        if (selectables[i].controller == "You")
+                        {
+                            selectables[i].controllerBackground.GetComponent<SpriteRenderer>().color = new Color(youColor.r*0.7f, youColor.g*0.7f, youColor.b*0.7f, 1f);
+                        }
+                        else
+                        {
+                            selectables[i].controllerBackground.GetComponent<SpriteRenderer>().color = new Color(otherColor.r * 0.7f, otherColor.g * 0.7f, otherColor.b * 0.7f, 1f);
+                        }
                     }
-                    else if (isOver(selectables[i].arrowBackground) && (selectables[i].arrow.GetComponent<SpriteRenderer>().sprite == Resources.Load<Sprite>("Menu/Arrow") || selectables[i].arrow.GetComponent<SpriteRenderer>().sprite == Resources.Load<Sprite>("Menu/Door")))
+                    else if (isOver(selectables[i].interactBackground) && (selectables[i].interactIcon.GetComponent<SpriteRenderer>().sprite == Resources.Load<Sprite>("Menu/Remove") || selectables[i].interactIcon.GetComponent<SpriteRenderer>().sprite == Resources.Load<Sprite>("Menu/Add")))
                     {
-                        selectables[i].arrowBackground.GetComponent<SpriteRenderer>().color = new Color(0.7f, 0.7f, 0.7f, 1f);
+                        if (selectables[i].controller == "You")
+                        {
+                            selectables[i].interactBackground.GetComponent<SpriteRenderer>().color = new Color(youColor.r * 0.7f, youColor.g * 0.7f, youColor.b * 0.7f, 1f);
+                        }
+                        else
+                        {
+                            selectables[i].interactBackground.GetComponent<SpriteRenderer>().color = new Color(otherColor.r * 0.7f, otherColor.g * 0.7f, otherColor.b * 0.7f, 1f);
+                        }
                     }
                 }
 
-                if (ClickedOn(selectables[i].arrowBackground))
+                if (ClickedOn(selectables[i].interactBackground))
                 {
-                    if (selectables[i].status == "closed" && selectables[i].arrow.GetComponent<SpriteRenderer>().sprite == Resources.Load<Sprite>("Menu/Arrow"))
+                    if (selectables[i].status == "closed" && selectables[i].interactIcon.GetComponent<SpriteRenderer>().sprite == Resources.Load<Sprite>("Menu/Add"))
                     {
                         selectables[i].status = "opened";
                         selectables[i].tick.SetActive(true);
+                        selectables[i].interactIcon.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Remove");
                         updatePlayer(i);
                         acceptEffect.Play();
                     }
-                    else if (selectables[i].status == "opened" && (selectables[i].arrow.GetComponent<SpriteRenderer>().sprite == Resources.Load<Sprite>("Menu/Arrow") || selectables[i].arrow.GetComponent<SpriteRenderer>().sprite == Resources.Load<Sprite>("Menu/Door")))
+                    else if (selectables[i].status == "opened" && (selectables[i].interactIcon.GetComponent<SpriteRenderer>().sprite == Resources.Load<Sprite>("Menu/Remove")))
                     {
                         if (selectables[i].controller == "You")
                         {
@@ -511,43 +537,12 @@ public class PreparationScript : MonoBehaviour {
                         {
                             selectables[i].status = "closed";
                             selectables[i].tick.SetActive(false);
+                            selectables[i].interactIcon.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Add");
                         }
                         updatePlayer(i);
                         acceptEffect.Play();
                     }
                 }
-
-                if (selectables[i].status == "closed")
-                {
-                    if (selectables[i].arrow.GetComponent<SpriteRenderer>().sprite == Resources.Load<Sprite>("Menu/Arrow"))
-                    {
-                        selectables[i].arrow.transform.localEulerAngles = new Vector3(0f, 0f, Mathf.LerpAngle(selectables[i].arrow.transform.localEulerAngles.z, 0f, Time.deltaTime * 10f));
-                    }
-                    selectables[i].nameBackground.transform.localScale = new Vector3(Mathf.Lerp(selectables[i].nameBackground.transform.localScale.x, 0f, Time.deltaTime*10f), 1f, 1f);
-                    selectables[i].controllerBackground.transform.localScale = new Vector3(Mathf.Lerp(selectables[i].controllerBackground.transform.localScale.x, 0f, Time.deltaTime * 10f), 1f, 1f);
-                }
-                else if (selectables[i].status == "opened")
-                {
-                    if (selectables[i].arrow.GetComponent<SpriteRenderer>().sprite == Resources.Load<Sprite>("Menu/Arrow"))
-                    {
-                        selectables[i].arrow.transform.localEulerAngles = new Vector3(0f, 0f, Mathf.LerpAngle(selectables[i].arrow.transform.localEulerAngles.z, 180f, Time.deltaTime * 10f));
-                    }
-                    selectables[i].nameBackground.transform.localScale = new Vector3(Mathf.Lerp(selectables[i].nameBackground.transform.localScale.x, 1f, Time.deltaTime*10f), 1f, 1f);
-                    selectables[i].controllerBackground.transform.localScale = new Vector3(Mathf.Lerp(selectables[i].controllerBackground.transform.localScale.x, 0.45f, Time.deltaTime * 10f), 1f, 1f);
-                }
-
-                selectables[i].nameText.GetComponent<TextMesh>().text = selectables[i].currentName;
-                selectables[i].nameText2.GetComponent<TextMesh>().text = selectables[i].currentName;
-
-                selectables[i].nameText.GetComponent<TextMesh>().color = new Color(selectables[i].nameText.GetComponent<TextMesh>().color.r, selectables[i].nameText.GetComponent<TextMesh>().color.g, selectables[i].nameText.GetComponent<TextMesh>().color.b, selectables[i].nameBackground.transform.localScale.x);
-                selectables[i].nameText2.GetComponent<TextMesh>().color = new Color(selectables[i].nameText2.GetComponent<TextMesh>().color.r, selectables[i].nameText2.GetComponent<TextMesh>().color.g, selectables[i].nameText2.GetComponent<TextMesh>().color.b, selectables[i].nameBackground.transform.localScale.x);
-                selectables[i].controllerText.GetComponent<TextMesh>().color = new Color(selectables[i].controllerText.GetComponent<TextMesh>().color.r, selectables[i].controllerText.GetComponent<TextMesh>().color.g, selectables[i].controllerText.GetComponent<TextMesh>().color.b, selectables[i].nameBackground.transform.localScale.x);
-                selectables[i].controllerText2.GetComponent<TextMesh>().color = new Color(selectables[i].controllerText2.GetComponent<TextMesh>().color.r, selectables[i].controllerText2.GetComponent<TextMesh>().color.g, selectables[i].controllerText2.GetComponent<TextMesh>().color.b, selectables[i].nameBackground.transform.localScale.x);
-
-                selectables[i].nameBackground.transform.localPosition = new Vector3(selectables[i].nameBackground.GetComponent<SpriteRenderer>().bounds.size.x*0.9f +2.0f, 0.26f, 0.1f);
-                selectables[i].controllerBackground.transform.localPosition = new Vector3(selectables[i].nameBackground.GetComponent<SpriteRenderer>().bounds.size.x * 1.78f + selectables[i].controllerBackground.GetComponent<SpriteRenderer>().bounds.size.x + 1.8f, 0.26f, 0.1f);
-                selectables[i].arrowBackground.transform.localPosition = new Vector3(3.74f + selectables[i].nameBackground.GetComponent<SpriteRenderer>().bounds.size.x * 1.78f + selectables[i].controllerBackground.GetComponent<SpriteRenderer>().bounds.size.x*1.81f, 0.26f, 0.1f);
-                selectables[i].arrow.transform.localPosition = new Vector3(selectables[i].arrowBackground.transform.localPosition.x + 0.00f, 0.26f, 0f);
 
 
             }
@@ -583,15 +578,12 @@ public class PreparationScript : MonoBehaviour {
 
         public GameObject pictureHolder;
         public GameObject icon;
-        public GameObject arrowBackground;
-        public GameObject arrow;
-        public GameObject nameBackground;
+        public GameObject controllerIcon;
         public GameObject controllerBackground;
-        public GameObject nameText;
-        public GameObject nameText2;
-        public GameObject controllerText;
-        public GameObject controllerText2;
+        public GameObject interactIcon;
+        public GameObject interactBackground;
         public GameObject tick;
+        public GameObject crown;
 
         public selectableAgent(int number)
         {
@@ -600,47 +592,39 @@ public class PreparationScript : MonoBehaviour {
             root.transform.localPosition = new Vector3(root.transform.localPosition.x, (+2.5f -number +0.5f)*2.7f, 0.1f);
             pictureHolder = root.transform.FindChild("PictureHolder").gameObject;
             icon = root.transform.FindChild("Icon").gameObject;
-            arrowBackground = root.transform.FindChild("ArrowBackground").gameObject;
-            arrow = root.transform.FindChild("Arrow").gameObject;
-            nameBackground = root.transform.FindChild("NameBackground").gameObject;
+            controllerIcon = root.transform.FindChild("Controller").gameObject;
             controllerBackground = root.transform.FindChild("ControllerBackground").gameObject;
-            nameText = root.transform.FindChild("NameText").gameObject;
-            nameText2 = root.transform.FindChild("NameText2").gameObject;
-            controllerText = root.transform.FindChild("ControllerText").gameObject;
-            controllerText2 = root.transform.FindChild("ControllerText2").gameObject;
+            interactIcon = root.transform.FindChild("Interact").gameObject;
+            interactBackground = root.transform.FindChild("InteractBackground").gameObject;
+           
             tick = root.transform.FindChild("PictureHolder/Tick").gameObject;
             tick.SetActive(false);
 
-            nameText.GetComponent<TextMesh>().color = new Color(nameText.GetComponent<TextMesh>().color.r, nameText.GetComponent<TextMesh>().color.g, nameText.GetComponent<TextMesh>().color.b, 0f);
-            nameText2.GetComponent<TextMesh>().color = new Color(nameText2.GetComponent<TextMesh>().color.r, nameText2.GetComponent<TextMesh>().color.g, nameText2.GetComponent<TextMesh>().color.b, 0f);
+            crown = root.transform.FindChild("Crown").gameObject;
+            crown.SetActive(false);
 
-            controllerText.GetComponent<TextMesh>().color = new Color(controllerText.GetComponent<TextMesh>().color.r, controllerText.GetComponent<TextMesh>().color.g, controllerText.GetComponent<TextMesh>().color.b, 0f);
-            controllerText2.GetComponent<TextMesh>().color = new Color(controllerText2.GetComponent<TextMesh>().color.r, controllerText2.GetComponent<TextMesh>().color.g, controllerText2.GetComponent<TextMesh>().color.b, 0f);
+            controllerBackground.GetComponent<SpriteRenderer>().color = new Color(otherColor.r, otherColor.g, otherColor.b, controllerBackground.GetComponent<SpriteRenderer>().color.a);
+            interactBackground.GetComponent<SpriteRenderer>().color = new Color(otherColor.r, otherColor.g, otherColor.b, interactBackground.GetComponent<SpriteRenderer>().color.a);
 
-            controllerText.GetComponent<TextMesh>().color = new Color(0.35f, 0.35f, 1f, controllerText.GetComponent<TextMesh>().color.a);
-            controllerText2.GetComponent<TextMesh>().color = new Color(0f, 0f, 0.65f, controllerText2.GetComponent<TextMesh>().color.a);
 
             if (number == 0)
             {
+                crown.SetActive(true);
                 controller = "You";
-                controllerText.GetComponent<TextMesh>().color = new Color(1f, 0.35f, 0.35f, controllerText.GetComponent<TextMesh>().color.a);
-                controllerText2.GetComponent<TextMesh>().color = new Color(0.65f, 0f, 0f, controllerText2.GetComponent<TextMesh>().color.a);
                 changeLegend("barbarian");
                 status = "opened";
-                arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Door");
-                arrow.transform.localEulerAngles = new Vector3(0f, 0f, 180f);
+                interactIcon.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Remove");
+                controllerBackground.GetComponent<SpriteRenderer>().color = new Color(youColor.r, youColor.g, youColor.b, controllerBackground.GetComponent<SpriteRenderer>().color.a);
+                interactBackground.GetComponent<SpriteRenderer>().color = new Color(youColor.r, youColor.g, youColor.b, interactBackground.GetComponent<SpriteRenderer>().color.a);
+                controllerIcon.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Player");
             }
             else if (number <= 2)
             {
-                changeLegend("pilumantic");
+                //changeLegend("pilumantic");
                 status = "opened";
-                arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Lock");
-                arrow.transform.localEulerAngles = new Vector3(0f, 0f, 180f);
+                interactIcon.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Lock");
                 tick.SetActive(true);
             }
-
-            controllerText.GetComponent<TextMesh>().text = controller;
-            controllerText2.GetComponent<TextMesh>().text = controller;
 
         }
 
@@ -648,17 +632,9 @@ public class PreparationScript : MonoBehaviour {
         {
             pictureHolder.GetComponent<SpriteRenderer>().color = new Color(pictureHolder.GetComponent<SpriteRenderer>().color.r, pictureHolder.GetComponent<SpriteRenderer>().color.g, pictureHolder.GetComponent<SpriteRenderer>().color.b, amount);
             icon.GetComponent<SpriteRenderer>().color = new Color(icon.GetComponent<SpriteRenderer>().color.r, icon.GetComponent<SpriteRenderer>().color.g, icon.GetComponent<SpriteRenderer>().color.b, amount);
-            arrowBackground.GetComponent<SpriteRenderer>().color = new Color(arrowBackground.GetComponent<SpriteRenderer>().color.r, arrowBackground.GetComponent<SpriteRenderer>().color.g, arrowBackground.GetComponent<SpriteRenderer>().color.b, amount);
-            arrow.GetComponent<SpriteRenderer>().color = new Color(arrow.GetComponent<SpriteRenderer>().color.r, arrow.GetComponent<SpriteRenderer>().color.g, arrow.GetComponent<SpriteRenderer>().color.b, amount);
-            nameBackground.GetComponent<SpriteRenderer>().color = new Color(nameBackground.GetComponent<SpriteRenderer>().color.r, nameBackground.GetComponent<SpriteRenderer>().color.g, nameBackground.GetComponent<SpriteRenderer>().color.b, amount);
+            interactBackground.GetComponent<SpriteRenderer>().color = new Color(interactBackground.GetComponent<SpriteRenderer>().color.r, interactBackground.GetComponent<SpriteRenderer>().color.g, interactBackground.GetComponent<SpriteRenderer>().color.b, amount);
+            interactIcon.GetComponent<SpriteRenderer>().color = new Color(interactIcon.GetComponent<SpriteRenderer>().color.r, interactIcon.GetComponent<SpriteRenderer>().color.g, interactIcon.GetComponent<SpriteRenderer>().color.b, amount);
             controllerBackground.GetComponent<SpriteRenderer>().color = new Color(controllerBackground.GetComponent<SpriteRenderer>().color.r, controllerBackground.GetComponent<SpriteRenderer>().color.g, controllerBackground.GetComponent<SpriteRenderer>().color.b, amount);
-            if (status == "opened")
-            {
-                nameText.GetComponent<TextMesh>().color = new Color(nameText.GetComponent<TextMesh>().color.r, nameText.GetComponent<TextMesh>().color.g, nameText.GetComponent<TextMesh>().color.b, amount);
-                nameText2.GetComponent<TextMesh>().color = new Color(nameText2.GetComponent<TextMesh>().color.r, nameText2.GetComponent<TextMesh>().color.g, nameText2.GetComponent<TextMesh>().color.b, amount);
-                controllerText.GetComponent<TextMesh>().color = new Color(controllerText.GetComponent<TextMesh>().color.r, controllerText.GetComponent<TextMesh>().color.g, controllerText.GetComponent<TextMesh>().color.b, amount);
-                controllerText2.GetComponent<TextMesh>().color = new Color(controllerText2.GetComponent<TextMesh>().color.r, controllerText2.GetComponent<TextMesh>().color.g, controllerText2.GetComponent<TextMesh>().color.b, amount);
-            }
         }
 
         public void changeLegend(string newLegend)
