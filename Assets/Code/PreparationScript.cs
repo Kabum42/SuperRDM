@@ -544,6 +544,28 @@ public class PreparationScript : MonoBehaviour {
                     }
                 }
 
+                if (selectables[i].status == "opened")
+                {
+                    selectables[i].controllerBackground.transform.localScale = new Vector3(Mathf.Lerp(selectables[i].controllerBackground.transform.localScale.x, 1.336029f, Time.deltaTime * 10f), 1.336029f, 1.336029f);
+                    selectables[i].controllerBackground.transform.localPosition = new Vector3(Mathf.Lerp(selectables[i].controllerBackground.transform.localPosition.x, 3.47f, Time.deltaTime * 10f), selectables[i].controllerBackground.transform.localPosition.y, selectables[i].controllerBackground.transform.localPosition.z);
+                    
+                    selectables[i].controllerIcon.transform.localPosition = new Vector3(Mathf.Lerp(selectables[i].controllerIcon.transform.localPosition.x, 4.57f, Time.deltaTime * 10f), selectables[i].controllerIcon.transform.localPosition.y, selectables[i].controllerIcon.transform.localPosition.z);
+                    Hacks.SpriteRendererAlpha(selectables[i].controllerIcon, Mathf.Lerp(selectables[i].controllerIcon.GetComponent<SpriteRenderer>().color.a, 1f, Time.deltaTime * 10f));
+
+                    selectables[i].interactBackground.transform.localPosition = new Vector3(Mathf.Lerp(selectables[i].interactBackground.transform.localPosition.x, 7.55f, Time.deltaTime * 10f), selectables[i].interactBackground.transform.localPosition.y, selectables[i].interactBackground.transform.localPosition.z);
+                    selectables[i].interactIcon.transform.localPosition = new Vector3(Mathf.Lerp(selectables[i].interactIcon.transform.localPosition.x, 7.78f, Time.deltaTime * 10f), selectables[i].interactIcon.transform.localPosition.y, selectables[i].interactIcon.transform.localPosition.z);
+                }
+                else
+                {
+                    selectables[i].controllerBackground.transform.localScale = new Vector3(Mathf.Lerp(selectables[i].controllerBackground.transform.localScale.x, 0f, Time.deltaTime * 10f), 1.336029f, 1.336029f);
+                    selectables[i].controllerBackground.transform.localPosition = new Vector3(Mathf.Lerp(selectables[i].controllerBackground.transform.localPosition.x, 0f, Time.deltaTime * 10f), selectables[i].controllerBackground.transform.localPosition.y, selectables[i].controllerBackground.transform.localPosition.z);
+
+                    selectables[i].controllerIcon.transform.localPosition = new Vector3(Mathf.Lerp(selectables[i].controllerIcon.transform.localPosition.x, 0f, Time.deltaTime * 10f), selectables[i].controllerIcon.transform.localPosition.y, selectables[i].controllerIcon.transform.localPosition.z);
+                    Hacks.SpriteRendererAlpha(selectables[i].controllerIcon, Mathf.Lerp(selectables[i].controllerIcon.GetComponent<SpriteRenderer>().color.a, 0f, Time.deltaTime * 10f));
+
+                    selectables[i].interactBackground.transform.localPosition = new Vector3(Mathf.Lerp(selectables[i].interactBackground.transform.localPosition.x, 4.21f, Time.deltaTime * 10f), selectables[i].interactBackground.transform.localPosition.y, selectables[i].interactBackground.transform.localPosition.z);
+                    selectables[i].interactIcon.transform.localPosition = new Vector3(Mathf.Lerp(selectables[i].interactIcon.transform.localPosition.x, 4.44f, Time.deltaTime * 10f), selectables[i].interactIcon.transform.localPosition.y, selectables[i].interactIcon.transform.localPosition.z);
+                }
 
             }
 
