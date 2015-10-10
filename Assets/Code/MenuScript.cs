@@ -49,6 +49,9 @@ public class MenuScript : MonoBehaviour {
             GlobalData.Start();
         }
 
+        GlobalData.online = false;
+        GlobalData.connected = false;
+
         fading = GameObject.Find("Fading");
         Hacks.SpriteRendererAlpha(fading, 1f); 
 
