@@ -22,6 +22,7 @@ public class PreparationScript : MonoBehaviour {
     private GameObject background2;
     private AudioSource menuOk;
     private AudioSource menuBack;
+    private GameObject scrollInfo;
     private bool starting = false;
 
     private static Color otherColor = new Color(123f / 255f, 150f / 255f, 229f / 255f);
@@ -53,6 +54,8 @@ public class PreparationScript : MonoBehaviour {
         Hacks.SpriteRendererAlpha(support, 0f);
 
         background2 = GameObject.Find("Background2");
+
+        scrollInfo = GameObject.Find("Scroll/Info");
 
         selectEffect = gameObject.AddComponent<AudioSource>();
         selectEffect.clip = Resources.Load("Sounds/SelectCell") as AudioClip;
@@ -533,6 +536,7 @@ public class PreparationScript : MonoBehaviour {
                 {
                     if (!GlobalData.online) {
                         selectables[0].changeLegend(characters[i].champion);
+                        scrollInfo.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/" + characters[i].champion + "_info");
                     }
                     else {
                         for (int j = 0; j < selectables.Length; j++) {
@@ -541,11 +545,13 @@ public class PreparationScript : MonoBehaviour {
                                 if (int.Parse(Network.player.ToString()) == 0)
                                 {
                                     selectables[j].changeLegend(characters[i].champion);
+                                    scrollInfo.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/" + characters[i].champion+"_info");
                                     updatePlayer(j);
                                 }
                                 else
                                 {
                                     GetComponent<NetworkView>().RPC("championRequest", RPCMode.Server, Network.player, characters[i].champion);
+                                    scrollInfo.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/" + characters[i].champion + "_info");
                                 }
                                 
                             }
@@ -556,6 +562,18 @@ public class PreparationScript : MonoBehaviour {
 
             for (int i = 0; i < selectables.Length; i++) 
             {
+                // ICON COLOR
+                if (selectables[i].status == "closed")
+                {
+                    float aux = Mathf.Lerp(selectables[i].icon.GetComponent<SpriteRenderer>().color.r, 0f, Time.deltaTime * 10f);
+                    selectables[i].icon.GetComponent<SpriteRenderer>().color = new Color(aux, aux, aux, 1f);
+                }
+                else
+                {
+                    float aux = Mathf.Lerp(selectables[i].icon.GetComponent<SpriteRenderer>().color.r, 1f, Time.deltaTime * 10f);
+                    selectables[i].icon.GetComponent<SpriteRenderer>().color = new Color(aux, aux, aux, 1f);
+                }
+
                 // RESET A COLOR DEFAULT
                 if (selectables[i].controller == "You")
                 {
@@ -725,8 +743,8 @@ public class PreparationScript : MonoBehaviour {
         public GameObject root;
 
         public string status = "closed";
-        public string currentLegend = "barbarian";
-        public string currentName = "Retired Barbarian";
+        public string currentLegend = "random";
+        public string currentName = "Random";
         public string controller = "CPU";
         public NetworkPlayer player;
 
@@ -766,7 +784,6 @@ public class PreparationScript : MonoBehaviour {
             {
                 crown.SetActive(true);
                 controller = "You";
-                changeLegend("barbarian");
                 status = "opened";
                 interactIcon.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Remove");
                 controllerBackground.GetComponent<SpriteRenderer>().color = new Color(youColor.r, youColor.g, youColor.b, controllerBackground.GetComponent<SpriteRenderer>().color.a);
@@ -775,7 +792,6 @@ public class PreparationScript : MonoBehaviour {
             }
             else if (number <= 2)
             {
-                //changeLegend("pilumantic");
                 status = "opened";
                 interactIcon.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Lock");
                 tick.SetActive(true);
