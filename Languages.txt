@@ -1,0 +1,18 @@
+
+#Ron_1
+
+@English
+{I'm Ron Weasel}
+
+@Spanish
+{Soy Ron Weasel}
+
+
+
+#Ron_2
+
+@English
+{I'm Ron Weasel_2}
+
+@Spanish
+{Soy Ron Weasel_2}

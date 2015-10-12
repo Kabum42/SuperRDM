@@ -624,6 +624,14 @@ public class PreparationScript : MonoBehaviour {
                     if (selectables[i].status == "closed" && selectables[i].interactIcon.GetComponent<SpriteRenderer>().sprite == Resources.Load<Sprite>("Menu/Add"))
                     {
                         selectables[i].status = "opened";
+                        if (GlobalData.online)
+                        {
+                            selectables[i].controller = "WaitingPlayer";
+                        }
+                        else
+                        {
+                            selectables[i].controller = "CPU";
+                        }
                         selectables[i].tick.SetActive(true);
                         selectables[i].interactIcon.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Remove");
                         updatePlayer(i);
@@ -780,8 +788,14 @@ public class PreparationScript : MonoBehaviour {
             else if (number <= 2)
             {
                 status = "opened";
-                interactIcon.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Lock");
                 tick.SetActive(true);
+                if (GlobalData.online)
+                {
+                    controller = "WaitingPlayer";
+                    controllerIcon.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/WaitingPlayer");
+                    tick.SetActive(false);
+                }
+                interactIcon.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Lock");
             }
 
         }

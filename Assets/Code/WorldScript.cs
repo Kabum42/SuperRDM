@@ -225,13 +225,17 @@ public class WorldScript : MonoBehaviour {
         }
 
         distances[GlobalData.agents[GlobalData.myAgent].currentCell] = 0;
+
         visitCell(boardCells[GlobalData.agents[GlobalData.myAgent].currentCell]);
 
         for (int i = 0; i < boardCells.Length; i++)
         {
             if (distances[i] > GlobalData.agents[GlobalData.myAgent].getCurrentSteps())
             {
-                boardCells[i].root.GetComponent<SpriteRenderer>().color = new Color(0.7f, 0.7f, 0.7f, 1f);
+                float r = (boardCells[i].root.GetComponent<SpriteRenderer>().color.r / boardCells[i].root.GetComponent<SpriteRenderer>().color.r) * 0.7f;
+                float g = (boardCells[i].root.GetComponent<SpriteRenderer>().color.g / boardCells[i].root.GetComponent<SpriteRenderer>().color.g) * 0.7f;
+                float b = (boardCells[i].root.GetComponent<SpriteRenderer>().color.b / boardCells[i].root.GetComponent<SpriteRenderer>().color.b) * 0.7f;
+                boardCells[i].root.GetComponent<SpriteRenderer>().color = new Color(r, g, b, 1f);
             }
         }
     }
@@ -356,8 +360,6 @@ public class WorldScript : MonoBehaviour {
             
         }
 
-        //Debug.Log(boardCells[1].south);
-        //boardCells[1].south.root.transform.position = boardCells[1].south.root.transform.position + new Vector3(0f, 0.02f, 0f);
 
         if (GlobalData.agents[GlobalData.currentAgentTurn].IA && (int.Parse(Network.player.ToString()) == 0 || !GlobalData.online))
         {
@@ -1038,7 +1040,7 @@ public class WorldScript : MonoBehaviour {
 
     private void resetBoardBrightness() {
         for (int i = 0; i < boardCells.Length; i++) {
-            boardCells[i].root.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1f);
+            boardCells[i].root.GetComponent<SpriteRenderer>().color = new Color(boardCells[i].root.GetComponent<SpriteRenderer>().color.r / boardCells[i].root.GetComponent<SpriteRenderer>().color.r, boardCells[i].root.GetComponent<SpriteRenderer>().color.g / boardCells[i].root.GetComponent<SpriteRenderer>().color.g, boardCells[i].root.GetComponent<SpriteRenderer>().color.b / boardCells[i].root.GetComponent<SpriteRenderer>().color.b, 1f);
         }
     }
 
