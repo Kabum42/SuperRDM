@@ -58,6 +58,8 @@ public class MenuScript : MonoBehaviour {
         support = GameObject.Find("Support");
         Hacks.SpriteRendererAlpha(support, 0f);
 
+        button2.SetActive(false);
+
         pointer = GameObject.Find("Pointer");
         pointer.SetActive(false);
 
@@ -127,6 +129,9 @@ public class MenuScript : MonoBehaviour {
         Hacks.TextAlpha(startText, 0.15f + Mathf.Abs(Mathf.Sin(radius2 * Mathf.PI / 180)));
         Hacks.TextAlpha(startText2, 0.15f + Mathf.Abs(Mathf.Sin(radius2 * Mathf.PI / 180)));
 
+        startText.GetComponent<TextMesh>().text = Language.getText("Menu_Start");
+        startText2.GetComponent<TextMesh>().text = Language.getText("Menu_Start");
+
         Hacks.SpriteRendererAlpha(button1, 0.15f + Mathf.Abs(Mathf.Sin(radius2 * Mathf.PI / 180)));
         Hacks.SpriteRendererAlpha(button2, 0.15f + Mathf.Abs(Mathf.Sin(radius2 * Mathf.PI / 180)));
 
@@ -153,80 +158,74 @@ public class MenuScript : MonoBehaviour {
         {
             if (transition < 1f)
             {
-                transition += Time.deltaTime;
+                transition += Time.deltaTime*2f;
 
                 if (transition >= 1f)
                 {
                     transition = 1f;
                 }
-               
+
                 intro.volume = transition;
                 Hacks.SpriteRendererAlpha(fading, 1f - transition);
 
             }
-
-
-            int controllerConnected = -1;
-            for (int i = 0; i < Input.GetJoystickNames().Length; i++)
-            {
-                if (Input.GetJoystickNames()[i] != "")
-                {
-                    controllerConnected = i;
-                    break;
-                }
-            }
-
-            if (controllerConnected != -1)
-            {
-                // CONTROLLER PLUGGED
-                if (button1.activeInHierarchy) { button1.SetActive(false); }
-                if (!button2.activeInHierarchy) { button2.SetActive(true); }
-
-                if (GlobalData.OS == "Windows")
-                {
-                    // WINDOWS
-                    if (Input.GetKeyDown("joystick button 0"))
-                    {
-                        transition = 0f;
-                        phase = 1;
-                        menuOk.Play();
-                    }
-                }
-                if (GlobalData.OS == "Mac")
-                {
-                    // MAC
-                    if (Input.GetKeyDown("joystick button 16"))
-                    {
-                        transition = 0f;
-                        phase = 1;
-                        menuOk.Play();
-                    }
-                }
-                if (GlobalData.OS == "Linux")
-                {
-                    // LINUX
-                    if (Input.GetKeyDown("joystick button 0"))
-                    {
-                        transition = 0f;
-                        phase = 1;
-                        menuOk.Play();
-                    }
-                }
-            }
             else
             {
-                // CONTROLLER NOT PLUGGED
-                if (button2.activeInHierarchy) { button2.SetActive(false); }
-                if (!button1.activeInHierarchy) { button1.SetActive(true); }
-
-                if (Input.GetKeyDown(KeyCode.Return))
+                if (Hacks.ControllerAnyConnected())
                 {
-                    transition = 0f;
-                    phase = 1;
-                    menuOk.Play();
-                }
+                    // CONTROLLER PLUGGED
+                    if (button1.activeInHierarchy) { button1.SetActive(false); }
+                    if (!button2.activeInHierarchy) { button2.SetActive(true); }
 
+                    if (GlobalData.OS == "Windows")
+                    {
+                        // WINDOWS
+                        if (Input.GetKeyDown("joystick button 0"))
+                        {
+                            transition = 0f;
+                            phase = 1;
+                            menuOk.Play();
+                            Hacks.SpriteRendererAlpha(fading, 1f);
+                        }
+                    }
+                    if (GlobalData.OS == "Mac")
+                    {
+                        // MAC
+                        if (Input.GetKeyDown("joystick button 16"))
+                        {
+                            transition = 0f;
+                            phase = 1;
+                            menuOk.Play();
+                        }
+                    }
+                    if (GlobalData.OS == "Linux")
+                    {
+                        // LINUX
+                        if (Input.GetKeyDown("joystick button 0"))
+                        {
+                            transition = 0f;
+                            phase = 1;
+                            menuOk.Play();
+                        }
+                    }
+                }
+                else
+                {
+                    // CONTROLLER NOT PLUGGED
+                    if (button2.activeInHierarchy) { button2.SetActive(false); }
+                    if (!button1.activeInHierarchy) { button1.SetActive(true); }
+
+                    if (Input.GetKeyDown(KeyCode.Return))
+                    {
+                        transition = 0f;
+                        phase = 1;
+                        menuOk.Play();
+                    }
+
+                }
             }
+
+            
 
         }
         else if (phase == 1)

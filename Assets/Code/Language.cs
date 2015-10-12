@@ -23,7 +23,7 @@ public static class Language {
         languages[English] = new Dictionary<string, string>();
         languages[Spanish] = new Dictionary<string, string>();
 
-        string loadedInfo = System.IO.File.ReadAllText("Languages.txt");
+        string loadedInfo = System.IO.File.ReadAllText("Languages.txt", System.Text.Encoding.GetEncoding("iso-8859-1"));
         loadedInfo.Replace("\r\n", "\n");
         loadedInfo.Replace("\r", "\n");
 

@@ -1,4 +1,13 @@
 
+#Menu_Start
+
+@English
+{Start Your Adventure!}
+
+@Spanish
+{¡Empieza tu aventura!}
+
+
 #Ron_1
 
 @English
