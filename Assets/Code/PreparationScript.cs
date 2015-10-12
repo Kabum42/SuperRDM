@@ -39,10 +39,7 @@ public class PreparationScript : MonoBehaviour {
     // Use this for initialization
     void Start () {
 
-        if (!GlobalData.started)
-        {
-            GlobalData.Start();
-        }
+        if (!GlobalData.started) { GlobalData.Start(); }
 
         fading = GameObject.Find("Fading");
         Hacks.SpriteRendererAlpha(fading, 1f); 
@@ -418,17 +415,7 @@ public class PreparationScript : MonoBehaviour {
             Hacks.SpriteRendererAlpha(playBackground, 1f);
             playBackground.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1f);
 
-            int controllerConnected = -1;
-            for (int i = 0; i < Input.GetJoystickNames().Length; i++)
-            {
-                if (Input.GetJoystickNames()[i] != "")
-                {
-                    controllerConnected = i;
-                    break;
-                }
-            }
-
-            if (controllerConnected != -1)
+            if (Hacks.ControllerAnyConnected())
             {
                 // CONTROLLER PLUGGED
                 if (GlobalData.OS == "Windows")
@@ -586,7 +573,7 @@ public class PreparationScript : MonoBehaviour {
                     selectables[i].interactBackground.GetComponent<SpriteRenderer>().color = new Color(otherColor.r, otherColor.g, otherColor.b, 1f);
                 }
 
-                if (selectableY == i && controllerConnected != -1)
+                if (selectableY == i && Hacks.ControllerAnyConnected())
                 {
                     if (i <= 1)
                     {
@@ -605,7 +592,7 @@ public class PreparationScript : MonoBehaviour {
                         //selectables[i].interactBackground.GetComponent<SpriteRenderer>().color = new Color(0.7f, 0.7f, 0.7f, 1f);
                     }
                 }
-                else if (controllerConnected == -1)
+                else if (!Hacks.ControllerAnyConnected())
                 {
                     // COLORES OSCURECIDOS
                     if (isOver(selectables[i].controllerBackground) && (GlobalData.online && int.Parse(Network.player.ToString()) == 0))

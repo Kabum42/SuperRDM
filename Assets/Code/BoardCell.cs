@@ -1,10 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class BoardCell {
+public class BoardCell : System.IEquatable<BoardCell> {
 
     public Biome biome;
     public GameObject root;
+    public int positionInArray = 0;
 
     public int ring = 0;
 
@@ -66,6 +67,11 @@ public class BoardCell {
         if (southEast == b) { return true; }
 
         return false;
+    }
+
+    public bool Equals(BoardCell other)
+    {
+        return positionInArray == other.positionInArray;
     }
 
 }

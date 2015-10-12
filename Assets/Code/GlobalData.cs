@@ -21,6 +21,7 @@ public static class GlobalData {
     public static Color color5 = new Color(1f, 1f, 0.62f);
     public static Color[] colorCharacters = {color0, color1, color2, color3, color4, color5};
     public static string[] biomeNames;
+    public static int[] biomeCosts;
 
     public static bool online = false;
     public static bool hosting = false;
@@ -57,6 +58,19 @@ public static class GlobalData {
 		biomeNames[(int) Biome.Harbour1] = "Dock_1";
 		biomeNames[(int) Biome.Harbour2] = "Dock_2";
 		biomeNames[(int) Biome.Harbour3] = "Dock_3";
+
+        biomeCosts = new int[11];
+        biomeCosts[(int)Biome.Sanctuary] = 1;
+        biomeCosts[(int)Biome.Prairie] = 1;
+        biomeCosts[(int)Biome.Forest] = 2;
+        biomeCosts[(int)Biome.Swamp] = 3;
+        biomeCosts[(int)Biome.Lake] = 42;
+        biomeCosts[(int)Biome.Desert] = 4;
+        biomeCosts[(int)Biome.Mountain] = 5;
+        biomeCosts[(int)Biome.TheEvil] = 6;
+        biomeCosts[(int)Biome.Harbour1] = 1;
+        biomeCosts[(int)Biome.Harbour2] = 1;
+        biomeCosts[(int)Biome.Harbour3] = 1;
 
 	}
 	

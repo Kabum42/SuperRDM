@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class WorldScript : MonoBehaviour {
 
@@ -21,6 +22,9 @@ public class WorldScript : MonoBehaviour {
     private GameObject fading;
     private AudioSource musicWorld;
     private GameObject selectedSprite;
+    private bool usedDijkstra = false;
+    private List<BoardCell> unvisited;
+    private int[] distances;
 
     private float lastDPadX = 0f;
     private float lastDPadY = 0f;
@@ -92,6 +96,7 @@ public class WorldScript : MonoBehaviour {
             BoardCell b = new BoardCell();
             b.root = Instantiate(Resources.Load("Prefabs/BoardCell")) as GameObject;
             boardCells[i] = b;
+            b.positionInArray = i;
         }
 
         GenerateBoard();
@@ -202,12 +207,106 @@ public class WorldScript : MonoBehaviour {
         auxOrder++;
         if (auxOrder > GlobalData.activeAgents - 1) { auxOrder = 0; }
         GlobalData.currentAgentTurn = GlobalData.order[auxOrder];
+        usedDijkstra = false;
+        resetBoardBrightness();
 
+    }
+
+    void Dijkstra()
+    {
+        usedDijkstra = true;
+
+        distances = new int[boardCells.Length];
+        unvisited = new List<BoardCell>();
+        for (int i = 0; i < distances.Length; i++)
+        {
+            distances[i] = int.MaxValue;
+            unvisited.Add(boardCells[i]);
+        }
+
+        distances[GlobalData.agents[GlobalData.myAgent].currentCell] = 0;
+        visitCell(boardCells[GlobalData.agents[GlobalData.myAgent].currentCell]);
+
+        for (int i = 0; i < boardCells.Length; i++)
+        {
+            if (distances[i] > GlobalData.agents[GlobalData.myAgent].getCurrentSteps())
+            {
+                boardCells[i].root.GetComponent<SpriteRenderer>().color = new Color(0.7f, 0.7f, 0.7f, 1f);
+            }
+        }
+    }
+
+    private void visitCell(BoardCell b)
+    {
+
+        unvisited.Remove(b);
+
+        // CHANGE DISTANCES
+        if (b.northWest != null && distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.northWest.biome] < distances[b.northWest.positionInArray]) { distances[b.northWest.positionInArray] = distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.northWest.biome]; }
+        if (b.north != null && distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.north.biome] < distances[b.north.positionInArray]) { distances[b.north.positionInArray] = distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.north.biome]; }
+        if (b.northEast != null && distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.northEast.biome] < distances[b.northEast.positionInArray]) { distances[b.northEast.positionInArray] = distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.northEast.biome]; }
+
+        if (b.southWest != null && distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.southWest.biome] < distances[b.southWest.positionInArray]) { distances[b.southWest.positionInArray] = distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.southWest.biome]; }
+        if (b.south != null && distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.south.biome] < distances[b.south.positionInArray]) { distances[b.south.positionInArray] = distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.south.biome]; }
+        if (b.southEast != null && distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.southEast.biome] < distances[b.southEast.positionInArray]) { distances[b.southEast.positionInArray] = distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.southEast.biome]; }
+        
+
+        // VISIT NEIGHBOURS
+        if (unvisited.Count > 0)
+        {
+            // NORTH
+            if (b.northWest != null) {
+                if (unvisited.Contains(b.northWest))
+                {
+                    visitCell(b.northWest); 
+                }
+            }
+
+            if (b.north != null) { 
+                if (unvisited.Contains(b.north)) {
+                    visitCell(b.north); 
+                }
+            }
+            
+            if (b.northEast != null) { 
+                if (unvisited.Contains(b.northEast)) {
+                    visitCell(b.northEast); 
+                }
+            }
+
+            // SOUTH
+            if (b.southWest != null) {
+                if (unvisited.Contains(b.southWest))
+                {
+                    visitCell(b.southWest); 
+                }
+            }
+
+            if (b.south != null) {
+                if (unvisited.Contains(b.south))
+                {
+                    visitCell(b.south); 
+                }
+            }
+
+            if (b.southEast != null) { 
+                if (unvisited.Contains(b.southEast)) {
+                    visitCell(b.southEast); 
+                }
+            }
+
+        }
+        
     }
 
     // Update is called once per frame
     void Update()
     {
+
+        if (GlobalData.currentAgentTurn == GlobalData.myAgent && !usedDijkstra)
+        {
+            Dijkstra();
+        }
 
         if (Input.GetKey(KeyCode.Return))
         {
@@ -288,17 +387,9 @@ public class WorldScript : MonoBehaviour {
         }
         else
         {
-            int controllerConnected = -1;
-            for (int i = 0; i < Input.GetJoystickNames().Length; i++)
-            {
-                if (Input.GetJoystickNames()[i] != "")
-                {
-                    controllerConnected = i;
-                    break;
-                }
-            }
 
-            if (controllerConnected != -1)
+
+            if (Hacks.ControllerAnyConnected())
             {
                 // CONTROLLER PLUGGED
                 if (!selectedSprite.activeInHierarchy)
@@ -943,6 +1034,12 @@ public class WorldScript : MonoBehaviour {
         }
 
 
+    }
+
+    private void resetBoardBrightness() {
+        for (int i = 0; i < boardCells.Length; i++) {
+            boardCells[i].root.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1f);
+        }
     }
 
     private bool ClickedOn(GameObject target)
