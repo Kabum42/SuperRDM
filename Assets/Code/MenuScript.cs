@@ -1156,7 +1156,7 @@ public class MenuScript : MonoBehaviour {
         {
             if (selectables[i].status == "opened")
             {
-                GlobalData.agents[aux] = new MainCharacter();
+                GlobalData.agents[aux] = new MainCharacter(0, "Player1", 175, 100, GlobalData.Classes[0]);
                 if (selectables[i].controller == "CPU")
                 {
                     //NADA QUE HACER, NO ES UN PLAYER

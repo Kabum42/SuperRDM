@@ -156,6 +156,11 @@ public class WorldScript : MonoBehaviour {
             GenerateBoard();
         }
 
+		if (Input.GetKey(KeyCode.Space))
+		{
+			Application.LoadLevel("Battle");
+		}
+
         //Debug.Log(boardCells[1].south);
         //boardCells[1].south.root.transform.position = boardCells[1].south.root.transform.position + new Vector3(0f, 0.02f, 0f);
 

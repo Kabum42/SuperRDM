@@ -9,12 +9,23 @@ public class MainCharacter : Character {
 	private int CurrentMP;
 	private int MaxMP;
 	private int Experience;
-	private int ID;
     public NetworkPlayer player;
 
-	public MainCharacter()
+	public MainCharacter(int ID, string Name, float MaxHealth, float MaxIP, Class OwnClass)
 	{
-		Debug.Log("MainCharacter created");
+		this.ID = ID; 
+		this.Name = Name;
+		this.MaxHealth = MaxHealth;
+		this.MaxIPBar = MaxIP;
+		this.OwnClass = OwnClass;
+
+		switch (OwnClass.getName ()) {
+			case "Boar Ryder":
+				this.Aerial = false;
+				break;
+		}
+
+		Debug.Log(this.Name + " created");
 	}
 
 	public void Interact()
