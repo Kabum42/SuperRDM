@@ -32,6 +32,18 @@ public class Class {
 		CharactersInBattle[Attacker].setProgressIPBar (CharactersInBattle[Attacker].getProgressIPBar () - 20);
 	}
 
+	public bool CheckEnemiesSkill(int position){
+		return Skills [position].getNeedEnemy();
+	}
+
+	public string getSkillName(int position){
+		if (Skills [position] != null) {
+			return Skills [position].getName ();
+		} else {
+			return "Simple Attack";
+		}
+	}
+
 	public string getName(){
 		return this.Name;
 	}

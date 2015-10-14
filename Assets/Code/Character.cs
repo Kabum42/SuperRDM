@@ -5,6 +5,7 @@ public class Character {
 
 	protected int ID;
 	protected string Name;
+	protected float PreviousHealth;
 	protected float CurrentHealth;
 	protected float MaxHealth;
 	protected float ProgressIPBar;
@@ -31,6 +32,14 @@ public class Character {
 	public void UseSkill(int SkillSelected, int Attacker, ref Character[] CharactersInBattle, int EnemyFocused)
 	{
 		OwnClass.UseSkill (SkillSelected, Attacker, ref CharactersInBattle, EnemyFocused);
+	}
+
+	public string getSkillName(int position){
+		return OwnClass.getSkillName (position);
+	}
+
+	public bool CheckEnemies(int position){
+		return OwnClass.CheckEnemiesSkill (position);
 	}
 
 	// Getters and Setters
@@ -77,6 +86,14 @@ public class Character {
 
 	public bool getBottom(){
 		return Bottom;
+	}
+
+	public float getPreviousHealth(){
+		return PreviousHealth;
+	}
+
+	public void setPreviousHealth(float PreviousHealth){
+		this.PreviousHealth = PreviousHealth;
 	}
 
 	

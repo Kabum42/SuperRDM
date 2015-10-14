@@ -67,9 +67,9 @@ public static class GlobalData {
 	}
 
 	private static void GenerateSkills(){
-		Skills [0] = new Skill (0, "Hack", 30, 0, 20);
-		Skills [1] = new Skill (1, "Axe Throw", 60, 0, 30);
-		Skills [2] = new Skill (2, "Wild Roar", 45, 0, 5);
+		Skills [0] = new Skill (0, "Hack", 30, 0, 20, false);
+		Skills [1] = new Skill (1, "Axe Throw", 60, 0, 30, true);
+		Skills [2] = new Skill (2, "Wild Roar", 45, 0, 5, false);
 		
 	}
 
