@@ -20,11 +20,18 @@ public class MainCharacter : Character {
 		Debug.Log("MainCharacter created");
 	}
 
+    public int getCurrentSteps()
+    {
+        return 6;
+    }
+
 	public void Interact()
 	{
+
 	}
 
 	public void Death(){
+
 	}
 	
 }
