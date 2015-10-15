@@ -176,7 +176,7 @@ public class WorldScript : MonoBehaviour {
             GlobalData.order[i] = i;
         }
 
-        float startingPerlin = 0.2347234747f;
+        float startingPerlin = 34.785625f;
 
         for (int i = 0; i < (GlobalData.activeAgents*5); i++)
         {
@@ -184,60 +184,23 @@ public class WorldScript : MonoBehaviour {
             int first_element = 0;
             int second_element = 0;
 
-            bool first_element_decided = false;
+            /*
+            if (GlobalData.activeAgents <= 4) { first_element = (int)(((float)Hacks.BinaryPerlin(2, 0.23425f +startingPerlin, GlobalData.boardSeed)) / 3f * (GlobalData.activeAgents - 1)); }
+            else { first_element = (int)(((float)Hacks.BinaryPerlin(3, 0.23425f +startingPerlin, GlobalData.boardSeed)) / 7f * (GlobalData.activeAgents - 1)); }
+            startingPerlin += 2.5662845f;
 
-            while (!first_element_decided)
-            {
-                first_element = 0;
-                float aux2;
+            if (GlobalData.activeAgents <= 4) { second_element = (int)(((float)Hacks.BinaryPerlin(2, 4650.3753578f +startingPerlin, GlobalData.boardSeed)) / 3f * (GlobalData.activeAgents - 1)); }
+            else { second_element = (int)(((float)Hacks.BinaryPerlin(3, 4650.3753578f +startingPerlin, GlobalData.boardSeed)) / 7f * (GlobalData.activeAgents - 1)); }
+            startingPerlin += 2.5662845f;
+            */
 
-                aux2 = (Mathf.Clamp(Mathf.PerlinNoise(startingPerlin, GlobalData.boardSeed), 0f, 1f));
-                if (aux2 > 0.5f) { first_element += 1; }
-                startingPerlin += 1.573576868f;
-                aux2 = (Mathf.Clamp(Mathf.PerlinNoise(startingPerlin, GlobalData.boardSeed), 0f, 1f));
-                if (aux2 > 0.5f) { first_element += 2; }
-                startingPerlin += 1.573576868f;
+            if (GlobalData.activeAgents <= 4) { first_element = (int) Hacks.BinaryPerlin(0, GlobalData.activeAgents -1, 2, 0.23425f + startingPerlin, GlobalData.boardSeed); }
+            else { first_element = (int)Hacks.BinaryPerlin(0, GlobalData.activeAgents - 1, 3, 0.23425f + startingPerlin, GlobalData.boardSeed); }
+            startingPerlin += 2.5662845f;
 
-                if (GlobalData.activeAgents > 4)
-                {
-                    aux2 = (Mathf.Clamp(Mathf.PerlinNoise(startingPerlin, GlobalData.boardSeed), 0f, 1f));
-                    if (aux2 > 0.5f) { first_element += 4; }
-                    startingPerlin += 1.573576868f;
-                }
-
-                if (first_element < GlobalData.order.Length)
-                {
-                    first_element_decided = true;
-                }
-
-            }
-
-            bool second_element_decided = false;
-
-            while (!second_element_decided)
-            {
-                second_element = 0;
-                float aux2;
-
-                aux2 = (Mathf.Clamp(Mathf.PerlinNoise(startingPerlin, GlobalData.boardSeed), 0f, 1f));
-                if (aux2 > 0.5f) { second_element += 1; }
-                startingPerlin += 1.573576868f;
-                aux2 = (Mathf.Clamp(Mathf.PerlinNoise(startingPerlin, GlobalData.boardSeed), 0f, 1f));
-                if (aux2 > 0.5f) { second_element += 2; }
-                startingPerlin += 1.573576868f;
-
-                if (GlobalData.activeAgents > 4)
-                {
-                    aux2 = (Mathf.Clamp(Mathf.PerlinNoise(startingPerlin, GlobalData.boardSeed), 0f, 1f));
-                    if (aux2 > 0.5f) { second_element += 4; }
-                    startingPerlin += 1.573576868f;
-                }
-
-                if (second_element < GlobalData.order.Length)
-                {
-                    second_element_decided = true;
-                }
-            }
+            if (GlobalData.activeAgents <= 4) { second_element = (int)Hacks.BinaryPerlin(0, GlobalData.activeAgents - 1, 2, 4650.3753578f + startingPerlin, GlobalData.boardSeed); }
+            else { second_element = second_element = (int)Hacks.BinaryPerlin(0, GlobalData.activeAgents - 1, 3, 4650.3753578f + startingPerlin, GlobalData.boardSeed); }
+            startingPerlin += 2.5662845f;
 
             Debug.Log(first_element + "//" + second_element);
 

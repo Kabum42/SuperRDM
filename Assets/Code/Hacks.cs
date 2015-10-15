@@ -25,6 +25,29 @@ public static class Hacks {
         s.color = new Color(s.color.r, s.color.g, s.color.b, a);
     }
 
+    // BINARY PERLIN
+    public static int BinaryPerlin(int bits, float seedX, float seedY)
+    {
+        int result = 0;
+        float aux;
+
+        for (int i = 1; i <= bits; i++)
+        {
+            aux = (Mathf.Clamp(Mathf.PerlinNoise(seedX, seedY), 0f, 1f));
+            seedX += 1.573576868f;
+            if (aux > 0.5f) { result += (int) Mathf.Pow(2, i-1); }
+        }
+
+        return result;
+    }
+
+    public static float BinaryPerlin(float min, float max, int bits, float seedX, float seedY)
+    {
+        float result = min + ((float)Hacks.BinaryPerlin(bits, seedX, seedY)) / (Mathf.Pow(2, bits) -1) * (max - min);
+
+        return result;
+    }
+
     // XBOX CONTROLLER
     public static bool ControllerAnyConnected()
     {
