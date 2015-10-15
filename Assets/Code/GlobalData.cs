@@ -15,7 +15,7 @@ public static class GlobalData {
     public static int activeAgents = 0;
     public static Color color0 = new Color(1f, 0.62f, 0.62f);
     public static Color color1 = new Color(0.62f, 1f, 0.62f);
-    public static Color color2 = new Color(0.62f, 0.62f, 1f);
+    public static Color color2 = new Color(0.25f, 0.5f, 1f);
     public static Color color3 = new Color(0.62f, 1f, 1f);
     public static Color color4 = new Color(1f, 0.62f, 1f);
     public static Color color5 = new Color(1f, 1f, 0.62f);

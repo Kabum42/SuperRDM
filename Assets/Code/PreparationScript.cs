@@ -246,6 +246,7 @@ public class PreparationScript : MonoBehaviour {
 
         if (Network.player.ToString() == target.ToString())
         {
+            menuBack.Play();
             Network.Disconnect();
         }
 
@@ -390,6 +391,7 @@ public class PreparationScript : MonoBehaviour {
             {
                 phase = 7;
                 transition = 0f;
+                menuOk.Play();
             }
 
             if (transition < 1f)
@@ -641,6 +643,7 @@ public class PreparationScript : MonoBehaviour {
                     {
                         if (selectables[i].controller == "You")
                         {
+                            menuBack.Play();
                             if (GlobalData.online) { Network.Disconnect(); }
                             Application.LoadLevel("Menu");
                         }

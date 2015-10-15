@@ -178,20 +178,76 @@ public class WorldScript : MonoBehaviour {
 
         float startingPerlin = 0.2347234747f;
 
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < (GlobalData.activeAgents*5); i++)
         {
             // SWAPS
-            //int first_element = Random.Range(0, GlobalData.order.Length);
-            int first_element = (int) (Mathf.PerlinNoise(startingPerlin, GlobalData.boardSeed) * GlobalData.order.Length);
-            startingPerlin += 1.233427424f;
-            int second_element = (int) (Mathf.PerlinNoise(startingPerlin, GlobalData.boardSeed) * GlobalData.order.Length);
-            startingPerlin += 1.233427424f;
+            int first_element = 0;
+            int second_element = 0;
+
+            bool first_element_decided = false;
+
+            while (!first_element_decided)
+            {
+                first_element = 0;
+                float aux2;
+
+                aux2 = (Mathf.Clamp(Mathf.PerlinNoise(startingPerlin, GlobalData.boardSeed), 0f, 1f));
+                if (aux2 > 0.5f) { first_element += 1; }
+                startingPerlin += 1.573576868f;
+                aux2 = (Mathf.Clamp(Mathf.PerlinNoise(startingPerlin, GlobalData.boardSeed), 0f, 1f));
+                if (aux2 > 0.5f) { first_element += 2; }
+                startingPerlin += 1.573576868f;
+
+                if (GlobalData.activeAgents > 4)
+                {
+                    aux2 = (Mathf.Clamp(Mathf.PerlinNoise(startingPerlin, GlobalData.boardSeed), 0f, 1f));
+                    if (aux2 > 0.5f) { first_element += 4; }
+                    startingPerlin += 1.573576868f;
+                }
+
+                if (first_element < GlobalData.order.Length)
+                {
+                    first_element_decided = true;
+                }
+
+            }
+
+            bool second_element_decided = false;
+
+            while (!second_element_decided)
+            {
+                second_element = 0;
+                float aux2;
+
+                aux2 = (Mathf.Clamp(Mathf.PerlinNoise(startingPerlin, GlobalData.boardSeed), 0f, 1f));
+                if (aux2 > 0.5f) { second_element += 1; }
+                startingPerlin += 1.573576868f;
+                aux2 = (Mathf.Clamp(Mathf.PerlinNoise(startingPerlin, GlobalData.boardSeed), 0f, 1f));
+                if (aux2 > 0.5f) { second_element += 2; }
+                startingPerlin += 1.573576868f;
+
+                if (GlobalData.activeAgents > 4)
+                {
+                    aux2 = (Mathf.Clamp(Mathf.PerlinNoise(startingPerlin, GlobalData.boardSeed), 0f, 1f));
+                    if (aux2 > 0.5f) { second_element += 4; }
+                    startingPerlin += 1.573576868f;
+                }
+
+                if (second_element < GlobalData.order.Length)
+                {
+                    second_element_decided = true;
+                }
+            }
+
+            Debug.Log(first_element + "//" + second_element);
+
             int aux = GlobalData.order[first_element];
             GlobalData.order[first_element] = GlobalData.order[second_element];
             GlobalData.order[second_element] = aux;
+            
         }
 
-        GlobalData.currentAgentTurn = (int)(Mathf.PerlinNoise(startingPerlin, GlobalData.boardSeed) * GlobalData.order.Length);
+        GlobalData.currentAgentTurn = (int)(Mathf.Clamp(Mathf.PerlinNoise(startingPerlin, GlobalData.boardSeed), 0f, 1f) * (GlobalData.order.Length));
         Debug.Log(GlobalData.currentAgentTurn);
 
     }
@@ -589,6 +645,7 @@ public class WorldScript : MonoBehaviour {
         b.root = Instantiate(Resources.Load("Prefabs/BoardCell")) as GameObject;
         b.ring = 4;
         b.changeBiome(Biome.Sanctuary);
+        b.root.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("BoardCells/" + GlobalData.biomeNames[(int)Biome.Sanctuary] + "_" +(agent+1).ToString("00"));
         b.root.GetComponent<SpriteRenderer>().color = GlobalData.colorCharacters[agent];
         b.root.transform.parent = board.transform;
         b.root.name = "Cell_" + 4 + "_" + num;
@@ -650,11 +707,11 @@ public class WorldScript : MonoBehaviour {
         // 2-3 PLAYERS : 1 MOUNTAIN
         // 4-5 PLAYERS : 1-2 MOUNTAINS
         // 6 PLAYERS : 1-3 MOUNTAINS
-        goalMountains = 1 + (int) Mathf.Floor((Mathf.PerlinNoise(0.1f, GlobalData.boardSeed) * (GlobalData.activeAgents / 2 )));
+        goalMountains = 1 + (int) Mathf.Floor((Mathf.Clamp(Mathf.PerlinNoise(0.1f, GlobalData.boardSeed), 0f, 1f) * (GlobalData.activeAgents / 2 )));
         // 2-4 LAKES
-        goalLakes = 2 + (int)Mathf.Floor((Mathf.PerlinNoise(3.1f, GlobalData.boardSeed) * 3f));
+        goalLakes = 2 + (int)Mathf.Floor((Mathf.Clamp(Mathf.PerlinNoise(3.1f, GlobalData.boardSeed), 0f, 1f) * 3f));
         // 5-6 SWAMPS
-        goalSwamps = 5 + (int)Mathf.Floor((Mathf.PerlinNoise(6.1f, GlobalData.boardSeed) * 2f));
+        goalSwamps = 5 + (int)Mathf.Floor((Mathf.Clamp(Mathf.PerlinNoise(6.1f, GlobalData.boardSeed), 0f, 1f) * 2f));
 
         // RINGS
         for (int i = 0; i <= numRings; i++)
@@ -669,7 +726,7 @@ public class WorldScript : MonoBehaviour {
                 while (currentMountains < goalMountains)
                 {
 
-                    int target = 1 + (int)Mathf.Floor((Mathf.PerlinNoise(startingX, GlobalData.boardSeed) * 6f));
+                    int target = 1 + (int)Mathf.Floor((Mathf.Clamp(Mathf.PerlinNoise(startingX, GlobalData.boardSeed), 0f, 1f) * 6f));
                     if (boardCells[target].biome == Biome.Desert)
                     {
                         boardCells[target].changeBiome(Biome.Mountain);
@@ -690,7 +747,7 @@ public class WorldScript : MonoBehaviour {
                 while (currentLakes < goalLakes)
                 {
 
-                    int target = 7 + (int)Mathf.Floor((Mathf.PerlinNoise(startingX, GlobalData.boardSeed) * 12f));
+                    int target = 7 + (int)Mathf.Floor((Mathf.Clamp(Mathf.PerlinNoise(startingX, GlobalData.boardSeed), 0f, 1f) * 12f));
                     if (boardCells[target].biome == Biome.Forest)
                     {
                         boardCells[target].changeBiome(Biome.Lake);
