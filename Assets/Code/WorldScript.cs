@@ -25,6 +25,7 @@ public class WorldScript : MonoBehaviour {
     private bool usedDijkstra = false;
     private List<BoardCell> unvisited;
     private int[] distances;
+    private List<List<int>> candidates;
 
     private float lastDPadX = 0f;
     private float lastDPadY = 0f;
@@ -95,6 +96,7 @@ public class WorldScript : MonoBehaviour {
         {
             BoardCell b = new BoardCell();
             b.root = Instantiate(Resources.Load("Prefabs/BoardCell")) as GameObject;
+            b.text = b.root.transform.FindChild("Text").gameObject;
             boardCells[i] = b;
             b.positionInArray = i;
         }
@@ -166,7 +168,7 @@ public class WorldScript : MonoBehaviour {
     }
 
 
-    void RandomizeTurns()
+    private void RandomizeTurns()
     {
         GlobalData.order = new int[GlobalData.activeAgents];
 
@@ -184,16 +186,6 @@ public class WorldScript : MonoBehaviour {
             int first_element = 0;
             int second_element = 0;
 
-            /*
-            if (GlobalData.activeAgents <= 4) { first_element = (int)(((float)Hacks.BinaryPerlin(2, 0.23425f +startingPerlin, GlobalData.boardSeed)) / 3f * (GlobalData.activeAgents - 1)); }
-            else { first_element = (int)(((float)Hacks.BinaryPerlin(3, 0.23425f +startingPerlin, GlobalData.boardSeed)) / 7f * (GlobalData.activeAgents - 1)); }
-            startingPerlin += 2.5662845f;
-
-            if (GlobalData.activeAgents <= 4) { second_element = (int)(((float)Hacks.BinaryPerlin(2, 4650.3753578f +startingPerlin, GlobalData.boardSeed)) / 3f * (GlobalData.activeAgents - 1)); }
-            else { second_element = (int)(((float)Hacks.BinaryPerlin(3, 4650.3753578f +startingPerlin, GlobalData.boardSeed)) / 7f * (GlobalData.activeAgents - 1)); }
-            startingPerlin += 2.5662845f;
-            */
-
             if (GlobalData.activeAgents <= 4) { first_element = (int) Hacks.BinaryPerlin(0, GlobalData.activeAgents -1, 2, 0.23425f + startingPerlin, GlobalData.boardSeed); }
             else { first_element = (int)Hacks.BinaryPerlin(0, GlobalData.activeAgents - 1, 3, 0.23425f + startingPerlin, GlobalData.boardSeed); }
             startingPerlin += 2.5662845f;
@@ -202,7 +194,7 @@ public class WorldScript : MonoBehaviour {
             else { second_element = second_element = (int)Hacks.BinaryPerlin(0, GlobalData.activeAgents - 1, 3, 4650.3753578f + startingPerlin, GlobalData.boardSeed); }
             startingPerlin += 2.5662845f;
 
-            Debug.Log(first_element + "//" + second_element);
+            //Debug.Log(first_element + "//" + second_element);
 
             int aux = GlobalData.order[first_element];
             GlobalData.order[first_element] = GlobalData.order[second_element];
@@ -215,7 +207,7 @@ public class WorldScript : MonoBehaviour {
 
     }
 
-    void NextTurn()
+    private void NextTurn()
     {
 
         int auxOrder = 0;
@@ -231,7 +223,7 @@ public class WorldScript : MonoBehaviour {
 
     }
 
-    void Dijkstra()
+    private void Dijkstra()
     {
         usedDijkstra = true;
 
@@ -322,13 +314,155 @@ public class WorldScript : MonoBehaviour {
         
     }
 
+    private List<int> DijkstraTarget(int numCell, MainCharacter agent)
+    {
+
+        candidates = new List<List<int>>();
+
+        List<int> list = new List<int>();
+        list.Add(GlobalData.agents[GlobalData.myAgent].currentCell);
+
+        visitCellTarget(list, boardCells[GlobalData.agents[GlobalData.myAgent].currentCell], numCell, 10);
+
+        List<int> bestList = null;
+        int bestSteps = int.MaxValue;
+
+        //Debug.Log("CANDIDATES: " + candidates.Count);
+
+        for (int i = 0; i < candidates.Count; i++)
+        {
+            int currentSteps = 0;
+            for (int j = 0; j < candidates[i].Count; j++)
+            {
+                currentSteps += GlobalData.biomeCosts[(int)boardCells[candidates[i][j]].biome];
+            }
+            if (currentSteps < bestSteps)
+            {
+                bestSteps = currentSteps;
+                bestList = candidates[i];
+            }
+        }
+
+        return bestList;
+    }
+
+    private void visitCellTarget(List<int> list, BoardCell b, int numTarget, int currentSteps)
+    {
+
+        int auxSteps = currentSteps;
+
+        // NORTH
+        if (b.northWest != null)
+        {
+            if (GlobalData.biomeCosts[(int)b.northWest.biome] <= currentSteps && !list.Contains(b.northWest.positionInArray))
+            {
+                List<int> newList = copyList(list);
+                newList.Add(b.northWest.positionInArray);
+                auxSteps -= GlobalData.biomeCosts[(int)b.northWest.biome];
+                if (b.northWest.positionInArray == numTarget) { candidates.Add(newList); }
+                visitCellTarget(newList, b.northWest, numTarget, auxSteps);
+            }
+        }
+
+        if (b.north != null)
+        {
+            if (GlobalData.biomeCosts[(int)b.north.biome] <= currentSteps && !list.Contains(b.north.positionInArray))
+            {
+                List<int> newList = copyList(list);
+                newList.Add(b.north.positionInArray);
+                auxSteps -= GlobalData.biomeCosts[(int)b.north.biome];
+                if (b.north.positionInArray == numTarget) { candidates.Add(newList); }
+                visitCellTarget(newList, b.north, numTarget, auxSteps);
+            }
+        }
+
+        if (b.northEast != null)
+        {
+            if (GlobalData.biomeCosts[(int)b.northEast.biome] <= currentSteps && !list.Contains(b.northEast.positionInArray))
+            {
+                List<int> newList = copyList(list);
+                newList.Add(b.northEast.positionInArray);
+                auxSteps -= GlobalData.biomeCosts[(int)b.northEast.biome];
+                if (b.northEast.positionInArray == numTarget) { candidates.Add(newList); }
+                visitCellTarget(newList, b.northEast, numTarget, auxSteps);
+            }
+        }
+
+        // SOUTH
+        if (b.southWest != null)
+        {
+            if (GlobalData.biomeCosts[(int)b.southWest.biome] <= currentSteps && !list.Contains(b.southWest.positionInArray))
+            {
+                List<int> newList = copyList(list);
+                newList.Add(b.southWest.positionInArray);
+                auxSteps -= GlobalData.biomeCosts[(int)b.southWest.biome];
+                if (b.southWest.positionInArray == numTarget) { candidates.Add(newList); }
+                visitCellTarget(newList, b.southWest, numTarget, auxSteps);
+            }
+        }
+
+        if (b.south != null)
+        {
+            if (GlobalData.biomeCosts[(int)b.south.biome] <= currentSteps && !list.Contains(b.south.positionInArray))
+            {
+                List<int> newList = copyList(list);
+                newList.Add(b.south.positionInArray);
+                auxSteps -= GlobalData.biomeCosts[(int)b.south.biome];
+                if (b.south.positionInArray == numTarget) { candidates.Add(newList); }
+                visitCellTarget(newList, b.south, numTarget, auxSteps);
+            }
+        }
+
+        if (b.southEast != null)
+        {
+            if (GlobalData.biomeCosts[(int)b.southEast.biome] <= currentSteps && !list.Contains(b.southEast.positionInArray))
+            {
+                List<int> newList = copyList(list);
+                newList.Add(b.southEast.positionInArray);
+                auxSteps -= GlobalData.biomeCosts[(int)b.southEast.biome];
+                if (b.southEast.positionInArray == numTarget) { candidates.Add(newList); }
+                visitCellTarget(newList, b.southEast, numTarget, auxSteps);
+            }
+        }
+
+
+        // ESTO LIBERA LA MEMORIA DE ESA VARIABLE
+        list = null;
+
+    }
+
+    private List<int> copyList(List<int> source)
+    {
+        List<int> newList = new List<int>();
+
+        for (int i = 0; i < source.Count; i++)
+        {
+            newList.Add(source[i]);
+        }
+
+        return newList;
+    }
+
     // Update is called once per frame
     void Update()
     {
 
         if (GlobalData.currentAgentTurn == GlobalData.myAgent && !usedDijkstra)
         {
-            Dijkstra();
+            //Dijkstra();
+            /*
+            List<int> meh = DijkstraTarget(37, GlobalData.agents[GlobalData.myAgent]);
+
+            if (meh != null)
+            {
+                
+                for (int i = 0; i < meh.Count; i++)
+                {
+                    boardCells[meh[i]].root.GetComponent<SpriteRenderer>().color = new Color(0.5f - ((float)i / (float)meh.Count) * 0.5f, 0.5f - ((float)i / (float)meh.Count) * 0.5f, 0.5f - ((float)i / (float)meh.Count) * 0.5f, 1f);
+                }
+                
+            }
+            */
         }
 
         if (Input.GetKey(KeyCode.Return))
@@ -595,6 +729,25 @@ public class WorldScript : MonoBehaviour {
             if (selected != null)
             {
                 selectedSprite.transform.position = new Vector3(selected.root.transform.position.x, selected.root.transform.position.y, selectedSprite.transform.position.z);
+
+                resetBoardBrightness();
+
+                List<int> meh = DijkstraTarget(selected.positionInArray, GlobalData.agents[GlobalData.myAgent]);
+
+                if (meh != null)
+                {
+
+                    int currentSteps = 10;
+
+                    for (int i = 1; i < meh.Count; i++)
+                    {
+                        boardCells[meh[i]].root.GetComponent<SpriteRenderer>().color = new Color(0.5f - ((float)i / (float)meh.Count) * 0.5f, 0.5f - ((float)i / (float)meh.Count) * 0.5f, 0.5f - ((float)i / (float)meh.Count) * 0.5f, 1f);
+                        currentSteps -= GlobalData.biomeCosts[(int)boardCells[meh[i]].biome];
+                        boardCells[meh[i]].text.GetComponent<TextMesh>().text = ""+currentSteps;
+                        boardCells[meh[i]].text.SetActive(true);
+                    }
+
+                }
             }
 
         }
@@ -606,6 +759,7 @@ public class WorldScript : MonoBehaviour {
     {
         BoardCell b = boardCells[currentCell];
         b.root = Instantiate(Resources.Load("Prefabs/BoardCell")) as GameObject;
+        b.text = b.root.transform.FindChild("Text").gameObject;
         b.ring = 4;
         b.changeBiome(Biome.Sanctuary);
         b.root.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("BoardCells/" + GlobalData.biomeNames[(int)Biome.Sanctuary] + "_" +(agent+1).ToString("00"));
@@ -1061,6 +1215,7 @@ public class WorldScript : MonoBehaviour {
     private void resetBoardBrightness() {
         for (int i = 0; i < boardCells.Length; i++) {
             boardCells[i].root.GetComponent<SpriteRenderer>().color = new Color(boardCells[i].root.GetComponent<SpriteRenderer>().color.r / boardCells[i].root.GetComponent<SpriteRenderer>().color.r, boardCells[i].root.GetComponent<SpriteRenderer>().color.g / boardCells[i].root.GetComponent<SpriteRenderer>().color.g, boardCells[i].root.GetComponent<SpriteRenderer>().color.b / boardCells[i].root.GetComponent<SpriteRenderer>().color.b, 1f);
+            boardCells[i].text.SetActive(false);
         }
     }
 

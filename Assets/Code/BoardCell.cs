@@ -5,6 +5,7 @@ public class BoardCell : System.IEquatable<BoardCell> {
 
     public Biome biome;
     public GameObject root;
+    public GameObject text;
     public int positionInArray = 0;
 
     public int ring = 0;
@@ -20,7 +21,6 @@ public class BoardCell : System.IEquatable<BoardCell> {
     public BoardCell()
     {
 
-       
     }
 
     public void randomBiome()

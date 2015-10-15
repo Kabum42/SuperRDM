@@ -73,7 +73,9 @@ public static class GlobalData {
         biomeCosts[(int)Biome.Harbour3] = 1;
 
         Language.Start();
-        Language.currentLanguage = Language.Spanish;
+        //Language.currentLanguage = Language.Spanish;
+
+        
 
 	}
 	
