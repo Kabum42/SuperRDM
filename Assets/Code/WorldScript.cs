@@ -356,6 +356,7 @@ public class WorldScript : MonoBehaviour {
         {
             if (GlobalData.biomeCosts[(int)b.northWest.biome] <= currentSteps && !list.Contains(b.northWest.positionInArray))
             {
+                auxSteps = currentSteps;
                 List<int> newList = copyList(list);
                 newList.Add(b.northWest.positionInArray);
                 auxSteps -= GlobalData.biomeCosts[(int)b.northWest.biome];
@@ -368,6 +369,7 @@ public class WorldScript : MonoBehaviour {
         {
             if (GlobalData.biomeCosts[(int)b.north.biome] <= currentSteps && !list.Contains(b.north.positionInArray))
             {
+                auxSteps = currentSteps;
                 List<int> newList = copyList(list);
                 newList.Add(b.north.positionInArray);
                 auxSteps -= GlobalData.biomeCosts[(int)b.north.biome];
@@ -380,6 +382,7 @@ public class WorldScript : MonoBehaviour {
         {
             if (GlobalData.biomeCosts[(int)b.northEast.biome] <= currentSteps && !list.Contains(b.northEast.positionInArray))
             {
+                auxSteps = currentSteps;
                 List<int> newList = copyList(list);
                 newList.Add(b.northEast.positionInArray);
                 auxSteps -= GlobalData.biomeCosts[(int)b.northEast.biome];
@@ -393,6 +396,7 @@ public class WorldScript : MonoBehaviour {
         {
             if (GlobalData.biomeCosts[(int)b.southWest.biome] <= currentSteps && !list.Contains(b.southWest.positionInArray))
             {
+                auxSteps = currentSteps;
                 List<int> newList = copyList(list);
                 newList.Add(b.southWest.positionInArray);
                 auxSteps -= GlobalData.biomeCosts[(int)b.southWest.biome];
@@ -405,6 +409,7 @@ public class WorldScript : MonoBehaviour {
         {
             if (GlobalData.biomeCosts[(int)b.south.biome] <= currentSteps && !list.Contains(b.south.positionInArray))
             {
+                auxSteps = currentSteps;
                 List<int> newList = copyList(list);
                 newList.Add(b.south.positionInArray);
                 auxSteps -= GlobalData.biomeCosts[(int)b.south.biome];
@@ -417,6 +422,7 @@ public class WorldScript : MonoBehaviour {
         {
             if (GlobalData.biomeCosts[(int)b.southEast.biome] <= currentSteps && !list.Contains(b.southEast.positionInArray))
             {
+                auxSteps = currentSteps;
                 List<int> newList = copyList(list);
                 newList.Add(b.southEast.positionInArray);
                 auxSteps -= GlobalData.biomeCosts[(int)b.southEast.biome];
@@ -758,8 +764,6 @@ public class WorldScript : MonoBehaviour {
     void AddSanctuary(int agent, int num)
     {
         BoardCell b = boardCells[currentCell];
-        b.root = Instantiate(Resources.Load("Prefabs/BoardCell")) as GameObject;
-        b.text = b.root.transform.FindChild("Text").gameObject;
         b.ring = 4;
         b.changeBiome(Biome.Sanctuary);
         b.root.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("BoardCells/" + GlobalData.biomeNames[(int)Biome.Sanctuary] + "_" +(agent+1).ToString("00"));
