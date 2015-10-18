@@ -98,6 +98,7 @@ public class WorldScript : MonoBehaviour {
             BoardCell b = new BoardCell();
             b.root = Instantiate(Resources.Load("Prefabs/BoardCell")) as GameObject;
             b.text = b.root.transform.FindChild("Text").gameObject;
+            b.text.SetActive(false);
             boardCells[i] = b;
             b.positionInArray = i;
         }
@@ -132,20 +133,17 @@ public class WorldScript : MonoBehaviour {
     }
 
     [RPC]
-    void moveRequest(NetworkPlayer player, int i)
+    void moveRequestRPC(NetworkPlayer player, int i)
     {
 
         if (GlobalData.agents[GlobalData.currentAgentTurn].player == player) {
 
-            List<int> path = DijkstraTarget(boardCells[GlobalData.agents[GlobalData.currentAgentTurn].currentCell].positionInArray, GlobalData.agents[GlobalData.currentAgentTurn]);
+            List<int> path = DijkstraTarget(i, GlobalData.agents[GlobalData.currentAgentTurn]);
 
             if (path != null)
             {
                 // HA SIDO UN REQUEST VALIDO Y LEGAL
-                GetComponent<NetworkView>().RPC("moveAgent", RPCMode.All, GlobalData.currentAgentTurn, path);
-                NextTurn();
-                updateBoard();
-
+                GetComponent<NetworkView>().RPC("moveAgentRPC", RPCMode.All, GlobalData.currentAgentTurn, path[path.Count-1]);
             }
 
         }
@@ -153,11 +151,53 @@ public class WorldScript : MonoBehaviour {
     }
 
     [RPC]
-    void moveAgent(int agent, List<int> path)
+    void moveAgentRPC(int agent, int  endOfPath)
     {
+        moveAgent(agent, endOfPath);
+    }
+
+    void moveAgent(int agent, int endOfPath) {
+
+        List<int> path = DijkstraTarget(endOfPath, GlobalData.agents[agent]);
+        // ESTO LUEGO SE CAMBIA OBVIAMENTE
         GlobalData.agents[agent].currentCell = path[path.Count-1];
     }
 
+    [RPC]
+    void nextTurnRequestRPC(NetworkPlayer player)
+    {
+
+        if (GlobalData.agents[GlobalData.currentAgentTurn].player == player) {
+
+            GetComponent<NetworkView>().RPC("nextTurnRPC", RPCMode.All);
+
+        }
+
+    }
+
+    [RPC]
+    void nextTurnRPC()
+    {
+        nextTurn();
+    }
+
+    void nextTurn()
+    {
+
+        int auxOrder = 0;
+        for (int i = 0; i < GlobalData.activeAgents; i++)
+        {
+            if (GlobalData.currentAgentTurn == GlobalData.order[i]) { auxOrder = i; }
+        }
+        auxOrder++;
+        if (auxOrder > GlobalData.activeAgents - 1) { auxOrder = 0; }
+        GlobalData.currentAgentTurn = GlobalData.order[auxOrder];
+        usedDijkstra = false;
+        resetBoardBrightness();
+
+    }
+
+    /*
     void updateBoard()
     {
         if (GlobalData.online)
@@ -181,7 +221,7 @@ public class WorldScript : MonoBehaviour {
     {
         GlobalData.agents[position].currentCell = currentCell;
     }
-
+    */
 
     private void RandomizeTurns()
     {
@@ -219,22 +259,6 @@ public class WorldScript : MonoBehaviour {
 
         GlobalData.currentAgentTurn = (int)(Mathf.Clamp(Mathf.PerlinNoise(startingPerlin, GlobalData.boardSeed), 0f, 1f) * (GlobalData.order.Length));
         Debug.Log(GlobalData.currentAgentTurn);
-
-    }
-
-    private void NextTurn()
-    {
-
-        int auxOrder = 0;
-        for (int i = 0; i < GlobalData.activeAgents; i++)
-        {
-            if (GlobalData.currentAgentTurn == GlobalData.order[i]) { auxOrder = i; }
-        }
-        auxOrder++;
-        if (auxOrder > GlobalData.activeAgents - 1) { auxOrder = 0; }
-        GlobalData.currentAgentTurn = GlobalData.order[auxOrder];
-        usedDijkstra = false;
-        resetBoardBrightness();
 
     }
 
@@ -346,9 +370,9 @@ public class WorldScript : MonoBehaviour {
         candidates = new List<List<int>>();
 
         List<int> list = new List<int>();
-        list.Add(GlobalData.agents[GlobalData.myAgent].currentCell);
+        list.Add(agent.currentCell);
 
-        visitCellTarget(list, boardCells[GlobalData.agents[GlobalData.myAgent].currentCell], numCell, GlobalData.agents[GlobalData.myAgent].getCurrentSteps());
+        visitCellTarget(list, boardCells[agent.currentCell], numCell, agent.getCurrentSteps());
 
         List<int> bestList = null;
         int bestSteps = int.MaxValue;
@@ -537,8 +561,8 @@ public class WorldScript : MonoBehaviour {
 
         if (GlobalData.agents[GlobalData.currentAgentTurn].IA && (int.Parse(Network.player.ToString()) == 0 || !GlobalData.online))
         {
-            NextTurn();
-            updateBoard();
+            if (GlobalData.online) { GetComponent<NetworkView>().RPC("nextTurnRPC", RPCMode.All); }
+            else { nextTurn(); }
         }
 
         if (phase == 0)
@@ -727,20 +751,30 @@ public class WorldScript : MonoBehaviour {
                             if (int.Parse(Network.player.ToString()) == 0)
                             {
                                 // ES EL SERVER
-                                GlobalData.agents[GlobalData.myAgent].currentCell = i;
-                                NextTurn();
-                                updateBoard();
+                                List<int> path = DijkstraTarget(i, GlobalData.agents[GlobalData.currentAgentTurn]);
+
+                                if (path != null) {
+                                    GetComponent<NetworkView>().RPC("moveAgentRPC", RPCMode.All, GlobalData.myAgent, path[path.Count-1]);
+                                    GetComponent<NetworkView>().RPC("nextTurnRPC", RPCMode.All);
+                                }
+
                             }
                             else
                             {
                                 // ES UN CLIENTE
-                                GetComponent<NetworkView>().RPC("moveRequest", RPCMode.Server, Network.player, i);
+                                GetComponent<NetworkView>().RPC("moveRequestRPC", RPCMode.Server, Network.player, i);
+                                GetComponent<NetworkView>().RPC("nextTurnRequestRPC", RPCMode.Server, Network.player);
                             }
                         }
                         else
                         {
-                            GlobalData.agents[GlobalData.myAgent].currentCell = i;
-                            NextTurn();
+                            List<int> path = DijkstraTarget(i, GlobalData.agents[GlobalData.currentAgentTurn]);
+
+                            if (path != null) {
+                                moveAgent(GlobalData.myAgent, path[path.Count-1]);
+                                nextTurn();
+                            }
+                            
                         }
                     }
                 }
