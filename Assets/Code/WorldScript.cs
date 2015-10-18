@@ -26,6 +26,7 @@ public class WorldScript : MonoBehaviour {
     private List<BoardCell> unvisited;
     private int[] distances;
     private List<List<int>> candidates;
+    private List<int> reachables;
 
     private float lastDPadX = 0f;
     private float lastDPadY = 0f;
@@ -134,13 +135,27 @@ public class WorldScript : MonoBehaviour {
     void moveRequest(NetworkPlayer player, int i)
     {
 
-        if (GlobalData.agents[GlobalData.currentAgentTurn].player == player && boardCells[GlobalData.agents[GlobalData.currentAgentTurn].currentCell].isConnected(boardCells[i]))
-        {
-            GlobalData.agents[GlobalData.currentAgentTurn].currentCell = i;
-            NextTurn();
-            updateBoard();
+        if (GlobalData.agents[GlobalData.currentAgentTurn].player == player) {
+
+            List<int> path = DijkstraTarget(boardCells[GlobalData.agents[GlobalData.currentAgentTurn].currentCell].positionInArray, GlobalData.agents[GlobalData.currentAgentTurn]);
+
+            if (path != null)
+            {
+                // HA SIDO UN REQUEST VALIDO Y LEGAL
+                GetComponent<NetworkView>().RPC("moveAgent", RPCMode.All, GlobalData.currentAgentTurn, path);
+                NextTurn();
+                updateBoard();
+
+            }
+
         }
 
+    }
+
+    [RPC]
+    void moveAgent(int agent, List<int> path)
+    {
+        GlobalData.agents[agent].currentCell = path[path.Count-1];
     }
 
     void updateBoard()
@@ -223,7 +238,7 @@ public class WorldScript : MonoBehaviour {
 
     }
 
-    private void Dijkstra()
+    private List<int> Dijkstra()
     {
         usedDijkstra = true;
 
@@ -239,31 +254,42 @@ public class WorldScript : MonoBehaviour {
 
         visitCell(boardCells[GlobalData.agents[GlobalData.myAgent].currentCell]);
 
+        List <int> reachables = new List<int>();
+
         for (int i = 0; i < boardCells.Length; i++)
         {
-            if (distances[i] > GlobalData.agents[GlobalData.myAgent].getCurrentSteps())
+            float r = 0.7f;
+            float g = 0.7f;
+            float b = 0.7f;
+            if (distances[i] <= GlobalData.agents[GlobalData.myAgent].getCurrentSteps())
             {
-                float r = (boardCells[i].root.GetComponent<SpriteRenderer>().color.r / boardCells[i].root.GetComponent<SpriteRenderer>().color.r) * 0.7f;
-                float g = (boardCells[i].root.GetComponent<SpriteRenderer>().color.g / boardCells[i].root.GetComponent<SpriteRenderer>().color.g) * 0.7f;
-                float b = (boardCells[i].root.GetComponent<SpriteRenderer>().color.b / boardCells[i].root.GetComponent<SpriteRenderer>().color.b) * 0.7f;
-                boardCells[i].root.GetComponent<SpriteRenderer>().color = new Color(r, g, b, 1f);
+                r = 1f;
+                g = 1f;
+                b = 1f;
+                reachables.Add(boardCells[i].positionInArray);
             }
+            boardCells[i].root.GetComponent<SpriteRenderer>().color = new Color(r, g, b, 1f);
         }
+
+        return reachables;
     }
 
     private void visitCell(BoardCell b)
     {
 
-        unvisited.Remove(b);
+        if (unvisited.Contains(b)) {
+            unvisited.Remove(b);
+        }
+        
 
         // CHANGE DISTANCES
-        if (b.northWest != null && distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.northWest.biome] < distances[b.northWest.positionInArray]) { distances[b.northWest.positionInArray] = distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.northWest.biome]; }
-        if (b.north != null && distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.north.biome] < distances[b.north.positionInArray]) { distances[b.north.positionInArray] = distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.north.biome]; }
-        if (b.northEast != null && distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.northEast.biome] < distances[b.northEast.positionInArray]) { distances[b.northEast.positionInArray] = distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.northEast.biome]; }
+        if (b.northWest != null && distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.northWest.biome] < distances[b.northWest.positionInArray]) { distances[b.northWest.positionInArray] = distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.northWest.biome]; visitCell(b.northWest);  }
+        if (b.north != null && distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.north.biome] < distances[b.north.positionInArray]) { distances[b.north.positionInArray] = distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.north.biome]; visitCell(b.north);  }
+        if (b.northEast != null && distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.northEast.biome] < distances[b.northEast.positionInArray]) { distances[b.northEast.positionInArray] = distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.northEast.biome]; visitCell(b.northEast);  }
 
-        if (b.southWest != null && distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.southWest.biome] < distances[b.southWest.positionInArray]) { distances[b.southWest.positionInArray] = distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.southWest.biome]; }
-        if (b.south != null && distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.south.biome] < distances[b.south.positionInArray]) { distances[b.south.positionInArray] = distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.south.biome]; }
-        if (b.southEast != null && distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.southEast.biome] < distances[b.southEast.positionInArray]) { distances[b.southEast.positionInArray] = distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.southEast.biome]; }
+        if (b.southWest != null && distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.southWest.biome] < distances[b.southWest.positionInArray]) { distances[b.southWest.positionInArray] = distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.southWest.biome]; visitCell(b.southWest);  }
+        if (b.south != null && distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.south.biome] < distances[b.south.positionInArray]) { distances[b.south.positionInArray] = distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.south.biome]; visitCell(b.south);  }
+        if (b.southEast != null && distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.southEast.biome] < distances[b.southEast.positionInArray]) { distances[b.southEast.positionInArray] = distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.southEast.biome]; visitCell(b.southEast);  }
         
 
         // VISIT NEIGHBOURS
@@ -322,7 +348,7 @@ public class WorldScript : MonoBehaviour {
         List<int> list = new List<int>();
         list.Add(GlobalData.agents[GlobalData.myAgent].currentCell);
 
-        visitCellTarget(list, boardCells[GlobalData.agents[GlobalData.myAgent].currentCell], numCell, 10);
+        visitCellTarget(list, boardCells[GlobalData.agents[GlobalData.myAgent].currentCell], numCell, GlobalData.agents[GlobalData.myAgent].getCurrentSteps());
 
         List<int> bestList = null;
         int bestSteps = int.MaxValue;
@@ -449,26 +475,15 @@ public class WorldScript : MonoBehaviour {
         return newList;
     }
 
+
+
     // Update is called once per frame
     void Update()
     {
 
         if (GlobalData.currentAgentTurn == GlobalData.myAgent && !usedDijkstra)
         {
-            //Dijkstra();
-            /*
-            List<int> meh = DijkstraTarget(37, GlobalData.agents[GlobalData.myAgent]);
-
-            if (meh != null)
-            {
-                
-                for (int i = 0; i < meh.Count; i++)
-                {
-                    boardCells[meh[i]].root.GetComponent<SpriteRenderer>().color = new Color(0.5f - ((float)i / (float)meh.Count) * 0.5f, 0.5f - ((float)i / (float)meh.Count) * 0.5f, 0.5f - ((float)i / (float)meh.Count) * 0.5f, 1f);
-                }
-                
-            }
-            */
+            reachables = Dijkstra();
         }
 
         if (Input.GetKey(KeyCode.Return))
@@ -704,7 +719,7 @@ public class WorldScript : MonoBehaviour {
                         selected = boardCells[i];
                     }
 
-                    if (GlobalData.currentAgentTurn == GlobalData.myAgent && ClickedOn(boardCells[i].root) && boardCells[GlobalData.agents[GlobalData.myAgent].currentCell].isConnected(boardCells[i]))
+                    if (GlobalData.currentAgentTurn == GlobalData.myAgent && ClickedOn(boardCells[i].root) && reachables.Contains(i))
                     {
                         // MOVE TO THE CELL??
                         if (GlobalData.online)
@@ -735,7 +750,7 @@ public class WorldScript : MonoBehaviour {
             if (selected != null)
             {
                 selectedSprite.transform.position = new Vector3(selected.root.transform.position.x, selected.root.transform.position.y, selectedSprite.transform.position.z);
-
+                /*
                 resetBoardBrightness();
 
                 List<int> meh = DijkstraTarget(selected.positionInArray, GlobalData.agents[GlobalData.myAgent]);
@@ -743,7 +758,7 @@ public class WorldScript : MonoBehaviour {
                 if (meh != null)
                 {
 
-                    int currentSteps = 10;
+                    int currentSteps = GlobalData.agents[GlobalData.myAgent].getCurrentSteps();
 
                     for (int i = 1; i < meh.Count; i++)
                     {
@@ -754,6 +769,7 @@ public class WorldScript : MonoBehaviour {
                     }
 
                 }
+                */
             }
 
         }
