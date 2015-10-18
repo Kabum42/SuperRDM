@@ -45,6 +45,11 @@ public class WorldScript : MonoBehaviour {
     private int currentSwamps = 0;
     private int goalSwamps = 0;
 
+    private int movingAgent = 0;
+    private float movingDelta = 0f;
+    private List<int> movingList = null;
+
+
     // Use this for initialization
     void Start () {
 
@@ -160,7 +165,16 @@ public class WorldScript : MonoBehaviour {
 
         List<int> path = DijkstraTarget(endOfPath, GlobalData.agents[agent]);
         // ESTO LUEGO SE CAMBIA OBVIAMENTE
-        GlobalData.agents[agent].currentCell = path[path.Count-1];
+
+        if (path != null) {
+
+            movingAgent = agent;
+            movingDelta = 0f;
+            movingList = path;
+
+        }
+
+        
     }
 
     [RPC]
@@ -505,7 +519,7 @@ public class WorldScript : MonoBehaviour {
     void Update()
     {
 
-        if (GlobalData.currentAgentTurn == GlobalData.myAgent && !usedDijkstra)
+        if (GlobalData.currentAgentTurn == GlobalData.myAgent && !usedDijkstra && movingList == null)
         {
             reachables = Dijkstra();
         }
@@ -524,6 +538,23 @@ public class WorldScript : MonoBehaviour {
         }
 
         // Place Champions
+        if (movingList != null) {
+
+            movingDelta += Time.deltaTime;
+            float timeToMove = 0.25f;
+
+            int auxPosition =  (int) Mathf.Floor(Mathf.Clamp((movingDelta+timeToMove)*(1f/timeToMove), 0, movingList.Count-1));
+
+            GlobalData.agents[movingAgent].currentCell = movingList[auxPosition];
+
+            if (auxPosition == movingList.Count-1) {
+                movingAgent = -1;
+                movingDelta = 0f;
+                movingList = null;
+            }
+
+        }
+
         for (int i = 0; i < GlobalData.activeAgents; i++)
         {
             GlobalData.agents[i].cellChampion.transform.position = new Vector3(Mathf.Lerp(GlobalData.agents[i].cellChampion.transform.position.x, boardCells[GlobalData.agents[i].currentCell].root.transform.position.x, Time.deltaTime * 10f), Mathf.Lerp(GlobalData.agents[i].cellChampion.transform.position.y, boardCells[GlobalData.agents[i].currentCell].root.transform.position.y, Time.deltaTime * 10f), GlobalData.agents[i].cellChampion.transform.position.z);
@@ -585,7 +616,7 @@ public class WorldScript : MonoBehaviour {
             // TIME TO SELECT YOUR SANCTUARY
             phase = 2;
         }
-        else
+        else if (movingList == null)
         {
 
 
