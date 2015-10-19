@@ -56,6 +56,13 @@ public class WorldScript : MonoBehaviour {
     private bool ribbonAppearing = false;
     private AudioSource ribbonSound;
 
+    private GameObject actionAttack;
+    private GameObject actionHeal;
+    private GameObject actionLook;
+    private GameObject actionSail;
+
+    private float thinkingIA = 1f;
+
 
     // Use this for initialization
     void Start () {
@@ -96,6 +103,15 @@ public class WorldScript : MonoBehaviour {
         ribbonSound.clip = Resources.Load("Music/RibbonSound") as AudioClip;
         ribbonSound.volume = 1f;
         ribbonSound.playOnAwake = false;
+
+        actionAttack = GameObject.Find("Attack");
+        actionAttack.SetActive(false);
+        actionHeal = GameObject.Find("Heal");
+        actionHeal.SetActive(false);
+        actionLook = GameObject.Find("Look");
+        actionLook.SetActive(false);
+        actionSail = GameObject.Find("Sail");
+        actionSail.SetActive(false);
 
         UIAgents = new GameObject[GlobalData.activeAgents];
 
@@ -229,7 +245,6 @@ public class WorldScript : MonoBehaviour {
         if (auxOrder > GlobalData.activeAgents - 1) { auxOrder = 0; }
         GlobalData.currentAgentTurn = GlobalData.order[auxOrder];
         usedDijkstra = false;
-        resetBoardBrightness();
 
     }
 
@@ -310,25 +325,18 @@ public class WorldScript : MonoBehaviour {
             unvisited.Add(boardCells[i]);
         }
 
-        distances[GlobalData.agents[GlobalData.myAgent].currentCell] = 0;
+        distances[GlobalData.agents[GlobalData.currentAgentTurn].currentCell] = 0;
 
-        visitCell(boardCells[GlobalData.agents[GlobalData.myAgent].currentCell]);
+        visitCell(boardCells[GlobalData.agents[GlobalData.currentAgentTurn].currentCell]);
 
         List <int> reachables = new List<int>();
 
         for (int i = 0; i < boardCells.Length; i++)
         {
-            float r = 0.7f;
-            float g = 0.7f;
-            float b = 0.7f;
-            if (distances[i] <= GlobalData.agents[GlobalData.myAgent].getCurrentSteps())
+            if (distances[i] <= GlobalData.agents[GlobalData.currentAgentTurn].getCurrentSteps())
             {
-                r = 1f;
-                g = 1f;
-                b = 1f;
                 reachables.Add(boardCells[i].positionInArray);
             }
-            boardCells[i].root.GetComponent<SpriteRenderer>().color = new Color(r, g, b, 1f);
         }
 
         return reachables;
@@ -571,6 +579,22 @@ public class WorldScript : MonoBehaviour {
             }
         }
 
+        // BRIGHTNESS CELLS
+        if (usedDijkstra) {
+            for (int i = 0; i < boardCells.Length; i++)
+            {
+                if (!reachables.Contains(i)) {
+                    float aux = Mathf.Lerp(boardCells[i].root.GetComponent<SpriteRenderer>().color.r, 0.3f, Time.deltaTime*5f);
+                    boardCells[i].root.GetComponent<SpriteRenderer>().color = new Color(aux, aux, aux, 1f);
+                }
+            }
+        } else {
+            for (int i = 0; i < boardCells.Length; i++)
+            {
+                float aux = Mathf.Lerp(boardCells[i].root.GetComponent<SpriteRenderer>().color.r, 1f, Time.deltaTime*5f);
+                boardCells[i].root.GetComponent<SpriteRenderer>().color = new Color(aux, aux, aux, 1f);
+            }
+        }
         
 
         if (Input.GetKey(KeyCode.Return))
@@ -648,10 +672,27 @@ public class WorldScript : MonoBehaviour {
         }
 
 
-        if (GlobalData.agents[GlobalData.currentAgentTurn].IA && (int.Parse(Network.player.ToString()) == 0 || !GlobalData.online))
+        if (movingList == null && GlobalData.agents[GlobalData.currentAgentTurn].IA && (int.Parse(Network.player.ToString()) == 0 || !GlobalData.online))
         {
-            if (GlobalData.online) { GetComponent<NetworkView>().RPC("nextTurnRPC", RPCMode.All); }
-            else { nextTurn(); }
+            thinkingIA -= Time.deltaTime;
+
+            if (thinkingIA <= 0f) {
+                if (GlobalData.online) { 
+                    reachables = Dijkstra();
+                    int aux = Random.Range(0, reachables.Count);
+                    GetComponent<NetworkView>().RPC("moveAgentRPC", RPCMode.All, GlobalData.currentAgentTurn, reachables[aux]);
+                    GetComponent<NetworkView>().RPC("nextTurnRPC", RPCMode.All);
+                    reachables = null; 
+                }
+                else { 
+                    reachables = Dijkstra();
+                    int aux = Random.Range(0, reachables.Count);
+                    moveAgent(GlobalData.currentAgentTurn, reachables[aux]);
+                    nextTurn(); 
+                    reachables = null; 
+                }
+                thinkingIA = 1 + Random.Range(0f, 1f);
+            }
         }
 
         if (phase == 0)
@@ -873,26 +914,6 @@ public class WorldScript : MonoBehaviour {
             if (selected != null)
             {
                 selectedSprite.transform.position = new Vector3(selected.root.transform.position.x, selected.root.transform.position.y, selectedSprite.transform.position.z);
-                /*
-                resetBoardBrightness();
-
-                List<int> meh = DijkstraTarget(selected.positionInArray, GlobalData.agents[GlobalData.myAgent]);
-
-                if (meh != null)
-                {
-
-                    int currentSteps = GlobalData.agents[GlobalData.myAgent].getCurrentSteps();
-
-                    for (int i = 1; i < meh.Count; i++)
-                    {
-                        boardCells[meh[i]].root.GetComponent<SpriteRenderer>().color = new Color(0.5f - ((float)i / (float)meh.Count) * 0.5f, 0.5f - ((float)i / (float)meh.Count) * 0.5f, 0.5f - ((float)i / (float)meh.Count) * 0.5f, 1f);
-                        currentSteps -= GlobalData.biomeCosts[(int)boardCells[meh[i]].biome];
-                        boardCells[meh[i]].text.GetComponent<TextMesh>().text = ""+currentSteps;
-                        boardCells[meh[i]].text.SetActive(true);
-                    }
-
-                }
-                */
             }
 
         }
@@ -1352,14 +1373,6 @@ public class WorldScript : MonoBehaviour {
             b2.northEast = b1;
         }
 
-
-    }
-
-    private void resetBoardBrightness() {
-        for (int i = 0; i < boardCells.Length; i++) {
-            boardCells[i].root.GetComponent<SpriteRenderer>().color = new Color(boardCells[i].root.GetComponent<SpriteRenderer>().color.r / boardCells[i].root.GetComponent<SpriteRenderer>().color.r, boardCells[i].root.GetComponent<SpriteRenderer>().color.g / boardCells[i].root.GetComponent<SpriteRenderer>().color.g, boardCells[i].root.GetComponent<SpriteRenderer>().color.b / boardCells[i].root.GetComponent<SpriteRenderer>().color.b, 1f);
-            boardCells[i].text.SetActive(false);
-        }
     }
 
     private bool ClickedOn(GameObject target)
