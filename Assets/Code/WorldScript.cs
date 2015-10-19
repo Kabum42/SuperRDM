@@ -35,6 +35,7 @@ public class WorldScript : MonoBehaviour {
     private GameObject[] UIAgents;
 
     private AudioSource selectCellEffect;
+    private AudioSource pieceSound;
 
     private int currentMountains = 0;
     private int goalMountains = 0;
@@ -48,6 +49,12 @@ public class WorldScript : MonoBehaviour {
     private int movingAgent = 0;
     private float movingDelta = 0f;
     private List<int> movingList = null;
+    private int previousAuxPosition = -1;
+
+    private GameObject ribbon;
+    private GameObject ribbonOver;
+    private bool ribbonAppearing = false;
+    private AudioSource ribbonSound;
 
 
     // Use this for initialization
@@ -71,9 +78,24 @@ public class WorldScript : MonoBehaviour {
         selectCellEffect.volume = 1f;
         selectCellEffect.playOnAwake = false;
 
+        pieceSound = gameObject.AddComponent<AudioSource>();
+        pieceSound.clip = Resources.Load("Music/Pieces/Piece_01") as AudioClip;
+        pieceSound.volume = 1f;
+        pieceSound.playOnAwake = false;
+
         fading = GameObject.Find("Fading");
 
         selectedSprite = GameObject.Find("SelectedSprite");
+
+        ribbon = GameObject.Find("Ribbon");
+        ribbonOver = GameObject.Find("Ribbon_Over");
+        ribbonOver.SetActive(false);
+        ribbon.SetActive(false);
+
+        ribbonSound = gameObject.AddComponent<AudioSource>();
+        ribbonSound.clip = Resources.Load("Music/RibbonSound") as AudioClip;
+        ribbonSound.volume = 1f;
+        ribbonSound.playOnAwake = false;
 
         UIAgents = new GameObject[GlobalData.activeAgents];
 
@@ -522,7 +544,34 @@ public class WorldScript : MonoBehaviour {
         if (GlobalData.currentAgentTurn == GlobalData.myAgent && !usedDijkstra && movingList == null)
         {
             reachables = Dijkstra();
+
+            ribbon.SetActive(true);
+            ribbonOver.SetActive(true);
+            Hacks.SpriteRendererAlpha(ribbon, 0f);
+            Hacks.SpriteRendererAlpha(ribbonOver, 0f);
+            ribbonAppearing = true;
+            ribbonSound.Play();
         }
+
+        if (ribbon.activeInHierarchy) {
+            if (ribbonAppearing) {
+                Hacks.SpriteRendererAlpha(ribbon, Mathf.Lerp(ribbon.GetComponent<SpriteRenderer>().color.a, 1f, Time.deltaTime*5f));
+                Hacks.SpriteRendererAlpha(ribbonOver, Mathf.Lerp(ribbon.GetComponent<SpriteRenderer>().color.a, 1f, Time.deltaTime*5f));
+                if (ribbon.GetComponent<SpriteRenderer>().color.a >= 0.99f) {
+                    ribbonAppearing = false;
+                }
+            }
+            else {
+                Hacks.SpriteRendererAlpha(ribbon, ribbon.GetComponent<SpriteRenderer>().color.a - Time.deltaTime*2f);
+                Hacks.SpriteRendererAlpha(ribbonOver, ribbon.GetComponent<SpriteRenderer>().color.a - Time.deltaTime*2f);
+                if (ribbon.GetComponent<SpriteRenderer>().color.a <= 0f) {
+                    ribbon.SetActive(false);
+                    ribbonOver.SetActive(false);
+                }
+            }
+        }
+
+        
 
         if (Input.GetKey(KeyCode.Return))
         {
@@ -545,12 +594,21 @@ public class WorldScript : MonoBehaviour {
 
             int auxPosition =  (int) Mathf.Floor(Mathf.Clamp((movingDelta+timeToMove)*(1f/timeToMove), 0, movingList.Count-1));
 
+            if (auxPosition != previousAuxPosition) 
+            { 
+                int sound = Random.Range(1, 9);
+                pieceSound.clip = Resources.Load("Music/Pieces/Piece_"+sound.ToString("00")) as AudioClip;
+                pieceSound.Play();
+            }
+            previousAuxPosition = auxPosition;
+
             GlobalData.agents[movingAgent].currentCell = movingList[auxPosition];
 
             if (auxPosition == movingList.Count-1) {
                 movingAgent = -1;
                 movingDelta = 0f;
                 movingList = null;
+                previousAuxPosition = -1;
             }
 
         }
