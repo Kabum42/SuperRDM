@@ -831,7 +831,7 @@ public class PreparationScript : MonoBehaviour {
         {
             if (selectables[i].status == "opened")
             {
-                GlobalData.agents[aux] = new MainCharacter();
+                GlobalData.agents[aux] = new MainCharacter(0, "Player1", 175, 100, GlobalData.Classes[0]);
                 if (selectables[i].controller == "CPU")
                 {
                     GlobalData.agents[aux].IA = true;
