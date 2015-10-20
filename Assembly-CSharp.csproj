@@ -38,13 +38,21 @@
 	<Reference Include="System.Core" />
 	<Reference Include="System.Xml.Linq" />
 	<Reference Include="UnityEngine">
+<<<<<<< HEAD
 	  <HintPath>E:/Programas/Unity2/Editor/Data/Managed/UnityEngine.dll</HintPath>
 	</Reference>
 	<Reference Include="UnityEditor">
 	  <HintPath>E:/Programas/Unity2/Editor/Data/Managed/UnityEditor.dll</HintPath>
+=======
+	  <HintPath>F:/Unity3/Editor/Data/Managed/UnityEngine.dll</HintPath>
+	</Reference>
+	<Reference Include="UnityEditor">
+	  <HintPath>F:/Unity3/Editor/Data/Managed/UnityEditor.dll</HintPath>
+>>>>>>> refs/remotes/origin/FrVonLettow
 	</Reference>
   </ItemGroup>
   <ItemGroup>
+     <Compile Include="Assets\Code\BattleScript.cs" />
      <Compile Include="Assets\Code\Biome.cs" />
      <Compile Include="Assets\Code\Board.cs" />
      <Compile Include="Assets\Code\BoardCell.cs" />
@@ -66,7 +74,11 @@
      <Compile Include="Assets\Code\WorldScript.cs" />
      <None Include="Assets\Resources\Fonts\Comfortaa\OFL.txt" />
  <Reference Include="UnityEngine.UI">
+<<<<<<< HEAD
  <HintPath>E:/Programas/Unity2/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
+=======
+ <HintPath>F:/Unity3/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
+>>>>>>> refs/remotes/origin/FrVonLettow
  </Reference>
  <Reference Include="UnityEngine.Networking">
  <HintPath>E:/Programas/Unity2/Editor/Data/UnityExtensions/Unity/Networking/UnityEngine.Networking.dll</HintPath>
@@ -75,7 +87,11 @@
  <HintPath>E:/Programas/Unity2/Editor/Data/Managed/Mono.Cecil.dll</HintPath>
  </Reference>
  <Reference Include="UnityEditor.iOS.Extensions.Xcode">
+<<<<<<< HEAD
  <HintPath>E:/Programas/Unity2/Editor/Data/PlaybackEngines/iOSSupport/UnityEditor.iOS.Extensions.Xcode.dll</HintPath>
+=======
+ <HintPath>F:/Unity3/Editor/Data/PlaybackEngines/iOSSupport/UnityEditor.iOS.Extensions.Xcode.dll</HintPath>
+>>>>>>> refs/remotes/origin/FrVonLettow
  </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
