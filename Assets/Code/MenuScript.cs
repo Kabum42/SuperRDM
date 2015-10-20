@@ -14,19 +14,13 @@ public class MenuScript : MonoBehaviour {
     public GameObject button1;
     public GameObject button2;
     private AudioSource intro;
-    private AudioSource preparation;
     private float transition = 0f;
     private int phase = 0;
-    private selectableAgent[] selectables = new selectableAgent[6];
     private Vector3 lastMousePosition;
-    public GameObject playBackground;
-    public GameObject playText;
-    public GameObject playText2;
     private GameObject star;
     private GameObject support;
-    private AudioSource selectEffect;
-    private AudioSource acceptEffect;
     private GameObject pointer;
+    private GameObject pointer2;
     private GameObject offline1;
     private GameObject offline2;
     private GameObject online1;
@@ -37,6 +31,8 @@ public class MenuScript : MonoBehaviour {
     private GameObject join1;
     private GameObject join2;
     private GameObject background;
+    private AudioSource menuOk;
+    private AudioSource menuBack;
     private bool starting = false;
 
     private int selectableX = 0;
@@ -53,6 +49,9 @@ public class MenuScript : MonoBehaviour {
             GlobalData.Start();
         }
 
+        GlobalData.online = false;
+        GlobalData.connected = false;
+
         fading = GameObject.Find("Fading");
         Hacks.SpriteRendererAlpha(fading, 1f); 
 
@@ -62,8 +61,13 @@ public class MenuScript : MonoBehaviour {
         support = GameObject.Find("Support");
         Hacks.SpriteRendererAlpha(support, 0f);
 
+        button2.SetActive(false);
+
         pointer = GameObject.Find("Pointer");
         pointer.SetActive(false);
+
+        pointer2 = GameObject.Find("Pointer2");
+        pointer2.SetActive(false);
 
         offline1 = GameObject.Find("Offline1");
         offline1.SetActive(false);
@@ -91,258 +95,24 @@ public class MenuScript : MonoBehaviour {
 
         background = GameObject.Find("Background");
 
-        selectEffect = gameObject.AddComponent<AudioSource>();
-        selectEffect.clip = Resources.Load("Sounds/SelectCell") as AudioClip;
-        selectEffect.volume = 1f;
-        selectEffect.playOnAwake = false;
-
-        acceptEffect = gameObject.AddComponent<AudioSource>();
-        acceptEffect.clip = Resources.Load("Sounds/whip_01") as AudioClip;
-        acceptEffect.volume = 1f;
-        acceptEffect.playOnAwake = false;
-
         intro = gameObject.AddComponent<AudioSource>();
-        intro.clip = Resources.Load("Music/Intro") as AudioClip;
+        intro.clip = Resources.Load("Music/Menu/Intro") as AudioClip;
         intro.volume = 0f;
         intro.loop = true;
         intro.Play();
 
-        preparation = gameObject.AddComponent<AudioSource>();
-        preparation.clip = Resources.Load("Music/Preparation") as AudioClip;
-        preparation.volume = 1f;
-        preparation.loop = true;
+        menuOk = gameObject.AddComponent<AudioSource>();
+        menuOk.clip = Resources.Load("Music/Menu/MenuOk") as AudioClip;
+        menuOk.volume = 0.85f;
+
+        menuBack = gameObject.AddComponent<AudioSource>();
+        menuBack.clip = Resources.Load("Music/Menu/MenuBack") as AudioClip;
+        menuBack.volume = 0.85f;
         
         logoPosition = logo.transform.position;
 
-        playBackground.SetActive(false);
-        playText.SetActive(false);
-        playText2.SetActive(false);
-
-        for (int i = 0; i < selectables.Length; i++)
-        {
-            selectables[i] = new selectableAgent(i);
-            selectables[i].root.SetActive(false);
-        }
 
 	}
-
-    void OnServerInitialized()
-    {
-        Debug.Log("Server Initializied");
-        GlobalData.connected = true;
-        selectables[0].player = Network.player;
-        updatePlayer(0);
-    }
-
-    void OnMasterServerEvent(MasterServerEvent msEvent)
-    {
-        if (msEvent == MasterServerEvent.HostListReceived)
-        {
-            NetworkManager.hostList = MasterServer.PollHostList();
-            NetworkManager.JoinServer(NetworkManager.hostList[0]);
-        }  
-    }
-
-    void OnConnectedToServer()
-    {
-        Debug.Log("Server Joined");
-        GlobalData.connected = true;
-    }
-
-    void OnDisconnectedFromServer(NetworkDisconnection info)
-    {
-        Application.LoadLevel("Menu");
-    }
-
-    void OnPlayerConnected(NetworkPlayer player)
-    {
-        Debug.Log("Player connected from " + player.ipAddress + ":" + player.port);
-
-        for (int i = 0; i < selectables.Length; i++)
-        {
-            if (selectables[i].controller == "CPU")
-            {
-                selectables[i].player = player;
-                selectables[i].tick.SetActive(false);
-                selectables[i].status = "opened";
-                selectables[i].controller = "Player";
-                break;
-            }
-        }
-
-        updateAllPlayers();
-
-    }
-
-    [RPC]
-    void startMatch(float seed)
-    {
-        GlobalData.boardSeed = seed;
-        starting = true;
-    }
-
-    [RPC]
-    void readyRequest(NetworkPlayer player)
-    {
-
-        for (int i = 1; i < selectables.Length; i++)
-        {
-            if (int.Parse(selectables[i].player.ToString()) != 0 && selectables[i].player.ToString() == player.ToString())
-            {
-                selectables[i].tick.SetActive(true);
-                updatePlayer(i);
-            }
-        }
-
-    }
-
-    [RPC]
-    void disconnect(NetworkPlayer target)
-    {
-
-        if (Network.player.ToString() == target.ToString())
-        {
-            Network.Disconnect();
-        }
-
-    }
-
-    void updatePlayer(int i)
-    {
-        if (GlobalData.online)
-        {
-            GetComponent<NetworkView>().RPC("updatePlayerRPC", RPCMode.All, i, selectables[i].player, selectables[i].tick.activeInHierarchy, selectables[i].status, selectables[i].controller);
-        }
-    }
-
-    void updateAllPlayers()
-    {
-        for (int i = 0; i < selectables.Length; i++)
-        {
-            updatePlayer(i);
-        }
-    }
-
-    [RPC]
-    void updatePlayerRPC(int position, NetworkPlayer nPlayer, bool bTick, string trueStatus, string subjectiveController)
-    {
-
-        selectables[position].player = nPlayer;
-        selectables[position].tick.SetActive(bTick);
-        selectables[position].status = trueStatus;
-        selectables[position].controller = subjectiveController;
-
-        bool isServer = false;
-        if (int.Parse(Network.player.ToString()) == 0) { isServer = true; }
-
-        if (subjectiveController == "You" || subjectiveController == "Player")
-        {
-            // IT'S TRULY SUBJECTIVE
-            if (selectables[position].player.ToString() == Network.player.ToString())
-            {
-                selectables[position].controller = "You";
-                selectables[position].controllerText.GetComponent<TextMesh>().color = new Color(1f, 0.35f, 0.35f, selectables[position].controllerText.GetComponent<TextMesh>().color.a);
-                selectables[position].controllerText2.GetComponent<TextMesh>().color = new Color(0.65f, 0f, 0f, selectables[position].controllerText2.GetComponent<TextMesh>().color.a);
-
-                selectables[position].arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Arrow");
-            }
-            else
-            {
-                selectables[position].controller = "Player";
-                selectables[position].controllerText.GetComponent<TextMesh>().color = new Color(0.35f, 1f, 0.35f, selectables[position].controllerText.GetComponent<TextMesh>().color.a);
-                selectables[position].controllerText2.GetComponent<TextMesh>().color = new Color(0f, 0.65f, 0f, selectables[position].controllerText2.GetComponent<TextMesh>().color.a);
-
-                if (isServer) { selectables[position].arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Door"); }
-                else { selectables[position].arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Lock"); }
-            }
-        }
-        else
-        {
-            if (isServer && position >= 3)
-            {
-                selectables[position].arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Arrow");
-            }
-            else
-            {
-                selectables[position].arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Lock");
-                selectables[position].arrow.transform.eulerAngles = new Vector3(0f, 0f, 180f);
-            }
-            selectables[position].controllerText.GetComponent<TextMesh>().color = new Color(0.35f, 0.35f, 1f, selectables[position].controllerText.GetComponent<TextMesh>().color.a);
-            selectables[position].controllerText2.GetComponent<TextMesh>().color = new Color(0f, 0f, 0.65f, selectables[position].controllerText2.GetComponent<TextMesh>().color.a);
-        }
-
-        
-
-    }
-
-    /*
-    [RPC]
-    void updatePlayers(NetworkPlayer player1, NetworkPlayer player2, NetworkPlayer player3, NetworkPlayer player4, NetworkPlayer player5, NetworkPlayer player6, bool tick1, bool tick2, bool tick3, bool tick4, bool tick5, bool tick6)
-    {
-
-        selectables[0].player = player1;
-        selectables[1].player = player2;
-        selectables[2].player = player3;
-        selectables[3].player = player4;
-        selectables[4].player = player5;
-        selectables[5].player = player6;
-
-        selectables[0].tick.SetActive(tick1);
-        selectables[1].tick.SetActive(tick2);
-        selectables[2].tick.SetActive(tick3);
-        selectables[3].tick.SetActive(tick4);
-        selectables[4].tick.SetActive(tick5);
-        selectables[5].tick.SetActive(tick6);
-
-        if (int.Parse(Network.player.ToString()) == 0)
-        {
-            selectables[0].controller = "You";
-            selectables[0].controllerText.GetComponent<TextMesh>().color = new Color(1f, 0.35f, 0.35f, selectables[0].controllerText.GetComponent<TextMesh>().color.a);
-            selectables[0].controllerText2.GetComponent<TextMesh>().color = new Color(0.65f, 0f, 0f, selectables[0].controllerText2.GetComponent<TextMesh>().color.a);
-            selectables[0].arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Arrow");
-        }
-        else
-        {
-            selectables[0].controller = "Player";
-            selectables[0].controllerText.GetComponent<TextMesh>().color = new Color(0.35f, 1f, 0.35f, selectables[0].controllerText.GetComponent<TextMesh>().color.a);
-            selectables[0].controllerText2.GetComponent<TextMesh>().color = new Color(0f, 0.65f, 0f, selectables[0].controllerText2.GetComponent<TextMesh>().color.a);
-            selectables[0].arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Lock");
-            selectables[0].arrow.transform.localEulerAngles = new Vector3(0f, 0f, 180f);
-        }
-
-        for (int i = 1; i < selectables.Length; i++)
-        {
-            if (int.Parse(selectables[i].player.ToString()) != 0)
-            {
-                if (selectables[i].player.ToString() == Network.player.ToString())
-                {
-                    selectables[i].controller = "You";
-                    selectables[i].controllerText.GetComponent<TextMesh>().color = new Color(1f, 0.35f, 0.35f, selectables[i].controllerText.GetComponent<TextMesh>().color.a);
-                    selectables[i].controllerText2.GetComponent<TextMesh>().color = new Color(0.65f, 0f, 0f, selectables[i].controllerText2.GetComponent<TextMesh>().color.a);
-                    selectables[i].arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Arrow");
-                    selectables[i].status = "opened";
-                }
-                else
-                {
-                    selectables[i].controller = "Player";
-                    selectables[i].controllerText.GetComponent<TextMesh>().color = new Color(0.35f, 1f, 0.35f, selectables[i].controllerText.GetComponent<TextMesh>().color.a);
-                    selectables[i].controllerText2.GetComponent<TextMesh>().color = new Color(0f, 0.65f, 0f, selectables[i].controllerText2.GetComponent<TextMesh>().color.a);
-                    if (int.Parse(Network.player.ToString()) == 0) { selectables[0].arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Arrow"); }
-                    else { selectables[i].arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Lock"); selectables[i].arrow.transform.localEulerAngles = new Vector3(0f, 0f, 180f); }
-                    selectables[i].status = "opened";
-                }
-            }
-            else
-            {
-                selectables[i].controller = "CPU";
-                selectables[i].controllerText.GetComponent<TextMesh>().color = new Color(0.35f, 0.35f, 1f, selectables[i].controllerText.GetComponent<TextMesh>().color.a);
-                selectables[i].controllerText2.GetComponent<TextMesh>().color = new Color(0f, 0f, 0.65f, selectables[i].controllerText2.GetComponent<TextMesh>().color.a);
-                if (int.Parse(Network.player.ToString()) == 0) { selectables[0].arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Arrow");}
-                else { selectables[i].arrow.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Lock"); selectables[i].arrow.transform.localEulerAngles = new Vector3(0f, 0f, 180f); }
-            }
-        }
-    }
-    */
 
     // Update is called once per frame
     void Update () {
@@ -362,10 +132,15 @@ public class MenuScript : MonoBehaviour {
         Hacks.TextAlpha(startText, 0.15f + Mathf.Abs(Mathf.Sin(radius2 * Mathf.PI / 180)));
         Hacks.TextAlpha(startText2, 0.15f + Mathf.Abs(Mathf.Sin(radius2 * Mathf.PI / 180)));
 
+        startText.GetComponent<TextMesh>().text = Language.getText("Menu_Start");
+        startText2.GetComponent<TextMesh>().text = Language.getText("Menu_Start");
+
         Hacks.SpriteRendererAlpha(button1, 0.15f + Mathf.Abs(Mathf.Sin(radius2 * Mathf.PI / 180)));
         Hacks.SpriteRendererAlpha(button2, 0.15f + Mathf.Abs(Mathf.Sin(radius2 * Mathf.PI / 180)));
 
         Hacks.SpriteRendererAlpha(pointer, 0.35f + Mathf.Abs(Mathf.Sin(radius2 * Mathf.PI / 180)));
+        Hacks.SpriteRendererAlpha(pointer2, 1f);
+
 
         star.transform.eulerAngles = new Vector3(star.transform.eulerAngles.x, star.transform.eulerAngles.y, star.transform.eulerAngles.z - Time.deltaTime * 50f);
 
@@ -386,76 +161,74 @@ public class MenuScript : MonoBehaviour {
         {
             if (transition < 1f)
             {
-                transition += Time.deltaTime;
+                transition += Time.deltaTime*2f;
 
                 if (transition >= 1f)
                 {
                     transition = 1f;
                 }
-               
+
                 intro.volume = transition;
                 Hacks.SpriteRendererAlpha(fading, 1f - transition);
 
             }
-
-
-            int controllerConnected = -1;
-            for (int i = 0; i < Input.GetJoystickNames().Length; i++)
-            {
-                if (Input.GetJoystickNames()[i] != "")
-                {
-                    controllerConnected = i;
-                    break;
-                }
-            }
-
-            if (controllerConnected != -1)
-            {
-                // CONTROLLER PLUGGED
-                if (button1.activeInHierarchy) { button1.SetActive(false); }
-                if (!button2.activeInHierarchy) { button2.SetActive(true); }
-
-                if (GlobalData.OS == "Windows")
-                {
-                    // WINDOWS
-                    if (Input.GetKeyDown("joystick button 0"))
-                    {
-                        transition = 0f;
-                        phase = 1;
-                    }
-                }
-                if (GlobalData.OS == "Mac")
-                {
-                    // MAC
-                    if (Input.GetKeyDown("joystick button 16"))
-                    {
-                        transition = 0f;
-                        phase = 1;
-                    }
-                }
-                if (GlobalData.OS == "Linux")
-                {
-                    // LINUX
-                    if (Input.GetKeyDown("joystick button 0"))
-                    {
-                        transition = 0f;
-                        phase = 1;
-                    }
-                }
-            }
             else
             {
-                // CONTROLLER NOT PLUGGED
-                if (button2.activeInHierarchy) { button2.SetActive(false); }
-                if (!button1.activeInHierarchy) { button1.SetActive(true); }
-
-                if (Input.GetKeyDown(KeyCode.Return))
+                if (Hacks.ControllerAnyConnected())
                 {
-                    transition = 0f;
-                    phase = 1;
-                }
+                    // CONTROLLER PLUGGED
+                    if (button1.activeInHierarchy) { button1.SetActive(false); }
+                    if (!button2.activeInHierarchy) { button2.SetActive(true); }
 
+                    if (GlobalData.OS == "Windows")
+                    {
+                        // WINDOWS
+                        if (Input.GetKeyDown("joystick button 0"))
+                        {
+                            transition = 0f;
+                            phase = 1;
+                            menuOk.Play();
+                            Hacks.SpriteRendererAlpha(fading, 1f);
+                        }
+                    }
+                    if (GlobalData.OS == "Mac")
+                    {
+                        // MAC
+                        if (Input.GetKeyDown("joystick button 16"))
+                        {
+                            transition = 0f;
+                            phase = 1;
+                            menuOk.Play();
+                        }
+                    }
+                    if (GlobalData.OS == "Linux")
+                    {
+                        // LINUX
+                        if (Input.GetKeyDown("joystick button 0"))
+                        {
+                            transition = 0f;
+                            phase = 1;
+                            menuOk.Play();
+                        }
+                    }
+                }
+                else
+                {
+                    // CONTROLLER NOT PLUGGED
+                    if (button2.activeInHierarchy) { button2.SetActive(false); }
+                    if (!button1.activeInHierarchy) { button1.SetActive(true); }
+
+                    if (Input.GetKeyDown(KeyCode.Return))
+                    {
+                        transition = 0f;
+                        phase = 1;
+                        menuOk.Play();
+                    }
+
+                }
             }
+
+            
 
         }
         else if (phase == 1)
@@ -463,13 +236,16 @@ public class MenuScript : MonoBehaviour {
 
             Hacks.SpriteRendererAlpha(fading, Mathf.Lerp(fading.GetComponent<SpriteRenderer>().color.a, 0f, Time.deltaTime*5f));
 
-            transition += Time.deltaTime;
+            transition += Time.deltaTime*5f;
 
             startText.GetComponent<TextMesh>().color = new Color(startText.GetComponent<TextMesh>().color.r, startText.GetComponent<TextMesh>().color.g, startText.GetComponent<TextMesh>().color.b, startText.GetComponent<TextMesh>().color.a * (1f - transition));
             startText2.GetComponent<TextMesh>().color = new Color(startText2.GetComponent<TextMesh>().color.r, startText2.GetComponent<TextMesh>().color.g, startText2.GetComponent<TextMesh>().color.b, startText2.GetComponent<TextMesh>().color.a * (1f - transition));
 
             button1.GetComponent<SpriteRenderer>().color = new Color(button1.GetComponent<SpriteRenderer>().color.r, button1.GetComponent<SpriteRenderer>().color.g, button1.GetComponent<SpriteRenderer>().color.b, startText.GetComponent<TextMesh>().color.a);
             button2.GetComponent<SpriteRenderer>().color = new Color(button2.GetComponent<SpriteRenderer>().color.r, button2.GetComponent<SpriteRenderer>().color.g, button2.GetComponent<SpriteRenderer>().color.b, startText.GetComponent<TextMesh>().color.a);
+
+            //Camera.main.GetComponent<Camera>().orthographicSize = Mathf.Lerp(Camera.main.GetComponent<Camera>().orthographicSize, 40f, Time.deltaTime * 5f);
+            //Camera.main.transform.position = new Vector3(0, Mathf.Lerp(Camera.main.transform.position.y, -26f, Time.deltaTime*5f), -10);
 
             if (transition >= 1f)
             {
@@ -482,6 +258,8 @@ public class MenuScript : MonoBehaviour {
 
                 Hacks.SpriteRendererAlpha(pointer, 0f);
                 pointer.SetActive(true);
+                Hacks.SpriteRendererAlpha(pointer2, 0f);
+                pointer2.SetActive(true);
                 Hacks.TextAlpha(offline1, 0f);
                 offline1.SetActive(true);
                 Hacks.TextAlpha(offline2, 0f);
@@ -498,12 +276,16 @@ public class MenuScript : MonoBehaviour {
         else if (phase == 2)
         {
 
+            //Camera.main.GetComponent<Camera>().orthographicSize = Mathf.Lerp(Camera.main.GetComponent<Camera>().orthographicSize, 40f, Time.deltaTime * 5f);
+            //Camera.main.transform.position = new Vector3(0, Mathf.Lerp(Camera.main.transform.position.y, -26f, Time.deltaTime * 5f), -10);
+
             if (transition < 1f)
             {
 
-                transition += Time.deltaTime;
+                transition += Time.deltaTime*5f;
 
                 Hacks.SpriteRendererAlpha(pointer, transition * pointer.GetComponent<SpriteRenderer>().color.a);
+                Hacks.SpriteRendererAlpha(pointer2, transition * pointer2.GetComponent<SpriteRenderer>().color.a);
                 Hacks.TextAlpha(offline1, transition);
                 Hacks.TextAlpha(offline2, transition);
                 Hacks.TextAlpha(online1, transition);
@@ -540,11 +322,13 @@ public class MenuScript : MonoBehaviour {
                     {
                         phase = 5;
                         transition = 0f;
+                        menuOk.Play();
                     }
                     else if (playOption == 1)
                     {
                         phase = 3;
                         transition = 0f;
+                        menuOk.Play();
                     }
                 }
             }
@@ -568,22 +352,26 @@ public class MenuScript : MonoBehaviour {
                     {
                         phase = 5;
                         transition = 0f;
+                        menuOk.Play();
                     }
                     else if (playOption == 1)
                     {
                         phase = 3;
                         transition = 0f;
+                        menuOk.Play();
                     }
                 }
             }
 
             if (playOption == 0)
             {
-                pointer.transform.position = new Vector3(-4.36f, Mathf.Lerp(pointer.transform.position.y, -3.58f, Time.deltaTime * 10f), 0f);
+                pointer.transform.position = new Vector3(-4.36f, Mathf.Lerp(pointer.transform.position.y, -3.56f, Time.deltaTime * 10f), 0f);
+                pointer2.transform.position = new Vector3(-4.36f, Mathf.Lerp(pointer2.transform.position.y, -3.6f, Time.deltaTime * 10f), 0f);
             }
             else if (playOption == 1)
             {
-                pointer.transform.position = new Vector3(-4.36f, Mathf.Lerp(pointer.transform.position.y, -5.48f, Time.deltaTime * 10f), 0f);
+                pointer.transform.position = new Vector3(-4.36f, Mathf.Lerp(pointer.transform.position.y, -5.46f, Time.deltaTime * 10f), 0f);
+                pointer2.transform.position = new Vector3(-4.36f, Mathf.Lerp(pointer2.transform.position.y, -5.5f, Time.deltaTime * 10f), 0f);
             }
 
         }
@@ -592,7 +380,7 @@ public class MenuScript : MonoBehaviour {
 
             if (transition < 1f)
             {
-                transition += Time.deltaTime;
+                transition += Time.deltaTime*5f;
 
                 Hacks.TextAlpha(offline1, 1f - transition);
                 Hacks.TextAlpha(offline2, 1f - transition);
@@ -632,7 +420,7 @@ public class MenuScript : MonoBehaviour {
 
             if (transition < 1f)
             {
-                transition += Time.deltaTime;
+                transition += Time.deltaTime*5f;
 
                 Hacks.TextAlpha(host1, transition);
                 Hacks.TextAlpha(host2, transition);
@@ -667,15 +455,16 @@ public class MenuScript : MonoBehaviour {
                 {
                     if (playOption == 0)
                     {
-                        NetworkManager.RefreshHostList();
+                        GlobalData.hosting = false;
                     }
                     else if (playOption == 1)
                     {
-                        NetworkManager.StartServer("test");
+                        GlobalData.hosting = true;
                     }
                     GlobalData.online = true;
                     phase = 5;
                     transition = 0f;
+                    menuOk.Play();
                 }
             }
             else
@@ -696,25 +485,37 @@ public class MenuScript : MonoBehaviour {
                 {
                     if (playOption == 0)
                     {
-                        NetworkManager.RefreshHostList();
+                        GlobalData.hosting = false;
                     }
                     else if (playOption == 1)
                     {
-                        NetworkManager.StartServer("test");
+                        GlobalData.hosting = true;
                     }
                     GlobalData.online = true;
                     phase = 5;
                     transition = 0f;
+                    menuOk.Play();
+                }
+                else if (Input.GetKeyDown(KeyCode.Escape))
+                {
+                    phase = 1;
+                    menuBack.Play();
+                    join1.SetActive(false);
+                    join2.SetActive(false);
+                    host1.SetActive(false);
+                    host2.SetActive(false);
                 }
             }
 
             if (playOption == 0)
             {
-                pointer.transform.position = new Vector3(-4.36f, Mathf.Lerp(pointer.transform.position.y, -3.58f, Time.deltaTime * 10f), 0f);
+                pointer.transform.position = new Vector3(-4.36f, Mathf.Lerp(pointer.transform.position.y, -3.56f, Time.deltaTime * 10f), 0f);
+                pointer2.transform.position = new Vector3(-4.36f, Mathf.Lerp(pointer2.transform.position.y, -3.6f, Time.deltaTime * 10f), 0f);
             }
             else if (playOption == 1)
             {
-                pointer.transform.position = new Vector3(-4.36f, Mathf.Lerp(pointer.transform.position.y, -5.48f, Time.deltaTime * 10f), 0f);
+                pointer.transform.position = new Vector3(-4.36f, Mathf.Lerp(pointer.transform.position.y, -5.46f, Time.deltaTime * 10f), 0f);
+                pointer2.transform.position = new Vector3(-4.36f, Mathf.Lerp(pointer2.transform.position.y, -5.5f, Time.deltaTime * 10f), 0f);
             }
 
         }
@@ -725,322 +526,15 @@ public class MenuScript : MonoBehaviour {
 
             if (transition < 1f)
             {
-                transition += Time.deltaTime;
+                transition += Time.deltaTime*2f;
                 fading.GetComponent<SpriteRenderer>().color = new Color(fading.GetComponent<SpriteRenderer>().color.r, fading.GetComponent<SpriteRenderer>().color.g, fading.GetComponent<SpriteRenderer>().color.b, transition);
                 intro.volume = 1f - transition;
 
                 if (transition >= 1f)
                 {
-                    phase = 6;
-
-                    logo.SetActive(false);
-                    startText.SetActive(false);
-                    startText2.SetActive(false);
-                    button1.SetActive(false);
-                    button2.SetActive(false);
-                    pointer.SetActive(false);
-                    offline1.SetActive(false);
-                    offline2.SetActive(false);
-                    online1.SetActive(false);
-                    online2.SetActive(false);
-                    host1.SetActive(false);
-                    host2.SetActive(false);
-                    join1.SetActive(false);
-                    join2.SetActive(false);
-                    background.SetActive(false);
-                    transition = 0f;
-
-                    playBackground.SetActive(true);
-                    playText.SetActive(true);
-                    playText2.SetActive(true);
-
-                    intro.Stop();
-                    preparation.Play();
-
-                    for (int i = 0; i < selectables.Length; i++)
-                    {
-                        selectables[i].root.SetActive(true);
-                    }
-
+                    Application.LoadLevel("Preparation");
                 }
             }
-
-        }
-        else if (phase == 6 && (!GlobalData.online || (GlobalData.online && GlobalData.connected)))
-        {
-
-            if (int.Parse(Network.player.ToString()) == 0 || !GlobalData.online)
-            {
-                bool allReady = true;
-                for (int i = 0; i < selectables.Length; i++)
-                {
-                    if (!selectables[i].tick.activeInHierarchy && selectables[i].status == "opened")
-                    {
-                        allReady = false;
-                    }
-                }
-                if (allReady)
-                {
-                    if (GlobalData.online)
-                    {
-                        GetComponent<NetworkView>().RPC("startMatch", RPCMode.All, Random.Range(0f, 9999999f));
-                    }
-                    else
-                    {
-                        GlobalData.boardSeed = Random.Range(0f, 9999999f);
-                        starting = true;
-                    }
-                }
-            }
-
-            if (starting)
-            {
-                phase = 7;
-                transition = 0f;
-            }
-
-            if (transition < 1f)
-            {
-                transition += Time.deltaTime;
-                if (transition > 1f)
-                {
-                    transition = 1f;
-                }
-                //agent1_pictureHolder.GetComponent<SpriteRenderer>().color = new Color(agent1_pictureHolder.GetComponent<SpriteRenderer>().color.r, agent1_pictureHolder.GetComponent<SpriteRenderer>().color.g, agent1_pictureHolder.GetComponent<SpriteRenderer>().color.b, transition);
-                preparation.volume = transition;
-
-                fading.GetComponent<SpriteRenderer>().color = new Color(fading.GetComponent<SpriteRenderer>().color.r, fading.GetComponent<SpriteRenderer>().color.g, fading.GetComponent<SpriteRenderer>().color.b, 1f - transition);
-
-            }
-            else if (ClickedOn(playBackground))
-            {
-
-                clickOnReady();
-
-            }
-
-            playBackground.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1f);
-
-            int controllerConnected = -1;
-            for (int i = 0; i < Input.GetJoystickNames().Length; i++)
-            {
-                if (Input.GetJoystickNames()[i] != "")
-                {
-                    controllerConnected = i;
-                    break;
-                }
-            }
-
-            if (controllerConnected != -1)
-            {
-                // CONTROLLER PLUGGED
-                if (GlobalData.OS == "Windows")
-                {
-                    // WINDOWS
-                    if (lastDPadX != Input.GetAxis("DPad1") && Input.GetAxis("DPad1") != 0 && selectableY != 6 && selectableY >= 2 && selectables[selectableY].status == "opened")
-                    {
-                        if (Input.GetAxis("DPad1") == 1)
-                        {
-                            selectableX += 1;
-                            if (selectableX > 2) { selectableX = 0; }
-                            // TEMPORARY (?)
-                            if (selectableX == 1) { selectableX = 2; }
-                            selectEffect.Play();
-                        }
-                        else if (Input.GetAxis("DPad1") == -1)
-                        {
-                            selectableX -= 1;
-                            if (selectableX < 0) { selectableX = 2; }
-                            // TEMPORARY (?)
-                            if (selectableX == 1) { selectableX = 0; }
-                            selectEffect.Play();
-                        }
-                    }
-                    if (lastDPadY != Input.GetAxis("DPad2") && Input.GetAxis("DPad2") != 0)
-                    {
-                        if (Input.GetAxis("DPad2") == 1)
-                        {
-                            selectableY -= 1;
-                            if (selectableY < 0) { selectableY = 6; }
-                            selectEffect.Play();
-                        }
-                        else if (Input.GetAxis("DPad2") == -1)
-                        {
-                            selectableY += 1;
-                            if (selectableY > 6) { selectableY = 0; }
-                            selectEffect.Play();
-                        }
-                    }
-
-                    lastDPadX = Input.GetAxis("DPad1");
-                    lastDPadY = Input.GetAxis("DPad2");
-
-                    //CHECK BUTTON A
-                    if (Input.GetKeyDown("joystick button 0"))
-                    {
-                        if (selectableY < 6)
-                        {
-                            if (selectables[selectableY].status == "closed" && selectables[selectableY].arrow.GetComponent<SpriteRenderer>().sprite == Resources.Load<Sprite>("Menu/Arrow"))
-                            {
-                                selectables[selectableY].status = "opened";
-                                selectables[selectableY].tick.SetActive(true);
-                                updatePlayer(selectableY);
-                                acceptEffect.Play();
-                            } else
-                            {
-                                if (selectableX == 0 || selectableY <= 1)
-                                {
-                                    // CHANGE CHAMPION
-                                }
-                                else if (selectableX == 2 && selectables[selectableY].arrow.GetComponent<SpriteRenderer>().sprite == Resources.Load<Sprite>("Menu/Arrow"))
-                                {
-                                    selectables[selectableY].status = "closed";
-                                    selectables[selectableY].tick.SetActive(false);
-                                    updatePlayer(selectableY);
-                                    acceptEffect.Play();
-                                }
-                            }
-                        }
-                        else if (selectableY == 6)
-                        {
-                            clickOnReady();
-                        }
-                    }
-
-                }
-
-            }
-            else
-            {
-                // CONTROLLER NOT PLUGGED
-                if (isOver(playBackground))
-                {
-                    playBackground.GetComponent<SpriteRenderer>().color = new Color(0.7f, 0.7f, 0.7f, 1f);
-                }
-
-            }
-
-            if (selectableY == 6 && controllerConnected != -1)
-            {
-                playBackground.GetComponent<SpriteRenderer>().color = new Color(0.7f, 0.7f, 0.7f, 0.7f);
-            }
-
-            for (int i = 0; i < selectables.Length; i++)
-                {
-                selectables[i].nameBackground.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1f);
-                selectables[i].controllerBackground.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1f);
-                selectables[i].arrowBackground.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 1f);
-
-                selectables[i].controllerText.GetComponent<TextMesh>().text = selectables[i].controller;
-                selectables[i].controllerText2.GetComponent<TextMesh>().text = selectables[i].controller;
-
-
-                if (selectableY == i && controllerConnected != -1)
-                {
-                    if (i <= 1)
-                    {
-                        selectables[i].nameBackground.GetComponent<SpriteRenderer>().color = new Color(0.7f, 0.7f, 0.7f, 1f);
-                    }
-                    else if (selectableX == 0 && selectables[i].status == "opened")
-                    {
-                        selectables[i].nameBackground.GetComponent<SpriteRenderer>().color = new Color(0.7f, 0.7f, 0.7f, 1f);
-                    }
-                    else if (selectableX == 1 && selectables[i].status == "opened")
-                    {
-                        selectables[i].controllerBackground.GetComponent<SpriteRenderer>().color = new Color(0.7f, 0.7f, 0.7f, 1f);
-                    }
-                    else if (selectableX == 2 || selectables[i].status == "closed")
-                    {
-                        selectables[i].arrowBackground.GetComponent<SpriteRenderer>().color = new Color(0.7f, 0.7f, 0.7f, 1f);
-                    }
-                }
-                else if (controllerConnected == -1)
-                {
-                    if (isOver(selectables[i].nameBackground))
-                    {
-                        selectables[i].nameBackground.GetComponent<SpriteRenderer>().color = new Color(0.7f, 0.7f, 0.7f, 1f);
-                    }
-                    else if (isOver(selectables[i].arrowBackground) && (selectables[i].arrow.GetComponent<SpriteRenderer>().sprite == Resources.Load<Sprite>("Menu/Arrow") || selectables[i].arrow.GetComponent<SpriteRenderer>().sprite == Resources.Load<Sprite>("Menu/Door")))
-                    {
-                        selectables[i].arrowBackground.GetComponent<SpriteRenderer>().color = new Color(0.7f, 0.7f, 0.7f, 1f);
-                    }
-                }
-
-                if (ClickedOn(selectables[i].arrowBackground))
-                {
-                    if (selectables[i].status == "closed" && selectables[i].arrow.GetComponent<SpriteRenderer>().sprite == Resources.Load<Sprite>("Menu/Arrow"))
-                    {
-                        selectables[i].status = "opened";
-                        selectables[i].tick.SetActive(true);
-                        updatePlayer(i);
-                        acceptEffect.Play();
-                    }
-                    else if (selectables[i].status == "opened" && (selectables[i].arrow.GetComponent<SpriteRenderer>().sprite == Resources.Load<Sprite>("Menu/Arrow") || selectables[i].arrow.GetComponent<SpriteRenderer>().sprite == Resources.Load<Sprite>("Menu/Door")))
-                    {
-                        if (selectables[i].controller == "Player")
-                        {
-                            GetComponent<NetworkView>().RPC("disconnect", RPCMode.All, selectables[i].player);
-                            selectables[i].controller = "CPU";
-                            selectables[i].tick.SetActive(true);
-                        }
-                        if (i >= 3)
-                        {
-                            selectables[i].status = "closed";
-                            selectables[i].tick.SetActive(false);
-                        }
-                        updatePlayer(i);
-                        acceptEffect.Play();
-                    }
-                }
-
-                if (selectables[i].status == "closed")
-                {
-                    if (selectables[i].arrow.GetComponent<SpriteRenderer>().sprite == Resources.Load<Sprite>("Menu/Arrow"))
-                    {
-                        selectables[i].arrow.transform.localEulerAngles = new Vector3(0f, 0f, Mathf.LerpAngle(selectables[i].arrow.transform.localEulerAngles.z, 0f, Time.deltaTime * 10f));
-                    }
-                    selectables[i].nameBackground.transform.localScale = new Vector3(Mathf.Lerp(selectables[i].nameBackground.transform.localScale.x, 0f, Time.deltaTime*10f), 1f, 1f);
-                    selectables[i].controllerBackground.transform.localScale = new Vector3(Mathf.Lerp(selectables[i].controllerBackground.transform.localScale.x, 0f, Time.deltaTime * 10f), 1f, 1f);
-                }
-                else if (selectables[i].status == "opened")
-                {
-                    if (selectables[i].arrow.GetComponent<SpriteRenderer>().sprite == Resources.Load<Sprite>("Menu/Arrow"))
-                    {
-                        selectables[i].arrow.transform.localEulerAngles = new Vector3(0f, 0f, Mathf.LerpAngle(selectables[i].arrow.transform.localEulerAngles.z, 180f, Time.deltaTime * 10f));
-                    }
-                    selectables[i].nameBackground.transform.localScale = new Vector3(Mathf.Lerp(selectables[i].nameBackground.transform.localScale.x, 1f, Time.deltaTime*10f), 1f, 1f);
-                    selectables[i].controllerBackground.transform.localScale = new Vector3(Mathf.Lerp(selectables[i].controllerBackground.transform.localScale.x, 0.45f, Time.deltaTime * 10f), 1f, 1f);
-                }
-
-                selectables[i].nameText.GetComponent<TextMesh>().text = selectables[i].currentName;
-                selectables[i].nameText2.GetComponent<TextMesh>().text = selectables[i].currentName;
-
-                selectables[i].nameText.GetComponent<TextMesh>().color = new Color(selectables[i].nameText.GetComponent<TextMesh>().color.r, selectables[i].nameText.GetComponent<TextMesh>().color.g, selectables[i].nameText.GetComponent<TextMesh>().color.b, selectables[i].nameBackground.transform.localScale.x);
-                selectables[i].nameText2.GetComponent<TextMesh>().color = new Color(selectables[i].nameText2.GetComponent<TextMesh>().color.r, selectables[i].nameText2.GetComponent<TextMesh>().color.g, selectables[i].nameText2.GetComponent<TextMesh>().color.b, selectables[i].nameBackground.transform.localScale.x);
-                selectables[i].controllerText.GetComponent<TextMesh>().color = new Color(selectables[i].controllerText.GetComponent<TextMesh>().color.r, selectables[i].controllerText.GetComponent<TextMesh>().color.g, selectables[i].controllerText.GetComponent<TextMesh>().color.b, selectables[i].nameBackground.transform.localScale.x);
-                selectables[i].controllerText2.GetComponent<TextMesh>().color = new Color(selectables[i].controllerText2.GetComponent<TextMesh>().color.r, selectables[i].controllerText2.GetComponent<TextMesh>().color.g, selectables[i].controllerText2.GetComponent<TextMesh>().color.b, selectables[i].nameBackground.transform.localScale.x);
-
-                selectables[i].nameBackground.transform.localPosition = new Vector3(selectables[i].nameBackground.GetComponent<SpriteRenderer>().bounds.size.x*0.9f +2.0f, 0.26f, 0.1f);
-                selectables[i].controllerBackground.transform.localPosition = new Vector3(selectables[i].nameBackground.GetComponent<SpriteRenderer>().bounds.size.x * 1.78f + selectables[i].controllerBackground.GetComponent<SpriteRenderer>().bounds.size.x + 1.8f, 0.26f, 0.1f);
-                selectables[i].arrowBackground.transform.localPosition = new Vector3(3.74f + selectables[i].nameBackground.GetComponent<SpriteRenderer>().bounds.size.x * 1.78f + selectables[i].controllerBackground.GetComponent<SpriteRenderer>().bounds.size.x*1.81f, 0.26f, 0.1f);
-                selectables[i].arrow.transform.localPosition = new Vector3(selectables[i].arrowBackground.transform.localPosition.x + 0.00f, 0.26f, 0f);
-
-
-            }
-
-        }
-        else if (phase == 7)
-        {
-
-            transition += Time.deltaTime;
-            if (transition >= 1f)
-            {
-                transition = 1f;
-                toWorld();
-            }
-
-            preparation.volume = 1f - transition;
-            fading.GetComponent<SpriteRenderer>().color = new Color(fading.GetComponent<SpriteRenderer>().color.r, fading.GetComponent<SpriteRenderer>().color.g, fading.GetComponent<SpriteRenderer>().color.b, transition);
 
         }
 
@@ -1145,75 +639,6 @@ public class MenuScript : MonoBehaviour {
             icon.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Legends/"+currentLegend);
         }
 
-    }
-
-    private void toWorld()
-    {
-
-        int aux = 0;
-
-        for (int i = 0; i < selectables.Length; i++)
-        {
-            if (selectables[i].status == "opened")
-            {
-                GlobalData.agents[aux] = new MainCharacter();
-                if (selectables[i].controller == "CPU")
-                {
-                    //NADA QUE HACER, NO ES UN PLAYER
-                }
-                else
-                {
-                    GlobalData.agents[aux].player = selectables[i].player;
-                }
-                
-                aux++;
-            }
-        }
-
-        GlobalData.activeAgents = aux;
-        Application.LoadLevel("World");
-
-    }
-
-    private void clickOnReady()
-    {
-        selectableAgent myAgent = null;
-
-        if (int.Parse(Network.player.ToString()) == 0 || !GlobalData.online)
-        {
-            myAgent = selectables[0];
-        }
-        else
-        {
-            for (int i = 1; i < selectables.Length; i++)
-            {
-                if (int.Parse(selectables[i].player.ToString()) != 0 && selectables[i].player.ToString() == Network.player.ToString())
-                {
-                    myAgent = selectables[i];
-                }
-            }
-        }
-
-        if (!myAgent.tick.activeInHierarchy)
-        {
-            if (GlobalData.online)
-            {
-                if (int.Parse(Network.player.ToString()) == 0)
-                {
-                    // ES EL SERVER
-                    selectables[0].tick.SetActive(true);
-                    updatePlayer(0);
-                }
-                else
-                {
-                    GetComponent<NetworkView>().RPC("readyRequest", RPCMode.Server, Network.player);
-                }
-            }
-            else
-            {
-                selectables[0].tick.SetActive(true);
-            }
-        }
     }
 
 

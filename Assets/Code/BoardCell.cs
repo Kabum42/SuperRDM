@@ -1,10 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class BoardCell {
+public class BoardCell : System.IEquatable<BoardCell> {
 
     public Biome biome;
     public GameObject root;
+    public GameObject text;
+    public int positionInArray = 0;
 
     public int ring = 0;
 
@@ -19,7 +21,6 @@ public class BoardCell {
     public BoardCell()
     {
 
-       
     }
 
     public void randomBiome()
@@ -45,8 +46,6 @@ public class BoardCell {
             changeBiome(Biome.Forest);
         }
 
-		Debug.Log (Biome.Forest);
-
     }
 
     public void changeBiome(Biome auxBiome)
@@ -55,6 +54,24 @@ public class BoardCell {
         biome = auxBiome;
         root.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("BoardCells/" + GlobalData.biomeNames[(int)biome]);
     
+    }
+
+    public bool isConnected(BoardCell b)
+    {
+        if (northWest == b) { return true; }
+        if (north == b) { return true; }
+        if (northEast == b) { return true; }
+
+        if (southWest == b) { return true; }
+        if (south == b) { return true; }
+        if (southEast == b) { return true; }
+
+        return false;
+    }
+
+    public bool Equals(BoardCell other)
+    {
+        return positionInArray == other.positionInArray;
     }
 
 }

@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class WorldScript : MonoBehaviour {
 
@@ -21,12 +22,20 @@ public class WorldScript : MonoBehaviour {
     private GameObject fading;
     private AudioSource musicWorld;
     private GameObject selectedSprite;
+    private bool usedDijkstra = false;
+    private List<BoardCell> unvisited;
+    private int[] distances;
+    private List<List<int>> candidates;
+    private List<int> reachables;
 
     private float lastDPadX = 0f;
     private float lastDPadY = 0f;
     private string lastHorizontal = "down";
 
+    private GameObject[] UIAgents;
+
     private AudioSource selectCellEffect;
+    private AudioSource pieceSound;
 
     private int currentMountains = 0;
     private int goalMountains = 0;
@@ -37,6 +46,25 @@ public class WorldScript : MonoBehaviour {
     private int currentSwamps = 0;
     private int goalSwamps = 0;
 
+    private int movingAgent = 0;
+    private float movingDelta = 0f;
+    private List<int> movingList = null;
+    private int previousAuxPosition = -1;
+
+    private GameObject ribbon;
+    private GameObject ribbonOver;
+    private bool ribbonAppearing = false;
+    private AudioSource ribbonSound;
+
+    private GameObject actionWalk;
+    private GameObject actionAttack;
+    private GameObject actionHeal;
+    private GameObject actionLook;
+    private GameObject actionSail;
+
+    private float thinkingIA = 1f;
+
+
     // Use this for initialization
     void Start () {
 
@@ -44,8 +72,6 @@ public class WorldScript : MonoBehaviour {
         {
             GlobalData.Start();
         }
-       
-        
 
         //boardCells = new BoardCell[37];
 
@@ -60,10 +86,37 @@ public class WorldScript : MonoBehaviour {
         selectCellEffect.volume = 1f;
         selectCellEffect.playOnAwake = false;
 
+        pieceSound = gameObject.AddComponent<AudioSource>();
+        pieceSound.clip = Resources.Load("Music/Pieces/Piece_01") as AudioClip;
+        pieceSound.volume = 1f;
+        pieceSound.playOnAwake = false;
+
         fading = GameObject.Find("Fading");
 
         selectedSprite = GameObject.Find("SelectedSprite");
-        
+
+        ribbon = GameObject.Find("Ribbon");
+        ribbonOver = GameObject.Find("Ribbon_Over");
+        ribbonOver.SetActive(false);
+        ribbon.SetActive(false);
+
+        ribbonSound = gameObject.AddComponent<AudioSource>();
+        ribbonSound.clip = Resources.Load("Music/RibbonSound") as AudioClip;
+        ribbonSound.volume = 1f;
+        ribbonSound.playOnAwake = false;
+
+        actionAttack = GameObject.Find("Attack");
+        actionAttack.SetActive(false);
+        actionHeal = GameObject.Find("Heal");
+        actionHeal.SetActive(false);
+        actionLook = GameObject.Find("Look");
+        actionLook.SetActive(false);
+        actionSail = GameObject.Find("Sail");
+        actionSail.SetActive(false);
+        actionWalk = GameObject.Find("Walk");
+        actionWalk.SetActive(false);
+
+        UIAgents = new GameObject[GlobalData.activeAgents];
 
         int numCells = 1;
         
@@ -90,7 +143,10 @@ public class WorldScript : MonoBehaviour {
         {
             BoardCell b = new BoardCell();
             b.root = Instantiate(Resources.Load("Prefabs/BoardCell")) as GameObject;
+            b.text = b.root.transform.FindChild("Text").gameObject;
+            b.text.SetActive(false);
             boardCells[i] = b;
+            b.positionInArray = i;
         }
 
         GenerateBoard();
@@ -104,10 +160,11 @@ public class WorldScript : MonoBehaviour {
                 GameObject g = Instantiate(Resources.Load("Prefabs/UIAgent") as GameObject);
                 g.name = "UIAgent" + i;
                 g.transform.parent = GameObject.Find("UIAgents").transform;
-                g.transform.localPosition = new Vector3(9.64f, 1.5f * 2.5f - GlobalData.order[i] * 1.5f, 0f);
                 g.transform.FindChild("PictureHolder").gameObject.GetComponent<SpriteRenderer>().color = GlobalData.colorCharacters[i];
+                UIAgents[i] = g;
             }
         }
+
         
         for (int i = 0; i < GlobalData.activeAgents; i++)
         {
@@ -116,45 +173,503 @@ public class WorldScript : MonoBehaviour {
 
 	}
 
-    void RandomizeTurns()
+    void OnDisconnectedFromServer(NetworkDisconnection info)
+    {
+        Application.LoadLevel("Menu");
+    }
+
+    [RPC]
+    void moveRequestRPC(NetworkPlayer player, int i)
+    {
+
+        if (GlobalData.agents[GlobalData.currentAgentTurn].player == player) {
+
+            List<int> path = DijkstraTarget(i, GlobalData.agents[GlobalData.currentAgentTurn]);
+
+            if (path != null)
+            {
+                // HA SIDO UN REQUEST VALIDO Y LEGAL
+                GetComponent<NetworkView>().RPC("moveAgentRPC", RPCMode.All, GlobalData.currentAgentTurn, path[path.Count-1]);
+            }
+
+        }
+
+    }
+
+    [RPC]
+    void moveAgentRPC(int agent, int  endOfPath)
+    {
+        moveAgent(agent, endOfPath);
+    }
+
+    void moveAgent(int agent, int endOfPath) {
+
+        List<int> path = DijkstraTarget(endOfPath, GlobalData.agents[agent]);
+        // ESTO LUEGO SE CAMBIA OBVIAMENTE
+
+        if (path != null) {
+
+            movingAgent = agent;
+            movingDelta = 0f;
+            movingList = path;
+
+        }
+
+        
+    }
+
+    [RPC]
+    void nextTurnRequestRPC(NetworkPlayer player)
+    {
+
+        if (GlobalData.agents[GlobalData.currentAgentTurn].player == player) {
+
+            GetComponent<NetworkView>().RPC("nextTurnRPC", RPCMode.All);
+
+        }
+
+    }
+
+    [RPC]
+    void nextTurnRPC()
+    {
+        nextTurn();
+    }
+
+    void nextTurn()
+    {
+
+        int auxOrder = 0;
+        for (int i = 0; i < GlobalData.activeAgents; i++)
+        {
+            if (GlobalData.currentAgentTurn == GlobalData.order[i]) { auxOrder = i; }
+        }
+        auxOrder++;
+        if (auxOrder > GlobalData.activeAgents - 1) { auxOrder = 0; }
+        GlobalData.currentAgentTurn = GlobalData.order[auxOrder];
+        usedDijkstra = false;
+
+    }
+
+    private void RandomizeTurns()
     {
         GlobalData.order = new int[GlobalData.activeAgents];
 
+        List<int> positions = new List<int>();
+
         for (int i = 0; i < GlobalData.order.Length; i++)
         {
-            // DEFAULT ORDER
-            GlobalData.order[i] = i;
+            positions.Add(i);
         }
 
-        float startingPerlin = 0.2347234747f;
+        float startingPerlin = 34.785625f;
 
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < GlobalData.order.Length; i++)
         {
-            // SWAPS
-            //int first_element = Random.Range(0, GlobalData.order.Length);
-            int first_element = (int) (Mathf.PerlinNoise(startingPerlin, GlobalData.boardSeed) * GlobalData.order.Length);
-            startingPerlin += 1.233427424f;
-            int second_element = (int) (Mathf.PerlinNoise(startingPerlin, GlobalData.boardSeed) * GlobalData.order.Length);
-            startingPerlin += 1.233427424f;
-            int aux = GlobalData.order[first_element];
-            GlobalData.order[first_element] = GlobalData.order[second_element];
-            GlobalData.order[second_element] = aux;
+            int j = (int) Mathf.Ceil(Hacks.BinaryPerlin(0, positions.Count-1, 3, 0.23425f + startingPerlin, GlobalData.boardSeed));
+            GlobalData.order[i] = positions[j];
+            positions.RemoveAt(j);
+            startingPerlin += 2.5662845f;
         }
 
-        GlobalData.currentAgentTurn = (int)(Mathf.PerlinNoise(startingPerlin, GlobalData.boardSeed) * GlobalData.order.Length);
+
+        GlobalData.currentAgentTurn = (int) Mathf.Ceil(Hacks.BinaryPerlin(0, GlobalData.order.Length-1, 3, 0.23425f + startingPerlin, GlobalData.boardSeed));
         Debug.Log(GlobalData.currentAgentTurn);
 
     }
 
+    private List<int> Dijkstra()
+    {
+        usedDijkstra = true;
+
+        distances = new int[boardCells.Length];
+        unvisited = new List<BoardCell>();
+        for (int i = 0; i < distances.Length; i++)
+        {
+            distances[i] = int.MaxValue;
+            unvisited.Add(boardCells[i]);
+        }
+
+        distances[GlobalData.agents[GlobalData.currentAgentTurn].currentCell] = 0;
+
+        visitCell(boardCells[GlobalData.agents[GlobalData.currentAgentTurn].currentCell]);
+
+        List <int> reachables = new List<int>();
+
+        for (int i = 0; i < boardCells.Length; i++)
+        {
+            if (distances[i] <= GlobalData.agents[GlobalData.currentAgentTurn].getCurrentSteps())
+            {
+                reachables.Add(boardCells[i].positionInArray);
+            }
+        }
+
+        return reachables;
+    }
+
+    private void visitCell(BoardCell b)
+    {
+
+        if (unvisited.Contains(b)) {
+            unvisited.Remove(b);
+        }
+        
+
+        // CHANGE DISTANCES
+        if (b.northWest != null && distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.northWest.biome] < distances[b.northWest.positionInArray]) { distances[b.northWest.positionInArray] = distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.northWest.biome]; visitCell(b.northWest);  }
+        if (b.north != null && distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.north.biome] < distances[b.north.positionInArray]) { distances[b.north.positionInArray] = distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.north.biome]; visitCell(b.north);  }
+        if (b.northEast != null && distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.northEast.biome] < distances[b.northEast.positionInArray]) { distances[b.northEast.positionInArray] = distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.northEast.biome]; visitCell(b.northEast);  }
+
+        if (b.southWest != null && distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.southWest.biome] < distances[b.southWest.positionInArray]) { distances[b.southWest.positionInArray] = distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.southWest.biome]; visitCell(b.southWest);  }
+        if (b.south != null && distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.south.biome] < distances[b.south.positionInArray]) { distances[b.south.positionInArray] = distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.south.biome]; visitCell(b.south);  }
+        if (b.southEast != null && distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.southEast.biome] < distances[b.southEast.positionInArray]) { distances[b.southEast.positionInArray] = distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.southEast.biome]; visitCell(b.southEast);  }
+        
+
+        // VISIT NEIGHBOURS
+        if (unvisited.Count > 0)
+        {
+            // NORTH
+            if (b.northWest != null) {
+                if (unvisited.Contains(b.northWest))
+                {
+                    visitCell(b.northWest); 
+                }
+            }
+
+            if (b.north != null) { 
+                if (unvisited.Contains(b.north)) {
+                    visitCell(b.north); 
+                }
+            }
+            
+            if (b.northEast != null) { 
+                if (unvisited.Contains(b.northEast)) {
+                    visitCell(b.northEast); 
+                }
+            }
+
+            // SOUTH
+            if (b.southWest != null) {
+                if (unvisited.Contains(b.southWest))
+                {
+                    visitCell(b.southWest); 
+                }
+            }
+
+            if (b.south != null) {
+                if (unvisited.Contains(b.south))
+                {
+                    visitCell(b.south); 
+                }
+            }
+
+            if (b.southEast != null) { 
+                if (unvisited.Contains(b.southEast)) {
+                    visitCell(b.southEast); 
+                }
+            }
+
+        }
+        
+    }
+
+    private List<int> DijkstraTarget(int numCell, MainCharacter agent)
+    {
+
+        candidates = new List<List<int>>();
+
+        List<int> list = new List<int>();
+        list.Add(agent.currentCell);
+
+        visitCellTarget(list, boardCells[agent.currentCell], numCell, agent.getCurrentSteps());
+
+        List<int> bestList = null;
+        int bestSteps = int.MaxValue;
+
+        //Debug.Log("CANDIDATES: " + candidates.Count);
+
+        for (int i = 0; i < candidates.Count; i++)
+        {
+            int currentSteps = 0;
+            for (int j = 0; j < candidates[i].Count; j++)
+            {
+                currentSteps += GlobalData.biomeCosts[(int)boardCells[candidates[i][j]].biome];
+            }
+            if (currentSteps < bestSteps)
+            {
+                bestSteps = currentSteps;
+                bestList = candidates[i];
+            }
+        }
+
+        return bestList;
+    }
+
+    private void visitCellTarget(List<int> list, BoardCell b, int numTarget, int currentSteps)
+    {
+
+        int auxSteps = currentSteps;
+
+        // NORTH
+        if (b.northWest != null)
+        {
+            if (GlobalData.biomeCosts[(int)b.northWest.biome] <= currentSteps && !list.Contains(b.northWest.positionInArray))
+            {
+                auxSteps = currentSteps;
+                List<int> newList = copyList(list);
+                newList.Add(b.northWest.positionInArray);
+                auxSteps -= GlobalData.biomeCosts[(int)b.northWest.biome];
+                if (b.northWest.positionInArray == numTarget) { candidates.Add(newList); }
+                visitCellTarget(newList, b.northWest, numTarget, auxSteps);
+            }
+        }
+
+        if (b.north != null)
+        {
+            if (GlobalData.biomeCosts[(int)b.north.biome] <= currentSteps && !list.Contains(b.north.positionInArray))
+            {
+                auxSteps = currentSteps;
+                List<int> newList = copyList(list);
+                newList.Add(b.north.positionInArray);
+                auxSteps -= GlobalData.biomeCosts[(int)b.north.biome];
+                if (b.north.positionInArray == numTarget) { candidates.Add(newList); }
+                visitCellTarget(newList, b.north, numTarget, auxSteps);
+            }
+        }
+
+        if (b.northEast != null)
+        {
+            if (GlobalData.biomeCosts[(int)b.northEast.biome] <= currentSteps && !list.Contains(b.northEast.positionInArray))
+            {
+                auxSteps = currentSteps;
+                List<int> newList = copyList(list);
+                newList.Add(b.northEast.positionInArray);
+                auxSteps -= GlobalData.biomeCosts[(int)b.northEast.biome];
+                if (b.northEast.positionInArray == numTarget) { candidates.Add(newList); }
+                visitCellTarget(newList, b.northEast, numTarget, auxSteps);
+            }
+        }
+
+        // SOUTH
+        if (b.southWest != null)
+        {
+            if (GlobalData.biomeCosts[(int)b.southWest.biome] <= currentSteps && !list.Contains(b.southWest.positionInArray))
+            {
+                auxSteps = currentSteps;
+                List<int> newList = copyList(list);
+                newList.Add(b.southWest.positionInArray);
+                auxSteps -= GlobalData.biomeCosts[(int)b.southWest.biome];
+                if (b.southWest.positionInArray == numTarget) { candidates.Add(newList); }
+                visitCellTarget(newList, b.southWest, numTarget, auxSteps);
+            }
+        }
+
+        if (b.south != null)
+        {
+            if (GlobalData.biomeCosts[(int)b.south.biome] <= currentSteps && !list.Contains(b.south.positionInArray))
+            {
+                auxSteps = currentSteps;
+                List<int> newList = copyList(list);
+                newList.Add(b.south.positionInArray);
+                auxSteps -= GlobalData.biomeCosts[(int)b.south.biome];
+                if (b.south.positionInArray == numTarget) { candidates.Add(newList); }
+                visitCellTarget(newList, b.south, numTarget, auxSteps);
+            }
+        }
+
+        if (b.southEast != null)
+        {
+            if (GlobalData.biomeCosts[(int)b.southEast.biome] <= currentSteps && !list.Contains(b.southEast.positionInArray))
+            {
+                auxSteps = currentSteps;
+                List<int> newList = copyList(list);
+                newList.Add(b.southEast.positionInArray);
+                auxSteps -= GlobalData.biomeCosts[(int)b.southEast.biome];
+                if (b.southEast.positionInArray == numTarget) { candidates.Add(newList); }
+                visitCellTarget(newList, b.southEast, numTarget, auxSteps);
+            }
+        }
+
+
+        // ESTO LIBERA LA MEMORIA DE ESA VARIABLE
+        list = null;
+
+    }
+
+    private List<int> copyList(List<int> source)
+    {
+        List<int> newList = new List<int>();
+
+        for (int i = 0; i < source.Count; i++)
+        {
+            newList.Add(source[i]);
+        }
+
+        return newList;
+    }
+
+
+
     // Update is called once per frame
     void Update()
     {
+
+        if (GlobalData.currentAgentTurn == GlobalData.myAgent && !usedDijkstra && movingList == null)
+        {
+            reachables = Dijkstra();
+
+            ribbon.transform.position = new Vector3(0f, 8f, -4f);
+            ribbon.SetActive(true);
+            ribbonOver.SetActive(true);
+            Hacks.SpriteRendererAlpha(ribbon, 0f);
+            Hacks.SpriteRendererAlpha(ribbonOver, 0f);
+            ribbonAppearing = true;
+            ribbonSound.Play();
+        }
+
+        if (ribbon.activeInHierarchy) {
+            if (ribbonAppearing) {
+                Hacks.SpriteRendererAlpha(ribbon, Mathf.Lerp(ribbon.GetComponent<SpriteRenderer>().color.a, 1f, Time.deltaTime*5f));
+                Hacks.SpriteRendererAlpha(ribbonOver, Mathf.Lerp(ribbon.GetComponent<SpriteRenderer>().color.a, 1f, Time.deltaTime*5f));
+                ribbon.transform.position = new Vector3(0f, Mathf.Lerp(ribbon.transform.position.y, 6.3f, Time.deltaTime*5f), -4f); 
+                if (ribbon.GetComponent<SpriteRenderer>().color.a >= 0.99f) {
+                    ribbonAppearing = false;
+                }
+            }
+            else {
+                Hacks.SpriteRendererAlpha(ribbon, ribbon.GetComponent<SpriteRenderer>().color.a - Time.deltaTime*2f);
+                Hacks.SpriteRendererAlpha(ribbonOver, ribbon.GetComponent<SpriteRenderer>().color.a - Time.deltaTime*2f);
+                if (ribbon.GetComponent<SpriteRenderer>().color.a <= 0f) {
+                    ribbon.SetActive(false);
+                    ribbonOver.SetActive(false);
+                }
+            }
+        }
+
+        // BRIGHTNESS CELLS
+        if (usedDijkstra) {
+            for (int i = 0; i < boardCells.Length; i++)
+            {
+                if (!reachables.Contains(i)) {
+                    float aux = Mathf.Lerp(boardCells[i].root.GetComponent<SpriteRenderer>().color.r, 0.3f, Time.deltaTime*5f);
+                    boardCells[i].root.GetComponent<SpriteRenderer>().color = new Color(aux, aux, aux, 1f);
+                }
+            }
+        } else {
+            for (int i = 0; i < boardCells.Length; i++)
+            {
+                float aux = Mathf.Lerp(boardCells[i].root.GetComponent<SpriteRenderer>().color.r, 1f, Time.deltaTime*5f);
+                boardCells[i].root.GetComponent<SpriteRenderer>().color = new Color(aux, aux, aux, 1f);
+            }
+        }
+        
 
         if (Input.GetKey(KeyCode.Return))
         {
             GlobalData.boardSeed = Random.Range(0f, 100f);
             GenerateBoard();
         }
+
+        if (Input.GetKeyDown(KeyCode.Space) && GlobalData.currentAgentTurn == GlobalData.myAgent)
+        {
+
+            //NextTurn();
+            
+        }
+
+        // Place Champions
+        if (movingList != null) {
+
+            movingDelta += Time.deltaTime;
+            float timeToMove = 0.25f;
+
+            int auxPosition =  (int) Mathf.Floor(Mathf.Clamp((movingDelta+timeToMove)*(1f/timeToMove), 0, movingList.Count-1));
+
+            if (auxPosition != previousAuxPosition) 
+            { 
+                int sound = Random.Range(1, 9);
+                pieceSound.clip = Resources.Load("Music/Pieces/Piece_"+sound.ToString("00")) as AudioClip;
+                pieceSound.Play();
+            }
+            previousAuxPosition = auxPosition;
+
+            GlobalData.agents[movingAgent].currentCell = movingList[auxPosition];
+
+            if (auxPosition == movingList.Count-1) {
+                movingAgent = -1;
+                movingDelta = 0f;
+                movingList = null;
+                previousAuxPosition = -1;
+            }
+
+        }
+
+        for (int i = 0; i < GlobalData.activeAgents; i++)
+        {
+            GlobalData.agents[i].cellChampion.transform.position = new Vector3(Mathf.Lerp(GlobalData.agents[i].cellChampion.transform.position.x, boardCells[GlobalData.agents[i].currentCell].root.transform.position.x, Time.deltaTime * 10f), Mathf.Lerp(GlobalData.agents[i].cellChampion.transform.position.y, boardCells[GlobalData.agents[i].currentCell].root.transform.position.y, Time.deltaTime * 10f), GlobalData.agents[i].cellChampion.transform.position.z);
+        }
+
+        // Place UI Agents
+        if (movingList == null) {
+
+            float default_y = 1.85f;
+            float total_y = (GlobalData.activeAgents-1) * default_y  +(default_y+1f);
+            float current_y = 0f;
+
+            for (int i = 0; i < GlobalData.order.Length; i++)
+            {
+                int j = GlobalData.order[i];
+
+                if (GlobalData.currentAgentTurn == GlobalData.order[i])
+                {
+                    current_y += 0.5f;
+                }
+
+                UIAgents[j].transform.localPosition = new Vector3(9.64f, Mathf.Lerp(UIAgents[j].transform.localPosition.y, (total_y - 1) / 2f - current_y, Time.deltaTime*10f), 0f);
+
+                if (GlobalData.currentAgentTurn == GlobalData.order[i])
+                {
+                    UIAgents[j].transform.localScale = new Vector3(Mathf.Lerp(UIAgents[j].transform.localScale.x, 1.62f, Time.deltaTime * 10f), Mathf.Lerp(UIAgents[j].transform.localScale.y, 1.62f, Time.deltaTime * 10f), Mathf.Lerp(UIAgents[j].transform.localScale.z, 1.62f, Time.deltaTime * 10f));
+                    current_y += default_y + 0.5f;
+                }
+                else
+                {
+                    UIAgents[j].transform.localScale = new Vector3(Mathf.Lerp(UIAgents[j].transform.localScale.x, 1f, Time.deltaTime * 10f), Mathf.Lerp(UIAgents[j].transform.localScale.y, 1f, Time.deltaTime * 10f), Mathf.Lerp(UIAgents[j].transform.localScale.z, 1f, Time.deltaTime * 10f));
+                    current_y += default_y;
+                }
+                
+            }
+
+        }
+        
+
+        if (movingList == null && GlobalData.agents[GlobalData.currentAgentTurn].IA && (int.Parse(Network.player.ToString()) == 0 || !GlobalData.online))
+        {
+            thinkingIA -= Time.deltaTime;
+
+            if (thinkingIA <= 0f) {
+                if (GlobalData.online) { 
+                    reachables = Dijkstra();
+                    int aux = Random.Range(0, reachables.Count);
+                    GetComponent<NetworkView>().RPC("moveAgentRPC", RPCMode.All, GlobalData.currentAgentTurn, reachables[aux]);
+                    GetComponent<NetworkView>().RPC("nextTurnRPC", RPCMode.All);
+                    reachables = null; 
+                }
+                else { 
+                    reachables = Dijkstra();
+                    int aux = Random.Range(0, reachables.Count);
+                    moveAgent(GlobalData.currentAgentTurn, reachables[aux]);
+                    nextTurn(); 
+                    reachables = null; 
+                }
+                thinkingIA = 1 + Random.Range(0f, 1f);
+            }
+        }
+
+		if (Input.GetKey(KeyCode.Space))
+		{
+			Application.LoadLevel("Battle");
+		}
 
         //Debug.Log(boardCells[1].south);
         //boardCells[1].south.root.transform.position = boardCells[1].south.root.transform.position + new Vector3(0f, 0.02f, 0f);
@@ -177,20 +692,13 @@ public class WorldScript : MonoBehaviour {
         else if (phase == 1)
         {
             // TIME TO SELECT YOUR SANCTUARY
+            phase = 2;
         }
-        else
+        else if (movingList == null)
         {
-            int controllerConnected = -1;
-            for (int i = 0; i < Input.GetJoystickNames().Length; i++)
-            {
-                if (Input.GetJoystickNames()[i] != "")
-                {
-                    controllerConnected = i;
-                    break;
-                }
-            }
 
-            if (controllerConnected != -1)
+
+            if (Hacks.ControllerAnyConnected())
             {
                 // CONTROLLER PLUGGED
                 if (!selectedSprite.activeInHierarchy)
@@ -343,11 +851,41 @@ public class WorldScript : MonoBehaviour {
                         selectedSprite.SetActive(true);
                         selected = boardCells[i];
                     }
-                }
 
-                if (ClickedOn(selected.root))
-                {
-                    // MOVE TO THE CELL??
+                    if (GlobalData.currentAgentTurn == GlobalData.myAgent && ClickedOn(boardCells[i].root) && reachables.Contains(i))
+                    {
+                        // MOVE TO THE CELL??
+                        if (GlobalData.online)
+                        {
+                            if (int.Parse(Network.player.ToString()) == 0)
+                            {
+                                // ES EL SERVER
+                                List<int> path = DijkstraTarget(i, GlobalData.agents[GlobalData.currentAgentTurn]);
+
+                                if (path != null) {
+                                    GetComponent<NetworkView>().RPC("moveAgentRPC", RPCMode.All, GlobalData.myAgent, path[path.Count-1]);
+                                    GetComponent<NetworkView>().RPC("nextTurnRPC", RPCMode.All);
+                                }
+
+                            }
+                            else
+                            {
+                                // ES UN CLIENTE
+                                GetComponent<NetworkView>().RPC("moveRequestRPC", RPCMode.Server, Network.player, i);
+                                GetComponent<NetworkView>().RPC("nextTurnRequestRPC", RPCMode.Server, Network.player);
+                            }
+                        }
+                        else
+                        {
+                            List<int> path = DijkstraTarget(i, GlobalData.agents[GlobalData.currentAgentTurn]);
+
+                            if (path != null) {
+                                moveAgent(GlobalData.myAgent, path[path.Count-1]);
+                                nextTurn();
+                            }
+                            
+                        }
+                    }
                 }
 
             }
@@ -365,12 +903,17 @@ public class WorldScript : MonoBehaviour {
     void AddSanctuary(int agent, int num)
     {
         BoardCell b = boardCells[currentCell];
-        b.root = Instantiate(Resources.Load("Prefabs/BoardCell")) as GameObject;
         b.ring = 4;
         b.changeBiome(Biome.Sanctuary);
+        b.root.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("BoardCells/" + GlobalData.biomeNames[(int)Biome.Sanctuary] + "_" +(agent+1).ToString("00"));
         b.root.GetComponent<SpriteRenderer>().color = GlobalData.colorCharacters[agent];
         b.root.transform.parent = board.transform;
         b.root.name = "Cell_" + 4 + "_" + num;
+
+        GlobalData.agents[agent].currentCell = currentCell;
+        GlobalData.agents[agent].cellChampion = Instantiate(Resources.Load("Prefabs/Champion")) as GameObject;
+        GlobalData.agents[agent].cellChampion.name = "Champion_" + agent;
+        GlobalData.agents[agent].cellChampion.transform.parent = GameObject.Find("Champions").transform;
 
         if (num == 0) {
             positionCell(b, 2, 3);
@@ -406,7 +949,9 @@ public class WorldScript : MonoBehaviour {
             connectCells(b, "south", boardCells[35]);
             connectCells(b, "southEast", boardCells[36]);
         }
-        
+
+        GlobalData.agents[agent].cellChampion.transform.position = new Vector3(boardCells[GlobalData.agents[agent].currentCell].root.transform.position.x, boardCells[GlobalData.agents[agent].currentCell].root.transform.position.y, GlobalData.agents[agent].cellChampion.transform.position.z);
+
         currentCell++;
 
     }
@@ -422,11 +967,11 @@ public class WorldScript : MonoBehaviour {
         // 2-3 PLAYERS : 1 MOUNTAIN
         // 4-5 PLAYERS : 1-2 MOUNTAINS
         // 6 PLAYERS : 1-3 MOUNTAINS
-        goalMountains = 1 + (int) Mathf.Floor((Mathf.PerlinNoise(0.1f, GlobalData.boardSeed) * (GlobalData.activeAgents / 2 )));
+        goalMountains = 1 + (int) Mathf.Floor((Mathf.Clamp(Mathf.PerlinNoise(0.1f, GlobalData.boardSeed), 0f, 1f) * (GlobalData.activeAgents / 2 )));
         // 2-4 LAKES
-        goalLakes = 2 + (int)Mathf.Floor((Mathf.PerlinNoise(3.1f, GlobalData.boardSeed) * 3f));
+        goalLakes = 2 + (int)Mathf.Floor((Mathf.Clamp(Mathf.PerlinNoise(3.1f, GlobalData.boardSeed), 0f, 1f) * 3f));
         // 5-6 SWAMPS
-        goalSwamps = 5 + (int)Mathf.Floor((Mathf.PerlinNoise(6.1f, GlobalData.boardSeed) * 2f));
+        goalSwamps = 5 + (int)Mathf.Floor((Mathf.Clamp(Mathf.PerlinNoise(6.1f, GlobalData.boardSeed), 0f, 1f) * 2f));
 
         // RINGS
         for (int i = 0; i <= numRings; i++)
@@ -441,7 +986,7 @@ public class WorldScript : MonoBehaviour {
                 while (currentMountains < goalMountains)
                 {
 
-                    int target = 1 + (int)Mathf.Floor((Mathf.PerlinNoise(startingX, GlobalData.boardSeed) * 6f));
+                    int target = 1 + (int)Mathf.Floor((Mathf.Clamp(Mathf.PerlinNoise(startingX, GlobalData.boardSeed), 0f, 1f) * 6f));
                     if (boardCells[target].biome == Biome.Desert)
                     {
                         boardCells[target].changeBiome(Biome.Mountain);
@@ -462,7 +1007,7 @@ public class WorldScript : MonoBehaviour {
                 while (currentLakes < goalLakes)
                 {
 
-                    int target = 7 + (int)Mathf.Floor((Mathf.PerlinNoise(startingX, GlobalData.boardSeed) * 12f));
+                    int target = 7 + (int)Mathf.Floor((Mathf.Clamp(Mathf.PerlinNoise(startingX, GlobalData.boardSeed), 0f, 1f) * 12f));
                     if (boardCells[target].biome == Biome.Forest)
                     {
                         boardCells[target].changeBiome(Biome.Lake);
@@ -806,7 +1351,6 @@ public class WorldScript : MonoBehaviour {
             b1.southWest = b2;
             b2.northEast = b1;
         }
-
 
     }
 

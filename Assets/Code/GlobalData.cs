@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public static class GlobalData {
@@ -9,19 +9,26 @@ public static class GlobalData {
 	public static int MaxEnemies;
     public static string OS;
     public static MainCharacter[] agents = new MainCharacter[6];
+    public static int myAgent = 0;
     public static int[] order;
     public static int currentAgentTurn = 0;
     public static int activeAgents = 0;
     public static Color color0 = new Color(1f, 0.62f, 0.62f);
     public static Color color1 = new Color(0.62f, 1f, 0.62f);
-    public static Color color2 = new Color(0.62f, 0.62f, 1f);
+    public static Color color2 = new Color(0.25f, 0.5f, 1f);
     public static Color color3 = new Color(0.62f, 1f, 1f);
     public static Color color4 = new Color(1f, 0.62f, 1f);
     public static Color color5 = new Color(1f, 1f, 0.62f);
     public static Color[] colorCharacters = {color0, color1, color2, color3, color4, color5};
     public static string[] biomeNames;
+    public static int[] biomeCosts;
+
+	public static EventCharacter[] RandomEnemies = new EventCharacter[3];
+	public static Skill[] Skills = new Skill[24];
+	public static Class[] Classes = new Class[7];
 
     public static bool online = false;
+    public static bool hosting = false;
     public static bool connected = false;
     public static float boardSeed = 42f;
 
@@ -55,6 +62,52 @@ public static class GlobalData {
 		biomeNames[(int) Biome.Harbour1] = "Dock_1";
 		biomeNames[(int) Biome.Harbour2] = "Dock_2";
 		biomeNames[(int) Biome.Harbour3] = "Dock_3";
+		GenerateSkills ();
+		GenerateClasses ();
+		GenerateEnemies ();
+		agents[0] = new MainCharacter(0, "Player1", 175, 100, GlobalData.Classes[0]);
+
+        biomeCosts = new int[11];
+        biomeCosts[(int)Biome.Sanctuary] = 1;
+        biomeCosts[(int)Biome.Prairie] = 1;
+        biomeCosts[(int)Biome.Forest] = 2;
+        biomeCosts[(int)Biome.Swamp] = 3;
+        biomeCosts[(int)Biome.Lake] = 42;
+        biomeCosts[(int)Biome.Desert] = 4;
+        biomeCosts[(int)Biome.Mountain] = 5;
+        biomeCosts[(int)Biome.TheEvil] = 6;
+        biomeCosts[(int)Biome.Harbour1] = 1;
+        biomeCosts[(int)Biome.Harbour2] = 1;
+        biomeCosts[(int)Biome.Harbour3] = 1;
+
+        Language.Start();
+        //Language.currentLanguage = Language.Spanish;
+
+	}
+
+	private static void GenerateSkills(){
+		Skills [0] = new Skill (0, "Hack", 30, 0, 20, false);
+		Skills [1] = new Skill (1, "Axe Throw", 60, 0, 30, true);
+		Skills [2] = new Skill (2, "Wild Roar", 45, 0, 5, false);
+		
+	}
+
+	private static void GenerateClasses(){
+		Classes [0] = new Class (0, "Boar Ryder", Skills [0], Skills [1], Skills [2]);
+		Classes [6] = new Class (6, "Wolf", null, null, null);
+	}
+
+
+        
+
+        
+
+
+	private static void GenerateEnemies (){
+		Biome newBiome;
+		newBiome = Biome.Forest;
+		RandomEnemies [0] = new EventCharacter (1, "Wolf", 50, 100, Classes [6], Biome.Forest);
+		RandomEnemies[1] = new EventCharacter (2, "Wolf", 50, 100, Classes [6], Biome.Forest);
 
 	}
 	

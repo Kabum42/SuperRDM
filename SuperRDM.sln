@@ -17,8 +17,13 @@ Global
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
-<<<<<<< HEAD
-																																																																																																																																														GlobalSection(MonoDevelopProperties) = preSolution
+																																																																																																																																																																																																																																																					GlobalSection(MonoDevelopProperties) = preSolution
+=======
+																																																																																																																																																																																																																																										GlobalSection(MonoDevelopProperties) = preSolution
+>>>>>>> origin/Kabum42
+=======
+																																																																																																																																																																																		GlobalSection(MonoDevelopProperties) = preSolution
+>>>>>>> refs/remotes/origin/FrVonLettow
 =======
 																																																									GlobalSection(MonoDevelopProperties) = preSolution
 =======
