@@ -94,6 +94,12 @@ public static class GlobalData {
 
 	private static void GenerateClasses(){
 		Classes [0] = new Class (0, "Boar Ryder", Skills [0], Skills [1], Skills [2]);
+        Classes [1] = new Class (1, "Pilumantic", Skills [0], Skills [1], Skills [2]);
+        Classes [2] = new Class (2, "Dreamwalker", Skills [0], Skills [1], Skills [2]);
+        Classes [3] = new Class (3, "Henmancer", Skills [0], Skills [1], Skills [2]);
+        Classes [4] = new Class (4, "Disembodied", Skills [0], Skills [1], Skills [2]);
+        Classes [5] = new Class (5, "Black Shield", Skills [0], Skills [1], Skills [2]);
+
 		Classes [6] = new Class (6, "Wolf", null, null, null);
 	}
 

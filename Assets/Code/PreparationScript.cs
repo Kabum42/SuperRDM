@@ -831,7 +831,16 @@ public class PreparationScript : MonoBehaviour {
         {
             if (selectables[i].status == "opened")
             {
-                GlobalData.agents[aux] = new MainCharacter(0, "Player1", 175, 100, GlobalData.Classes[0]);
+                Class auxClass = null;
+                if (selectables[i].currentLegend == "random") { auxClass = GlobalData.Classes[Random.Range(0, 6)]; }
+                else if (selectables[i].currentLegend == "barbarian") { auxClass = GlobalData.Classes[0]; }
+                else if (selectables[i].currentLegend == "pilumantic") { auxClass = GlobalData.Classes[1]; }
+                else if (selectables[i].currentLegend == "dreamwalker") { auxClass = GlobalData.Classes[2]; }
+                else if (selectables[i].currentLegend == "henmancer") { auxClass = GlobalData.Classes[3]; }
+                else if (selectables[i].currentLegend == "disembodied") { auxClass = GlobalData.Classes[4]; }
+                else if (selectables[i].currentLegend == "buckler") { auxClass = GlobalData.Classes[5]; }
+
+                GlobalData.agents[aux] = new MainCharacter(0, "Player"+i, 175, 100, auxClass);
                 if (selectables[i].controller == "CPU")
                 {
                     GlobalData.agents[aux].IA = true;
