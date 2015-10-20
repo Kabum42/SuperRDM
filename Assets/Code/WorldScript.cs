@@ -267,7 +267,6 @@ public class WorldScript : MonoBehaviour {
         for (int i = 0; i < GlobalData.order.Length; i++)
         {
             int j = (int) Mathf.Ceil(Hacks.BinaryPerlin(0, positions.Count-1, 3, 0.23425f + startingPerlin, GlobalData.boardSeed));
-            Debug.Log("AGENTE: "+i +"// POSICION: "+positions[j]);
             GlobalData.order[i] = positions[j];
             positions.RemoveAt(j);
             startingPerlin += 2.5662845f;
