@@ -56,6 +56,7 @@ public class WorldScript : MonoBehaviour {
     private bool ribbonAppearing = false;
     private AudioSource ribbonSound;
 
+    private GameObject actionWalk;
     private GameObject actionAttack;
     private GameObject actionHeal;
     private GameObject actionLook;
@@ -112,6 +113,8 @@ public class WorldScript : MonoBehaviour {
         actionLook.SetActive(false);
         actionSail = GameObject.Find("Sail");
         actionSail.SetActive(false);
+        actionWalk = GameObject.Find("Walk");
+        actionWalk.SetActive(false);
 
         UIAgents = new GameObject[GlobalData.activeAgents];
 
@@ -248,67 +251,30 @@ public class WorldScript : MonoBehaviour {
 
     }
 
-    /*
-    void updateBoard()
-    {
-        if (GlobalData.online)
-        {
-            GetComponent<NetworkView>().RPC("updateBoardRPC", RPCMode.Others, GlobalData.currentAgentTurn);
-            for (int i = 0; i < GlobalData.activeAgents; i++)
-            {
-                GetComponent<NetworkView>().RPC("updateAgentRPC", RPCMode.Others, i, GlobalData.agents[i].currentCell);
-            }
-        }
-    }
-
-    [RPC]
-    void updateBoardRPC(int currentAgentTurn)
-    {
-        GlobalData.currentAgentTurn = currentAgentTurn;
-    }
-
-    [RPC]
-    void updateAgentRPC(int position, int currentCell)
-    {
-        GlobalData.agents[position].currentCell = currentCell;
-    }
-    */
-
     private void RandomizeTurns()
     {
         GlobalData.order = new int[GlobalData.activeAgents];
 
+        List<int> positions = new List<int>();
+
         for (int i = 0; i < GlobalData.order.Length; i++)
         {
-            // DEFAULT ORDER
-            GlobalData.order[i] = i;
+            positions.Add(i);
         }
 
         float startingPerlin = 34.785625f;
 
-        for (int i = 0; i < (GlobalData.activeAgents*5); i++)
+        for (int i = 0; i < GlobalData.order.Length; i++)
         {
-            // SWAPS
-            int first_element = 0;
-            int second_element = 0;
-
-            if (GlobalData.activeAgents <= 4) { first_element = (int) Hacks.BinaryPerlin(0, GlobalData.activeAgents -1, 2, 0.23425f + startingPerlin, GlobalData.boardSeed); }
-            else { first_element = (int)Hacks.BinaryPerlin(0, GlobalData.activeAgents - 1, 3, 0.23425f + startingPerlin, GlobalData.boardSeed); }
+            int j = (int) Mathf.Ceil(Hacks.BinaryPerlin(0, positions.Count-1, 3, 0.23425f + startingPerlin, GlobalData.boardSeed));
+            Debug.Log("AGENTE: "+i +"// POSICION: "+positions[j]);
+            GlobalData.order[i] = positions[j];
+            positions.RemoveAt(j);
             startingPerlin += 2.5662845f;
-
-            if (GlobalData.activeAgents <= 4) { second_element = (int)Hacks.BinaryPerlin(0, GlobalData.activeAgents - 1, 2, 4650.3753578f + startingPerlin, GlobalData.boardSeed); }
-            else { second_element = second_element = (int)Hacks.BinaryPerlin(0, GlobalData.activeAgents - 1, 3, 4650.3753578f + startingPerlin, GlobalData.boardSeed); }
-            startingPerlin += 2.5662845f;
-
-            //Debug.Log(first_element + "//" + second_element);
-
-            int aux = GlobalData.order[first_element];
-            GlobalData.order[first_element] = GlobalData.order[second_element];
-            GlobalData.order[second_element] = aux;
-            
         }
 
-        GlobalData.currentAgentTurn = (int)(Mathf.Clamp(Mathf.PerlinNoise(startingPerlin, GlobalData.boardSeed), 0f, 1f) * (GlobalData.order.Length));
+
+        GlobalData.currentAgentTurn = (int) Mathf.Ceil(Hacks.BinaryPerlin(0, GlobalData.order.Length-1, 3, 0.23425f + startingPerlin, GlobalData.boardSeed));
         Debug.Log(GlobalData.currentAgentTurn);
 
     }
@@ -553,6 +519,7 @@ public class WorldScript : MonoBehaviour {
         {
             reachables = Dijkstra();
 
+            ribbon.transform.position = new Vector3(0f, 8f, -4f);
             ribbon.SetActive(true);
             ribbonOver.SetActive(true);
             Hacks.SpriteRendererAlpha(ribbon, 0f);
@@ -565,6 +532,7 @@ public class WorldScript : MonoBehaviour {
             if (ribbonAppearing) {
                 Hacks.SpriteRendererAlpha(ribbon, Mathf.Lerp(ribbon.GetComponent<SpriteRenderer>().color.a, 1f, Time.deltaTime*5f));
                 Hacks.SpriteRendererAlpha(ribbonOver, Mathf.Lerp(ribbon.GetComponent<SpriteRenderer>().color.a, 1f, Time.deltaTime*5f));
+                ribbon.transform.position = new Vector3(0f, Mathf.Lerp(ribbon.transform.position.y, 6.3f, Time.deltaTime*5f), -4f); 
                 if (ribbon.GetComponent<SpriteRenderer>().color.a >= 0.99f) {
                     ribbonAppearing = false;
                 }
@@ -643,34 +611,38 @@ public class WorldScript : MonoBehaviour {
         }
 
         // Place UI Agents
-        float default_y = 1.85f;
-        float total_y = (GlobalData.activeAgents-1) * default_y  +(default_y+1f);
-        float current_y = 0f;
+        if (movingList == null) {
 
-        for (int i = 0; i < GlobalData.order.Length; i++)
-        {
-            int j = GlobalData.order[i];
+            float default_y = 1.85f;
+            float total_y = (GlobalData.activeAgents-1) * default_y  +(default_y+1f);
+            float current_y = 0f;
 
-            if (GlobalData.currentAgentTurn == GlobalData.order[i])
+            for (int i = 0; i < GlobalData.order.Length; i++)
             {
-                current_y += 0.5f;
+                int j = GlobalData.order[i];
+
+                if (GlobalData.currentAgentTurn == GlobalData.order[i])
+                {
+                    current_y += 0.5f;
+                }
+
+                UIAgents[j].transform.localPosition = new Vector3(9.64f, Mathf.Lerp(UIAgents[j].transform.localPosition.y, (total_y - 1) / 2f - current_y, Time.deltaTime*10f), 0f);
+
+                if (GlobalData.currentAgentTurn == GlobalData.order[i])
+                {
+                    UIAgents[j].transform.localScale = new Vector3(Mathf.Lerp(UIAgents[j].transform.localScale.x, 1.62f, Time.deltaTime * 10f), Mathf.Lerp(UIAgents[j].transform.localScale.y, 1.62f, Time.deltaTime * 10f), Mathf.Lerp(UIAgents[j].transform.localScale.z, 1.62f, Time.deltaTime * 10f));
+                    current_y += default_y + 0.5f;
+                }
+                else
+                {
+                    UIAgents[j].transform.localScale = new Vector3(Mathf.Lerp(UIAgents[j].transform.localScale.x, 1f, Time.deltaTime * 10f), Mathf.Lerp(UIAgents[j].transform.localScale.y, 1f, Time.deltaTime * 10f), Mathf.Lerp(UIAgents[j].transform.localScale.z, 1f, Time.deltaTime * 10f));
+                    current_y += default_y;
+                }
+                
             }
 
-            UIAgents[j].transform.localPosition = new Vector3(9.64f, Mathf.Lerp(UIAgents[j].transform.localPosition.y, (total_y - 1) / 2f - current_y, Time.deltaTime*10f), 0f);
-
-            if (GlobalData.currentAgentTurn == GlobalData.order[i])
-            {
-                UIAgents[j].transform.localScale = new Vector3(Mathf.Lerp(UIAgents[j].transform.localScale.x, 1.62f, Time.deltaTime * 10f), Mathf.Lerp(UIAgents[j].transform.localScale.y, 1.62f, Time.deltaTime * 10f), Mathf.Lerp(UIAgents[j].transform.localScale.z, 1.62f, Time.deltaTime * 10f));
-                current_y += default_y + 0.5f;
-            }
-            else
-            {
-                UIAgents[j].transform.localScale = new Vector3(Mathf.Lerp(UIAgents[j].transform.localScale.x, 1f, Time.deltaTime * 10f), Mathf.Lerp(UIAgents[j].transform.localScale.y, 1f, Time.deltaTime * 10f), Mathf.Lerp(UIAgents[j].transform.localScale.z, 1f, Time.deltaTime * 10f));
-                current_y += default_y;
-            }
-            
         }
-
+        
 
         if (movingList == null && GlobalData.agents[GlobalData.currentAgentTurn].IA && (int.Parse(Network.player.ToString()) == 0 || !GlobalData.online))
         {
