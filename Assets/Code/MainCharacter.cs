@@ -22,6 +22,9 @@ public class MainCharacter : Character {
 		this.MaxIPBar = MaxIP;
 		this.OwnClass = OwnClass;
 
+        MaxMP = 6;
+        CurrentMP = MaxMP;
+
 		switch (OwnClass.getName ()) {
 			case "Boar Ryder":
 				this.Aerial = false;
@@ -33,7 +36,17 @@ public class MainCharacter : Character {
 
     public int getCurrentSteps()
     {
-        return 6;
+        return CurrentMP;
+    }
+
+    public void setCurrentSteps(int n)
+    {
+        CurrentMP = n;
+    }
+
+    public int getMaxSteps()
+    {
+        return MaxMP;
     }
 
 	public void Interact()

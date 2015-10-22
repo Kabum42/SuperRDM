@@ -30,6 +30,8 @@ public class WorldScript : MonoBehaviour {
     private int[] distances;
     private List<List<int>> candidates;
     private List<int> reachables;
+    private int lastDijkstraTargetSteps = 0;
+    private int lastTurn = -1;
 
     private float lastDPadX = 0f;
     private float lastDPadY = 0f;
@@ -224,6 +226,7 @@ public class WorldScript : MonoBehaviour {
             movingAgent = agent;
             movingDelta = 0f;
             movingList = path;
+            GlobalData.agents[agent].setCurrentSteps(GlobalData.agents[agent].getCurrentSteps() -lastDijkstraTargetSteps);
 
         }
 
@@ -250,7 +253,6 @@ public class WorldScript : MonoBehaviour {
 
     void nextTurn()
     {
-
         int auxOrder = 0;
         for (int i = 0; i < GlobalData.activeAgents; i++)
         {
@@ -259,9 +261,11 @@ public class WorldScript : MonoBehaviour {
         auxOrder++;
         if (auxOrder > GlobalData.activeAgents - 1) { auxOrder = 0; }
         GlobalData.currentAgentTurn = GlobalData.order[auxOrder];
+        GlobalData.agents[GlobalData.currentAgentTurn].setCurrentSteps(GlobalData.agents[GlobalData.currentAgentTurn].getMaxSteps());
         usedDijkstra = false;
         usedAction = false;
         usedTurn = false;
+        clickedCell = -1;
     }
 
     private void RandomizeTurns()
@@ -287,7 +291,7 @@ public class WorldScript : MonoBehaviour {
 
 
         GlobalData.currentAgentTurn = (int) Mathf.Ceil(Hacks.BinaryPerlin(0, GlobalData.order.Length-1, 3, 0.23425f + startingPerlin, GlobalData.boardSeed));
-        Debug.Log(GlobalData.currentAgentTurn);
+        //Debug.Log(GlobalData.currentAgentTurn);
 
     }
 
@@ -404,7 +408,7 @@ public class WorldScript : MonoBehaviour {
         for (int i = 0; i < candidates.Count; i++)
         {
             int currentSteps = 0;
-            for (int j = 0; j < candidates[i].Count; j++)
+            for (int j = 1; j < candidates[i].Count; j++)
             {
                 currentSteps += GlobalData.biomeCosts[(int)boardCells[candidates[i][j]].biome];
             }
@@ -414,6 +418,8 @@ public class WorldScript : MonoBehaviour {
                 bestList = candidates[i];
             }
         }
+
+        lastDijkstraTargetSteps = bestSteps;
 
         return bestList;
     }
@@ -530,7 +536,10 @@ public class WorldScript : MonoBehaviour {
         if (GlobalData.currentAgentTurn == GlobalData.myAgent && !usedDijkstra && movingList == null)
         {
             reachables = Dijkstra();
+        }
 
+        if (lastTurn != GlobalData.currentAgentTurn && GlobalData.currentAgentTurn == GlobalData.myAgent)
+        {
             ribbon.transform.position = new Vector3(0f, 8f, -4f);
             ribbon.SetActive(true);
             ribbonOver.SetActive(true);
@@ -539,6 +548,7 @@ public class WorldScript : MonoBehaviour {
             ribbonAppearing = true;
             ribbonSound.Play();
         }
+        lastTurn = GlobalData.currentAgentTurn;
 
         if (ribbon.activeInHierarchy) {
             if (ribbonAppearing) {
@@ -568,6 +578,8 @@ public class WorldScript : MonoBehaviour {
                     boardCells[i].root.GetComponent<SpriteRenderer>().color = new Color(aux, aux, aux, 1f);
                 }
             }
+            float aux2 = Mathf.Lerp(boardCells[GlobalData.agents[GlobalData.currentAgentTurn].currentCell].root.GetComponent<SpriteRenderer>().color.r, 1f, Time.deltaTime * 5f);
+            boardCells[GlobalData.agents[GlobalData.currentAgentTurn].currentCell].root.GetComponent<SpriteRenderer>().color = new Color(aux2, aux2, aux2, 1f);
         } else {
             for (int i = 0; i < boardCells.Length; i++)
             {
@@ -575,6 +587,8 @@ public class WorldScript : MonoBehaviour {
                 boardCells[i].root.GetComponent<SpriteRenderer>().color = new Color(aux, aux, aux, 1f);
             }
         }
+
+
         
 
         if (Input.GetKey(KeyCode.Return))
@@ -586,7 +600,7 @@ public class WorldScript : MonoBehaviour {
         if (Input.GetKeyDown(KeyCode.Space) && GlobalData.currentAgentTurn == GlobalData.myAgent)
         {
 
-            //NextTurn();
+            usedTurn = true;
             
         }
 
@@ -619,6 +633,7 @@ public class WorldScript : MonoBehaviour {
                     movingList = null;
                     previousAuxPosition = -1;
                     movingDelay = timeToMove;
+                    usedDijkstra = false;
                 }
             }
 
@@ -684,13 +699,6 @@ public class WorldScript : MonoBehaviour {
             }
         }
 
-		if (Input.GetKey(KeyCode.Space))
-		{
-			Application.LoadLevel("Battle");
-		}
-
-        //Debug.Log(boardCells[1].south);
-        //boardCells[1].south.root.transform.position = boardCells[1].south.root.transform.position + new Vector3(0f, 0.02f, 0f);
 
         if (phase == 0)
         {
@@ -863,7 +871,8 @@ public class WorldScript : MonoBehaviour {
 
                 if (action1.activeInHierarchy && ClickedOn(action1Option1))
                 {
-
+                    clickedCell = -1;
+                    usedAction = true;
                 }
                 else if (action2.activeInHierarchy && ClickedOn(action2Option1))
                 {
@@ -1054,7 +1063,6 @@ public class WorldScript : MonoBehaviour {
 
                 if (path != null) {
                     GetComponent<NetworkView>().RPC("moveAgentRPC", RPCMode.All, GlobalData.myAgent, path[path.Count-1]);
-                    //usedTurn = true;
                     reachables = null;
                 }
 
@@ -1063,7 +1071,6 @@ public class WorldScript : MonoBehaviour {
             {
                 // ES UN CLIENTE
                 GetComponent<NetworkView>().RPC("moveRequestRPC", RPCMode.Server, Network.player, i);
-                //usedTurn = true;
                 reachables = null;
             }
         }
