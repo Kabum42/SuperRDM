@@ -9,6 +9,10 @@ public class WorldScript : MonoBehaviour {
     private int currentCell = 0;
     private int[] cellsPerRing;
 
+    private BoardCell[] auxSanctuaryCells = new BoardCell[6];
+    private List<int> auxSanctuaryAvailable = new List<int> { 0, 1, 2, 3, 4, 5 };
+    private int selectedSanctuaries = 0;
+
     private float cellWidth = 1.30f;
     private float cellHeight = 1.51f;
 
@@ -179,11 +183,54 @@ public class WorldScript : MonoBehaviour {
             }
         }
 
+        for (int num = 0; num < auxSanctuaryCells.Length; num++)
+        {
+            BoardCell b = new BoardCell();
+            b.root = Instantiate(Resources.Load("Prefabs/BoardCell")) as GameObject;
+            b.text = b.root.transform.FindChild("Text").gameObject;
+            b.text.SetActive(false);
+            b.ring = 4;
+            b.changeBiome(Biome.Sanctuary);
+            b.root.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("BoardCells/" + GlobalData.biomeNames[(int)Biome.Sanctuary]);
+            b.root.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f);
+            b.root.name = "Cell_Aux" + 4 + "_" + num;
+
+            auxSanctuaryCells[num] = b;
+
+            if (num == 0)
+            {
+                positionCell(b, 2, 3);
+            }
+            else if (num == 1)
+            {
+                positionCell(b, 4, 0);
+            }
+            else if (num == 2)
+            {
+                positionCell(b, 2, -3);
+            }
+            else if (num == 3)
+            {
+                positionCell(b, -2, -3);
+            }
+            else if (num == 4)
+            {
+                positionCell(b, -4, 0);
+            }
+            else if (num == 5)
+            {
+                positionCell(b, -2, 3);
+            }
+        }
+
         
+
+        /*
         for (int i = 0; i < GlobalData.activeAgents; i++)
         {
             AddSanctuary(i, i);
         }
+        */
 
 	}
 
@@ -260,6 +307,23 @@ public class WorldScript : MonoBehaviour {
         }
         auxOrder++;
         if (auxOrder > GlobalData.activeAgents - 1) { auxOrder = 0; }
+        GlobalData.currentAgentTurn = GlobalData.order[auxOrder];
+        GlobalData.agents[GlobalData.currentAgentTurn].setCurrentSteps(GlobalData.agents[GlobalData.currentAgentTurn].getMaxSteps());
+        usedDijkstra = false;
+        usedAction = false;
+        usedTurn = false;
+        clickedCell = -1;
+    }
+
+    void previousTurn()
+    {
+        int auxOrder = 0;
+        for (int i = 0; i < GlobalData.activeAgents; i++)
+        {
+            if (GlobalData.currentAgentTurn == GlobalData.order[i]) { auxOrder = i; }
+        }
+        auxOrder--;
+        if (auxOrder < 0) { auxOrder = GlobalData.activeAgents - 1; }
         GlobalData.currentAgentTurn = GlobalData.order[auxOrder];
         GlobalData.agents[GlobalData.currentAgentTurn].setCurrentSteps(GlobalData.agents[GlobalData.currentAgentTurn].getMaxSteps());
         usedDijkstra = false;
@@ -533,7 +597,7 @@ public class WorldScript : MonoBehaviour {
     void Update()
     {
 
-        if (GlobalData.currentAgentTurn == GlobalData.myAgent && !usedDijkstra && movingList == null)
+        if (phase == 2 && GlobalData.currentAgentTurn == GlobalData.myAgent && !usedDijkstra && movingList == null)
         {
             reachables = Dijkstra();
         }
@@ -570,23 +634,40 @@ public class WorldScript : MonoBehaviour {
         }
 
         // BRIGHTNESS CELLS
-        if (usedDijkstra && GlobalData.currentAgentTurn == GlobalData.myAgent && reachables != null) {
-            for (int i = 0; i < boardCells.Length; i++)
+        if (phase == 2)
+        {
+            if (usedDijkstra && GlobalData.currentAgentTurn == GlobalData.myAgent && reachables != null)
             {
-                if (!reachables.Contains(i)) {
-                    float aux = Mathf.Lerp(boardCells[i].root.GetComponent<SpriteRenderer>().color.r, 0.3f, Time.deltaTime*5f);
+                for (int i = 0; i < boardCells.Length; i++)
+                {
+                    if (!reachables.Contains(i))
+                    {
+                        float aux = Mathf.Lerp(boardCells[i].root.GetComponent<SpriteRenderer>().color.r, 0.3f, Time.deltaTime * 5f);
+                        boardCells[i].root.GetComponent<SpriteRenderer>().color = new Color(aux, aux, aux, 1f);
+                    }
+                }
+                float aux2 = Mathf.Lerp(boardCells[GlobalData.agents[GlobalData.currentAgentTurn].currentCell].root.GetComponent<SpriteRenderer>().color.r, 1f, Time.deltaTime * 5f);
+                boardCells[GlobalData.agents[GlobalData.currentAgentTurn].currentCell].root.GetComponent<SpriteRenderer>().color = new Color(aux2, aux2, aux2, 1f);
+            }
+            else
+            {
+                for (int i = 0; i < boardCells.Length; i++)
+                {
+                    float aux = Mathf.Lerp(boardCells[i].root.GetComponent<SpriteRenderer>().color.r, 1f, Time.deltaTime * 5f);
                     boardCells[i].root.GetComponent<SpriteRenderer>().color = new Color(aux, aux, aux, 1f);
                 }
             }
-            float aux2 = Mathf.Lerp(boardCells[GlobalData.agents[GlobalData.currentAgentTurn].currentCell].root.GetComponent<SpriteRenderer>().color.r, 1f, Time.deltaTime * 5f);
-            boardCells[GlobalData.agents[GlobalData.currentAgentTurn].currentCell].root.GetComponent<SpriteRenderer>().color = new Color(aux2, aux2, aux2, 1f);
-        } else {
+        }
+        else
+        {
             for (int i = 0; i < boardCells.Length; i++)
             {
-                float aux = Mathf.Lerp(boardCells[i].root.GetComponent<SpriteRenderer>().color.r, 1f, Time.deltaTime*5f);
+                float aux = Mathf.Lerp(boardCells[i].root.GetComponent<SpriteRenderer>().color.r, 0.3f, Time.deltaTime * 5f);
                 boardCells[i].root.GetComponent<SpriteRenderer>().color = new Color(aux, aux, aux, 1f);
             }
         }
+
+        
 
 
         
@@ -639,9 +720,12 @@ public class WorldScript : MonoBehaviour {
 
         }
 
-        for (int i = 0; i < GlobalData.activeAgents; i++)
+        if (phase == 2)
         {
-            GlobalData.agents[i].cellChampion.transform.position = new Vector3(Mathf.Lerp(GlobalData.agents[i].cellChampion.transform.position.x, boardCells[GlobalData.agents[i].currentCell].root.transform.position.x, Time.deltaTime * 10f), Mathf.Lerp(GlobalData.agents[i].cellChampion.transform.position.y, boardCells[GlobalData.agents[i].currentCell].root.transform.position.y, Time.deltaTime * 10f), GlobalData.agents[i].cellChampion.transform.position.z);
+            for (int i = 0; i < GlobalData.activeAgents; i++)
+            {
+                GlobalData.agents[i].cellChampion.transform.position = new Vector3(Mathf.Lerp(GlobalData.agents[i].cellChampion.transform.position.x, boardCells[GlobalData.agents[i].currentCell].root.transform.position.x, Time.deltaTime * 10f), Mathf.Lerp(GlobalData.agents[i].cellChampion.transform.position.y, boardCells[GlobalData.agents[i].currentCell].root.transform.position.y, Time.deltaTime * 10f), GlobalData.agents[i].cellChampion.transform.position.z);
+            }
         }
 
         // Place UI Agents
@@ -678,7 +762,7 @@ public class WorldScript : MonoBehaviour {
         }
         
 
-        if (movingList == null && GlobalData.agents[GlobalData.currentAgentTurn].IA && (int.Parse(Network.player.ToString()) == 0 || !GlobalData.online))
+        if (phase == 2 && movingList == null && GlobalData.agents[GlobalData.currentAgentTurn].IA && (int.Parse(Network.player.ToString()) == 0 || !GlobalData.online))
         {
             thinkingIA -= Time.deltaTime;
 
@@ -718,11 +802,78 @@ public class WorldScript : MonoBehaviour {
         else if (phase == 1)
         {
             // TIME TO SELECT YOUR SANCTUARY
-            phase = 2;
+
+            if (selectedSanctuaries == GlobalData.activeAgents)
+            {
+                int bla = auxSanctuaryAvailable.Count;
+                for (int i = 0; i < bla; i++)
+                {
+                    int aux = auxSanctuaryAvailable[0];
+                    auxSanctuaryAvailable.Remove(aux);
+                    Destroy(auxSanctuaryCells[aux].root);
+                    auxSanctuaryCells[aux] = null;
+                }
+
+                GlobalData.agents[GlobalData.currentAgentTurn].setCurrentSteps(GlobalData.agents[GlobalData.currentAgentTurn].getMaxSteps());
+                usedDijkstra = false;
+                usedAction = false;
+                usedTurn = false;
+                clickedCell = -1;
+
+                for (int i = 0; i < boardCells.Length; i++)
+                {
+                    float aux = Mathf.Lerp(boardCells[i].root.GetComponent<SpriteRenderer>().color.r, 1f, Time.deltaTime * 5f);
+                    boardCells[i].root.GetComponent<SpriteRenderer>().color = new Color(aux, aux, aux, 1f);
+                }
+
+                phase = 2;
+            }
+            else
+            {
+                if (GlobalData.online)
+                {
+
+                }
+                else
+                {
+                    if (GlobalData.agents[GlobalData.currentAgentTurn].IA && GlobalData.agents[GlobalData.currentAgentTurn].cellChampion == null)
+                    {
+                        // ES LA IA
+                        int aux = auxSanctuaryAvailable[Random.Range(0, auxSanctuaryAvailable.Count)];
+                        auxSanctuaryAvailable.Remove(aux);
+                        Destroy(auxSanctuaryCells[aux].root);
+                        auxSanctuaryCells[aux] = null;
+                        AddSanctuary(GlobalData.currentAgentTurn, aux);
+                        selectedSanctuaries++;
+
+                        if (selectedSanctuaries < GlobalData.activeAgents)
+                        {
+                            previousTurn();
+                        }
+
+                    }
+                    else
+                    {
+                        // ES EL JUGADOR
+                        int aux = auxSanctuaryAvailable[Random.Range(0, auxSanctuaryAvailable.Count)];
+                        auxSanctuaryAvailable.Remove(aux);
+                        Destroy(auxSanctuaryCells[aux].root);
+                        auxSanctuaryCells[aux] = null;
+                        AddSanctuary(GlobalData.currentAgentTurn, aux);
+                        selectedSanctuaries++;
+
+                        if (selectedSanctuaries < GlobalData.activeAgents)
+                        {
+                            previousTurn();
+                        }
+
+                    }
+                }
+            }
+
         }
         else if (movingList == null)
         {
-
 
             if (Hacks.ControllerAnyConnected())
             {
