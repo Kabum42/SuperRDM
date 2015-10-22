@@ -22,7 +22,10 @@ public class WorldScript : MonoBehaviour {
     private GameObject fading;
     private AudioSource musicWorld;
     private GameObject selectedSprite;
+    private int clickedCell = -1;
     private bool usedDijkstra = false;
+    private bool usedAction = false;
+    private bool usedTurn = false;
     private List<BoardCell> unvisited;
     private int[] distances;
     private List<List<int>> candidates;
@@ -50,17 +53,18 @@ public class WorldScript : MonoBehaviour {
     private float movingDelta = 0f;
     private List<int> movingList = null;
     private int previousAuxPosition = -1;
+    private float movingDelay = 0.25f;
 
     private GameObject ribbon;
     private GameObject ribbonOver;
     private bool ribbonAppearing = false;
     private AudioSource ribbonSound;
 
-    private GameObject actionWalk;
-    private GameObject actionAttack;
-    private GameObject actionHeal;
-    private GameObject actionLook;
-    private GameObject actionSail;
+    private GameObject action1;
+    private GameObject action1Option1;
+    private GameObject action2;
+    private GameObject action2Option1;
+    private GameObject action2Option2;
 
     private float thinkingIA = 1f;
 
@@ -105,16 +109,13 @@ public class WorldScript : MonoBehaviour {
         ribbonSound.volume = 1f;
         ribbonSound.playOnAwake = false;
 
-        actionAttack = GameObject.Find("Attack");
-        actionAttack.SetActive(false);
-        actionHeal = GameObject.Find("Heal");
-        actionHeal.SetActive(false);
-        actionLook = GameObject.Find("Look");
-        actionLook.SetActive(false);
-        actionSail = GameObject.Find("Sail");
-        actionSail.SetActive(false);
-        actionWalk = GameObject.Find("Walk");
-        actionWalk.SetActive(false);
+        action1 = GameObject.Find("Action1");
+        action1Option1 = GameObject.Find("Action1/Option1");
+        action1.SetActive(false);
+        action2 = GameObject.Find("Action2");
+        action2Option1 = GameObject.Find("Action2/Option1");
+        action2Option2 = GameObject.Find("Action2/Option2");
+        action2.SetActive(false);
 
         UIAgents = new GameObject[GlobalData.activeAgents];
 
@@ -259,7 +260,8 @@ public class WorldScript : MonoBehaviour {
         if (auxOrder > GlobalData.activeAgents - 1) { auxOrder = 0; }
         GlobalData.currentAgentTurn = GlobalData.order[auxOrder];
         usedDijkstra = false;
-
+        usedAction = false;
+        usedTurn = false;
     }
 
     private void RandomizeTurns()
@@ -558,7 +560,7 @@ public class WorldScript : MonoBehaviour {
         }
 
         // BRIGHTNESS CELLS
-        if (usedDijkstra) {
+        if (usedDijkstra && GlobalData.currentAgentTurn == GlobalData.myAgent && reachables != null) {
             for (int i = 0; i < boardCells.Length; i++)
             {
                 if (!reachables.Contains(i)) {
@@ -607,10 +609,17 @@ public class WorldScript : MonoBehaviour {
             GlobalData.agents[movingAgent].currentCell = movingList[auxPosition];
 
             if (auxPosition == movingList.Count-1) {
-                movingAgent = -1;
-                movingDelta = 0f;
-                movingList = null;
-                previousAuxPosition = -1;
+
+                movingDelay -= Time.deltaTime;
+
+                if (movingDelay <= 0f)
+                {
+                    movingAgent = -1;
+                    movingDelta = 0f;
+                    movingList = null;
+                    previousAuxPosition = -1;
+                    movingDelay = timeToMove;
+                }
             }
 
         }
@@ -663,15 +672,13 @@ public class WorldScript : MonoBehaviour {
                     reachables = Dijkstra();
                     int aux = Random.Range(0, reachables.Count);
                     GetComponent<NetworkView>().RPC("moveAgentRPC", RPCMode.All, GlobalData.currentAgentTurn, reachables[aux]);
-                    GetComponent<NetworkView>().RPC("nextTurnRPC", RPCMode.All);
-                    reachables = null; 
+                    usedTurn = true;
                 }
                 else { 
                     reachables = Dijkstra();
                     int aux = Random.Range(0, reachables.Count);
                     moveAgent(GlobalData.currentAgentTurn, reachables[aux]);
-                    nextTurn(); 
-                    reachables = null; 
+                    usedTurn = true;
                 }
                 thinkingIA = 1 + Random.Range(0f, 1f);
             }
@@ -847,57 +854,60 @@ public class WorldScript : MonoBehaviour {
                 }
                 */
 
-
-
             }
             else
             {
                 // CONTROLLER NOT PLUGGED
+
                 selectedSprite.SetActive(false);
 
-                for (int i = 0; i < boardCells.Length; i++)
+                if (action1.activeInHierarchy && ClickedOn(action1Option1))
                 {
-                    if (isOver(boardCells[i].root))
+
+                }
+                else if (action2.activeInHierarchy && ClickedOn(action2Option1))
+                {
+                    moveTo(clickedCell);
+                    clickedCell = -1;
+                    usedAction = true;
+                }
+                else if (action2.activeInHierarchy && ClickedOn(action2Option2))
+                {
+                    moveTo(clickedCell);
+                    clickedCell = -1;
+                }
+                else
+                {
+
+                    if (Input.GetMouseButtonUp(0))
                     {
-                        selectedSprite.SetActive(true);
-                        selected = boardCells[i];
+                        clickedCell = -1;
                     }
 
-                    if (GlobalData.currentAgentTurn == GlobalData.myAgent && ClickedOn(boardCells[i].root) && reachables.Contains(i))
+                    for (int i = 0; i < boardCells.Length; i++)
                     {
-                        // MOVE TO THE CELL??
-                        if (GlobalData.online)
+                        if (isOver(boardCells[i].root))
                         {
-                            if (int.Parse(Network.player.ToString()) == 0)
-                            {
-                                // ES EL SERVER
-                                List<int> path = DijkstraTarget(i, GlobalData.agents[GlobalData.currentAgentTurn]);
-
-                                if (path != null) {
-                                    GetComponent<NetworkView>().RPC("moveAgentRPC", RPCMode.All, GlobalData.myAgent, path[path.Count-1]);
-                                    GetComponent<NetworkView>().RPC("nextTurnRPC", RPCMode.All);
-                                }
-
-                            }
-                            else
-                            {
-                                // ES UN CLIENTE
-                                GetComponent<NetworkView>().RPC("moveRequestRPC", RPCMode.Server, Network.player, i);
-                                GetComponent<NetworkView>().RPC("nextTurnRequestRPC", RPCMode.Server, Network.player);
-                            }
+                            selectedSprite.SetActive(true);
+                            selected = boardCells[i];
                         }
-                        else
-                        {
-                            List<int> path = DijkstraTarget(i, GlobalData.agents[GlobalData.currentAgentTurn]);
 
-                            if (path != null) {
-                                moveAgent(GlobalData.myAgent, path[path.Count-1]);
-                                nextTurn();
-                            }
-                            
+                        if (GlobalData.currentAgentTurn == GlobalData.myAgent && ClickedOn(boardCells[i].root) && reachables.Contains(i))
+                        {
+
+                            clickedCell = i;
+
+                            Hacks.SpriteRendererAlpha(action1, 0f);
+                            Hacks.SpriteRendererAlpha(action1Option1, 0f);
+
+                            Hacks.SpriteRendererAlpha(action2, 0f);
+                            Hacks.SpriteRendererAlpha(action2Option1, 0f);
+                            Hacks.SpriteRendererAlpha(action2Option2, 0f);
+
                         }
                     }
                 }
+
 
             }
 
@@ -905,10 +915,170 @@ public class WorldScript : MonoBehaviour {
             {
                 selectedSprite.transform.position = new Vector3(selected.root.transform.position.x, selected.root.transform.position.y, selectedSprite.transform.position.z);
             }
+            if (clickedCell == -1)
+            {
+
+                if (action1.activeInHierarchy)
+                {
+                    Hacks.SpriteRendererAlpha(action1, Mathf.Lerp(action1.GetComponent<SpriteRenderer>().color.a, 0f, Time.deltaTime*10f));
+                    Hacks.SpriteRendererAlpha(action1Option1, action1.GetComponent<SpriteRenderer>().color.a);
+                    if (action1.GetComponent<SpriteRenderer>().color.a < 0.01f)
+                    {
+                        action1.SetActive(false);
+                    }
+                }
+
+                if (action2.activeInHierarchy)
+                {
+                    Hacks.SpriteRendererAlpha(action2, Mathf.Lerp(action2.GetComponent<SpriteRenderer>().color.a, 0f, Time.deltaTime * 10f));
+                    Hacks.SpriteRendererAlpha(action2Option1, action2.GetComponent<SpriteRenderer>().color.a);
+                    Hacks.SpriteRendererAlpha(action2Option2, action2.GetComponent<SpriteRenderer>().color.a);
+                    if (action2.GetComponent<SpriteRenderer>().color.a < 0.01f)
+                    {
+                        action2.SetActive(false);
+                    }
+                }
+                
+            }
+            else
+            {
+
+                if (clickedCell == GlobalData.agents[GlobalData.myAgent].currentCell)
+                {
+                    if (action2.activeInHierarchy)
+                    {
+                        Hacks.SpriteRendererAlpha(action2, 0f);
+                        Hacks.SpriteRendererAlpha(action2Option1, 0f);
+                        Hacks.SpriteRendererAlpha(action2Option2, 0f);
+                        action2.SetActive(false);
+                    }
+
+                    action1.SetActive(true);
+                    Hacks.SpriteRendererAlpha(action1, (float)Mathf.Lerp(action1.GetComponent<SpriteRenderer>().color.a, 1f, Time.deltaTime * 5f));
+                    Hacks.SpriteRendererAlpha(action1Option1, action1.GetComponent<SpriteRenderer>().color.a);
+                    action1.transform.position = new Vector3(boardCells[clickedCell].root.transform.position.x, boardCells[clickedCell].root.transform.position.y + 0.7f, action1.transform.position.z);
+                
+                    if (isOver(action1Option1)) {
+                        action1Option1.GetComponent<SpriteRenderer>().color = new Color(0.7f, 0.7f, 0.7f, action1Option1.GetComponent<SpriteRenderer>().color.a);
+                    }
+                    else {
+                        action1Option1.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, action1Option1.GetComponent<SpriteRenderer>().color.a);
+                    }
+
+                }
+                else
+                {
+
+                    if (action1.activeInHierarchy)
+                    {
+                        Hacks.SpriteRendererAlpha(action1, 0f);
+                        Hacks.SpriteRendererAlpha(action1Option1, 0f);
+                        action1.SetActive(false);
+                    }
+
+                    action2.SetActive(true);
+                    Hacks.SpriteRendererAlpha(action2, (float)Mathf.Lerp(action2.GetComponent<SpriteRenderer>().color.a, 1f, Time.deltaTime * 5f));
+                    Hacks.SpriteRendererAlpha(action2Option1, action2.GetComponent<SpriteRenderer>().color.a);
+                    Hacks.SpriteRendererAlpha(action2Option2, action2.GetComponent<SpriteRenderer>().color.a);
+                    action2.transform.position = new Vector3(boardCells[clickedCell].root.transform.position.x, boardCells[clickedCell].root.transform.position.y + 0.7f, action2.transform.position.z);
+
+                    if (isOver(action2Option1))
+                    {
+                        action2Option1.GetComponent<SpriteRenderer>().color = new Color(0.7f, 0.7f, 0.7f, action2Option1.GetComponent<SpriteRenderer>().color.a);
+                    }
+                    else
+                    {
+                        action2Option1.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, action2Option1.GetComponent<SpriteRenderer>().color.a);
+                    }
+
+
+                    if (isOver(action2Option2))
+                    {
+                        action2Option2.GetComponent<SpriteRenderer>().color = new Color(0.7f, 0.7f, 0.7f, action2Option2.GetComponent<SpriteRenderer>().color.a);
+                    }
+                    else
+                    {
+                        action2Option2.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, action2Option2.GetComponent<SpriteRenderer>().color.a);
+                    }
+
+                }
+
+                
+            }
 
         }
 
 
+        
+        if (movingList == null)
+        {
+            if (usedTurn)
+            {
+                if (GlobalData.online)
+                {
+                    if (int.Parse(Network.player.ToString()) == 0)
+                    {
+                        // ES EL SERVER
+                        GetComponent<NetworkView>().RPC("nextTurnRPC", RPCMode.All);
+                    }
+                    else
+                    {
+                        // ES UN CLIENTE
+                        GetComponent<NetworkView>().RPC("nextTurnRequestRPC", RPCMode.Server, Network.player);
+                    }
+                }
+                else
+                {
+                    nextTurn();
+                }
+            }
+            else if (usedAction)
+            {
+                usedTurn = true;
+                Application.LoadLevel("Battle");
+            }
+        }
+        
+
+    }
+
+    void moveTo(int i)
+    {
+
+        if (GlobalData.online)
+        {
+            if (int.Parse(Network.player.ToString()) == 0)
+            {
+                // ES EL SERVER
+                List<int> path = DijkstraTarget(i, GlobalData.agents[GlobalData.currentAgentTurn]);
+
+                if (path != null) {
+                    GetComponent<NetworkView>().RPC("moveAgentRPC", RPCMode.All, GlobalData.myAgent, path[path.Count-1]);
+                    //usedTurn = true;
+                    reachables = null;
+                }
+
+            }
+            else
+            {
+                // ES UN CLIENTE
+                GetComponent<NetworkView>().RPC("moveRequestRPC", RPCMode.Server, Network.player, i);
+                //usedTurn = true;
+                reachables = null;
+            }
+        }
+        else
+        {
+            List<int> path = DijkstraTarget(i, GlobalData.agents[GlobalData.currentAgentTurn]);
+
+            if (path != null) {
+                moveAgent(GlobalData.myAgent, path[path.Count-1]);
+                //usedTurn = true;
+                reachables = null;
+            }
+                            
+        }
+        
     }
 
     void AddSanctuary(int agent, int num)
