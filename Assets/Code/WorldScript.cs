@@ -658,14 +658,6 @@ public class WorldScript : MonoBehaviour {
                 }
             }
         }
-        else
-        {
-            for (int i = 0; i < boardCells.Length; i++)
-            {
-                float aux = Mathf.Lerp(boardCells[i].root.GetComponent<SpriteRenderer>().color.r, 0.3f, Time.deltaTime * 5f);
-                boardCells[i].root.GetComponent<SpriteRenderer>().color = new Color(aux, aux, aux, 1f);
-            }
-        }
 
         
 
@@ -779,7 +771,7 @@ public class WorldScript : MonoBehaviour {
                     moveAgent(GlobalData.currentAgentTurn, reachables[aux]);
                     usedTurn = true;
                 }
-                thinkingIA = 1 + Random.Range(0f, 1f);
+                thinkingIA = 0.5f + Random.Range(0f, 0.5f);
             }
         }
 
@@ -826,10 +818,20 @@ public class WorldScript : MonoBehaviour {
                     boardCells[i].root.GetComponent<SpriteRenderer>().color = new Color(aux, aux, aux, 1f);
                 }
 
-                phase = 2;
+                if (boardCells[0].root.GetComponent<SpriteRenderer>().color.r >= 0.99f) {
+                    phase = 2;
+                }
+                
             }
             else
             {
+
+                for (int i = 0; i < boardCells.Length; i++)
+                {
+                    float aux = Mathf.Lerp(boardCells[i].root.GetComponent<SpriteRenderer>().color.r, 0.3f, Time.deltaTime * 5f);
+                    boardCells[i].root.GetComponent<SpriteRenderer>().color = new Color(aux, aux, aux, 1f);
+                }
+
                 if (GlobalData.online)
                 {
 
@@ -839,32 +841,56 @@ public class WorldScript : MonoBehaviour {
                     if (GlobalData.agents[GlobalData.currentAgentTurn].IA && GlobalData.agents[GlobalData.currentAgentTurn].cellChampion == null)
                     {
                         // ES LA IA
-                        int aux = auxSanctuaryAvailable[Random.Range(0, auxSanctuaryAvailable.Count)];
-                        auxSanctuaryAvailable.Remove(aux);
-                        Destroy(auxSanctuaryCells[aux].root);
-                        auxSanctuaryCells[aux] = null;
-                        AddSanctuary(GlobalData.currentAgentTurn, aux);
-                        selectedSanctuaries++;
 
-                        if (selectedSanctuaries < GlobalData.activeAgents)
-                        {
-                            previousTurn();
+                        thinkingIA -= Time.deltaTime;
+
+                        if (thinkingIA <= 0f) {
+                            int aux = auxSanctuaryAvailable[Random.Range(0, auxSanctuaryAvailable.Count)];
+                            auxSanctuaryAvailable.Remove(aux);
+                            Destroy(auxSanctuaryCells[aux].root);
+                            auxSanctuaryCells[aux] = null;
+                            AddSanctuary(GlobalData.currentAgentTurn, aux);
+                            selectedSanctuaries++;
+
+                            if (selectedSanctuaries < GlobalData.activeAgents)
+                            {
+                                previousTurn();
+                            }
+
+                            thinkingIA = 0.5f +Random.Range(0f, 0.5f);
                         }
 
                     }
                     else
                     {
                         // ES EL JUGADOR
-                        int aux = auxSanctuaryAvailable[Random.Range(0, auxSanctuaryAvailable.Count)];
-                        auxSanctuaryAvailable.Remove(aux);
-                        Destroy(auxSanctuaryCells[aux].root);
-                        auxSanctuaryCells[aux] = null;
-                        AddSanctuary(GlobalData.currentAgentTurn, aux);
-                        selectedSanctuaries++;
+                        selectedSprite.SetActive(false);
 
-                        if (selectedSanctuaries < GlobalData.activeAgents)
-                        {
-                            previousTurn();
+                        for (int i = 0; i < auxSanctuaryAvailable.Count; i++) {
+
+                            if (isOver(auxSanctuaryCells[auxSanctuaryAvailable[i]].root)) {
+                                selectedSprite.SetActive(true);
+                                selectedSprite.transform.position = new Vector3(auxSanctuaryCells[auxSanctuaryAvailable[i]].root.transform.position.x, auxSanctuaryCells[auxSanctuaryAvailable[i]].root.transform.position.y, selectedSprite.transform.position.z);
+                            }
+
+                            if (ClickedOn(auxSanctuaryCells[auxSanctuaryAvailable[i]].root)) {
+
+                                int aux = auxSanctuaryAvailable[i];
+                                auxSanctuaryAvailable.Remove(aux);
+                                Destroy(auxSanctuaryCells[aux].root);
+                                auxSanctuaryCells[aux] = null;
+                                AddSanctuary(GlobalData.currentAgentTurn, aux);
+                                selectedSanctuaries++;
+
+                                if (selectedSanctuaries < GlobalData.activeAgents)
+                                {
+                                    previousTurn();
+                                }
+
+                                break;
+
+                            }
+
                         }
 
                     }
