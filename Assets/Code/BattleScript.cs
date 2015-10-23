@@ -336,11 +336,13 @@ public class BattleScript : MonoBehaviour {
 
 		if (Bottom == 0) {
 			Debug.Log ("Top Wins");
-			Application.LoadLevel ("World");
+            GlobalData.World();
+            Destroy(GameObject.Find("Battle"));
 		} 
 		else if (Top == 0){
 			Debug.Log ("Bottom Wins");
-			Application.LoadLevel ("World");
+            GlobalData.World();
+            Destroy(GameObject.Find("Battle"));
 		}
 	}
 

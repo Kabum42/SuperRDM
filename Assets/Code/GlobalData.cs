@@ -4,6 +4,7 @@ using System.Collections;
 public static class GlobalData {
 
     public static bool started = false;
+    public static GameObject worldObject = null;
 	// public static Events[] Event;
 	public static string[] NameItems;
 	public static int MaxEnemies;
@@ -106,9 +107,6 @@ public static class GlobalData {
 
         
 
-        
-
-
 	private static void GenerateEnemies (){
 		Biome newBiome;
 		newBiome = Biome.Forest;
@@ -116,6 +114,18 @@ public static class GlobalData {
 		RandomEnemies[1] = new EventCharacter (2, "Wolf", 50, 100, Classes [6], Biome.Forest);
 
 	}
-	
+
+
+
+    public static void Battle()
+    {
+        worldObject.SetActive(false);
+        Application.LoadLevelAdditive("Battle");
+    }
+
+    public static void World()
+    {
+        worldObject.SetActive(true);
+    }
 
 }

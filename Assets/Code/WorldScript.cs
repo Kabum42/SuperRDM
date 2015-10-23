@@ -83,6 +83,8 @@ public class WorldScript : MonoBehaviour {
             GlobalData.Start();
         }
 
+        GlobalData.worldObject = GameObject.Find("World");
+
         //boardCells = new BoardCell[37];
 
         musicWorld = gameObject.AddComponent<AudioSource>();
@@ -145,6 +147,7 @@ public class WorldScript : MonoBehaviour {
         board = new GameObject();
         board.name = "Board";
         board.transform.position = new Vector3(0f, 0f, 0f);
+        board.transform.parent = GlobalData.worldObject.transform;
 
         for (int i = 0; i < numCells; i++)
         {
@@ -1283,7 +1286,8 @@ public class WorldScript : MonoBehaviour {
             else if (usedAction)
             {
                 usedTurn = true;
-                Application.LoadLevel("Battle");
+                //Application.LoadLevel("Battle");
+                GlobalData.Battle();
             }
         }
         
