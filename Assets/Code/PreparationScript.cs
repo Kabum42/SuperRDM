@@ -193,8 +193,11 @@ public class PreparationScript : MonoBehaviour {
         {
             if (selectables[i].player.ToString() == player.ToString())
             {
-                selectables[i].controller = "CPU";
-                selectables[i].tick.SetActive(true);
+
+                selectables[i].controller = "WaitingPlayer";
+                selectables[i].changeLegend("random");
+                selectables[i].tick.SetActive(false);
+
                 break;
             }
         }
@@ -664,17 +667,15 @@ public class PreparationScript : MonoBehaviour {
                         acceptEffect.Play();
                     }
                 }
-                else if (ClickedOn(selectables[i].controllerBackground) && GlobalData.online)
+                else if (ClickedOn(selectables[i].controllerBackground) && (GlobalData.online && int.Parse(Network.player.ToString()) == 0))
                 {
                     if (selectables[i].controller == "CPU")
                     {
                         selectables[i].controller = "WaitingPlayer";
-                        //selectables[i].controllerIcon.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/WaitingPlayer");
                     }
                     else if (selectables[i].controller == "WaitingPlayer")
                     {
                         selectables[i].controller = "CPU";
-                        //selectables[i].controllerIcon.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Menu/Cpu");
                     }
                     updatePlayer(i);
                 }
@@ -826,13 +827,19 @@ public class PreparationScript : MonoBehaviour {
     {
 
         int aux = 0;
+        float startingPerlin = 348.263123f;
 
         for (int i = 0; i < selectables.Length; i++)
         {
             if (selectables[i].status == "opened")
             {
                 Class auxClass = null;
-                if (selectables[i].currentLegend == "random") { auxClass = GlobalData.Classes[Random.Range(0, 6)]; }
+
+                if (selectables[i].currentLegend == "random") {
+                    int num = (int)Mathf.Ceil(Hacks.BinaryPerlin(0, 6, 3, 9568.24581f + startingPerlin, GlobalData.boardSeed));
+                    auxClass = GlobalData.Classes[num];
+                    startingPerlin += 23.23464f;
+                }
                 else if (selectables[i].currentLegend == "barbarian") { auxClass = GlobalData.Classes[0]; }
                 else if (selectables[i].currentLegend == "pilumantic") { auxClass = GlobalData.Classes[1]; }
                 else if (selectables[i].currentLegend == "dreamwalker") { auxClass = GlobalData.Classes[2]; }

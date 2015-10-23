@@ -223,14 +223,6 @@ public class WorldScript : MonoBehaviour {
             }
         }
 
-        
-
-        /*
-        for (int i = 0; i < GlobalData.activeAgents; i++)
-        {
-            AddSanctuary(i, i);
-        }
-        */
 
 	}
 
@@ -330,6 +322,26 @@ public class WorldScript : MonoBehaviour {
         usedAction = false;
         usedTurn = false;
         clickedCell = -1;
+    }
+
+    [RPC]
+    void sanctuaryRequestRPC(NetworkPlayer player, int num)
+    {
+
+        if (phase == 1 && GlobalData.agents[GlobalData.currentAgentTurn].player == player && GlobalData.agents[GlobalData.currentAgentTurn].cellChampion == null)
+        {
+
+            // HA SIDO UN REQUEST VALIDO Y LEGAL
+            GetComponent<NetworkView>().RPC("sanctuaryRPC", RPCMode.All, GlobalData.currentAgentTurn, num);
+
+        }
+
+    }
+
+    [RPC]
+    void sanctuaryRPC(int agent, int num)
+    {
+        AddSanctuary(agent, num);
     }
 
     private void RandomizeTurns()
@@ -834,28 +846,88 @@ public class WorldScript : MonoBehaviour {
 
                 if (GlobalData.online)
                 {
+                    if (int.Parse(Network.player.ToString()) == 0)
+                    {
+                        // ES EL SERVER
+                        if (GlobalData.myAgent == GlobalData.currentAgentTurn)
+                        {
+                            // ES EL SERVER Y LE TOCA A EL
+                            selectedSprite.SetActive(false);
 
+                            for (int i = 0; i < auxSanctuaryAvailable.Count; i++)
+                            {
+
+                                if (isOver(auxSanctuaryCells[auxSanctuaryAvailable[i]].root))
+                                {
+                                    selectedSprite.SetActive(true);
+                                    selectedSprite.transform.position = new Vector3(auxSanctuaryCells[auxSanctuaryAvailable[i]].root.transform.position.x, auxSanctuaryCells[auxSanctuaryAvailable[i]].root.transform.position.y, selectedSprite.transform.position.z);
+                                }
+
+                                if (ClickedOn(auxSanctuaryCells[auxSanctuaryAvailable[i]].root))
+                                {
+
+                                    int aux = auxSanctuaryAvailable[i];
+                                    GetComponent<NetworkView>().RPC("sanctuaryRPC", RPCMode.All, GlobalData.myAgent, aux);
+                                    break;
+
+                                }
+
+                            }
+                        }
+                        else if (GlobalData.agents[GlobalData.currentAgentTurn].IA)
+                        {
+                            // ES EL SERVER Y LE TOCA A LA IA
+                            thinkingIA -= Time.deltaTime;
+
+                            if (thinkingIA <= 0f)
+                            {
+
+                                int aux = auxSanctuaryAvailable[Random.Range(0, auxSanctuaryAvailable.Count)];
+                                GetComponent<NetworkView>().RPC("sanctuaryRPC", RPCMode.All, GlobalData.currentAgentTurn, aux);
+
+                                thinkingIA = 0.5f + Random.Range(0f, 0.5f);
+                            }
+                        }
+
+                    }
+                    else if (GlobalData.myAgent == GlobalData.currentAgentTurn)
+                    {
+                        // ES UN CLIENTE
+                        selectedSprite.SetActive(false);
+
+                        for (int i = 0; i < auxSanctuaryAvailable.Count; i++)
+                        {
+
+                            if (isOver(auxSanctuaryCells[auxSanctuaryAvailable[i]].root))
+                            {
+                                selectedSprite.SetActive(true);
+                                selectedSprite.transform.position = new Vector3(auxSanctuaryCells[auxSanctuaryAvailable[i]].root.transform.position.x, auxSanctuaryCells[auxSanctuaryAvailable[i]].root.transform.position.y, selectedSprite.transform.position.z);
+                            }
+
+                            if (ClickedOn(auxSanctuaryCells[auxSanctuaryAvailable[i]].root))
+                            {
+
+                                int aux = auxSanctuaryAvailable[i];
+                                GetComponent<NetworkView>().RPC("sanctuaryRequestRPC", RPCMode.All, Network.player, aux);
+                                break;
+
+                            }
+
+                        }
+
+                    }
                 }
                 else
                 {
                     if (GlobalData.agents[GlobalData.currentAgentTurn].IA && GlobalData.agents[GlobalData.currentAgentTurn].cellChampion == null)
                     {
                         // ES LA IA
-
                         thinkingIA -= Time.deltaTime;
 
                         if (thinkingIA <= 0f) {
-                            int aux = auxSanctuaryAvailable[Random.Range(0, auxSanctuaryAvailable.Count)];
-                            auxSanctuaryAvailable.Remove(aux);
-                            Destroy(auxSanctuaryCells[aux].root);
-                            auxSanctuaryCells[aux] = null;
-                            AddSanctuary(GlobalData.currentAgentTurn, aux);
-                            selectedSanctuaries++;
 
-                            if (selectedSanctuaries < GlobalData.activeAgents)
-                            {
-                                previousTurn();
-                            }
+                            int aux = auxSanctuaryAvailable[Random.Range(0, auxSanctuaryAvailable.Count)];
+                            AddSanctuary(GlobalData.currentAgentTurn, aux);
 
                             thinkingIA = 0.5f +Random.Range(0f, 0.5f);
                         }
@@ -876,17 +948,7 @@ public class WorldScript : MonoBehaviour {
                             if (ClickedOn(auxSanctuaryCells[auxSanctuaryAvailable[i]].root)) {
 
                                 int aux = auxSanctuaryAvailable[i];
-                                auxSanctuaryAvailable.Remove(aux);
-                                Destroy(auxSanctuaryCells[aux].root);
-                                auxSanctuaryCells[aux] = null;
                                 AddSanctuary(GlobalData.currentAgentTurn, aux);
-                                selectedSanctuaries++;
-
-                                if (selectedSanctuaries < GlobalData.activeAgents)
-                                {
-                                    previousTurn();
-                                }
-
                                 break;
 
                             }
@@ -1318,6 +1380,16 @@ public class WorldScript : MonoBehaviour {
         GlobalData.agents[agent].cellChampion.transform.position = new Vector3(boardCells[GlobalData.agents[agent].currentCell].root.transform.position.x, boardCells[GlobalData.agents[agent].currentCell].root.transform.position.y, GlobalData.agents[agent].cellChampion.transform.position.z);
 
         currentCell++;
+
+        auxSanctuaryAvailable.Remove(num);
+        Destroy(auxSanctuaryCells[num].root);
+        auxSanctuaryCells[num] = null;
+        selectedSanctuaries++;
+
+        if (selectedSanctuaries < GlobalData.activeAgents)
+        {
+            previousTurn();
+        }
 
     }
 
