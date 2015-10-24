@@ -400,6 +400,7 @@ public class WorldScript : MonoBehaviour {
             }
         }
 
+        reachables.Remove(GlobalData.agents[GlobalData.currentAgentTurn].currentCell);
         return reachables;
     }
 
@@ -409,16 +410,15 @@ public class WorldScript : MonoBehaviour {
         if (unvisited.Contains(b)) {
             unvisited.Remove(b);
         }
-        
 
         // CHANGE DISTANCES
-        if (b.northWest != null && distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.northWest.biome] < distances[b.northWest.positionInArray]) { distances[b.northWest.positionInArray] = distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.northWest.biome]; visitCell(b.northWest);  }
-        if (b.north != null && distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.north.biome] < distances[b.north.positionInArray]) { distances[b.north.positionInArray] = distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.north.biome]; visitCell(b.north);  }
-        if (b.northEast != null && distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.northEast.biome] < distances[b.northEast.positionInArray]) { distances[b.northEast.positionInArray] = distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.northEast.biome]; visitCell(b.northEast);  }
+        if (b.northWest != null && distances[b.positionInArray] + GlobalData.getBiomeCost(b.northWest.biome, b.northWest.positionInArray, GlobalData.currentAgentTurn) < distances[b.northWest.positionInArray]) { distances[b.northWest.positionInArray] = distances[b.positionInArray] + GlobalData.getBiomeCost(b.northWest.biome, b.northWest.positionInArray, GlobalData.currentAgentTurn); visitCell(b.northWest);  }
+        if (b.north != null && distances[b.positionInArray] + GlobalData.getBiomeCost(b.north.biome, b.north.positionInArray, GlobalData.currentAgentTurn) < distances[b.north.positionInArray]) { distances[b.north.positionInArray] = distances[b.positionInArray] + GlobalData.getBiomeCost(b.north.biome, b.north.positionInArray, GlobalData.currentAgentTurn); visitCell(b.north);  }
+        if (b.northEast != null && distances[b.positionInArray] + GlobalData.getBiomeCost(b.northEast.biome, b.northEast.positionInArray, GlobalData.currentAgentTurn) < distances[b.northEast.positionInArray]) { distances[b.northEast.positionInArray] = distances[b.positionInArray] + GlobalData.getBiomeCost(b.northEast.biome, b.northEast.positionInArray, GlobalData.currentAgentTurn); visitCell(b.northEast);  }
 
-        if (b.southWest != null && distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.southWest.biome] < distances[b.southWest.positionInArray]) { distances[b.southWest.positionInArray] = distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.southWest.biome]; visitCell(b.southWest);  }
-        if (b.south != null && distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.south.biome] < distances[b.south.positionInArray]) { distances[b.south.positionInArray] = distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.south.biome]; visitCell(b.south);  }
-        if (b.southEast != null && distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.southEast.biome] < distances[b.southEast.positionInArray]) { distances[b.southEast.positionInArray] = distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.southEast.biome]; visitCell(b.southEast);  }
+        if (b.southWest != null && distances[b.positionInArray] + GlobalData.getBiomeCost(b.southWest.biome, b.southWest.positionInArray, GlobalData.currentAgentTurn) < distances[b.southWest.positionInArray]) { distances[b.southWest.positionInArray] = distances[b.positionInArray] + GlobalData.getBiomeCost(b.southWest.biome, b.southWest.positionInArray, GlobalData.currentAgentTurn); visitCell(b.southWest);  }
+        if (b.south != null && distances[b.positionInArray] + GlobalData.getBiomeCost(b.south.biome, b.south.positionInArray, GlobalData.currentAgentTurn) < distances[b.south.positionInArray]) { distances[b.south.positionInArray] = distances[b.positionInArray] + GlobalData.getBiomeCost(b.south.biome, b.south.positionInArray, GlobalData.currentAgentTurn); visitCell(b.south);  }
+        if (b.southEast != null && distances[b.positionInArray] + GlobalData.getBiomeCost(b.southEast.biome, b.southEast.positionInArray, GlobalData.currentAgentTurn) < distances[b.southEast.positionInArray]) { distances[b.southEast.positionInArray] = distances[b.positionInArray] + GlobalData.getBiomeCost(b.southEast.biome, b.southEast.positionInArray, GlobalData.currentAgentTurn); visitCell(b.southEast);  }
         
 
         // VISIT NEIGHBOURS
@@ -489,7 +489,7 @@ public class WorldScript : MonoBehaviour {
             int currentSteps = 0;
             for (int j = 1; j < candidates[i].Count; j++)
             {
-                currentSteps += GlobalData.biomeCosts[(int)boardCells[candidates[i][j]].biome];
+                currentSteps += GlobalData.getBiomeCost(boardCells[candidates[i][j]].biome, boardCells[candidates[i][j]].positionInArray, GlobalData.currentAgentTurn);
             }
             if (currentSteps < bestSteps)
             {
@@ -511,12 +511,12 @@ public class WorldScript : MonoBehaviour {
         // NORTH
         if (b.northWest != null)
         {
-            if (GlobalData.biomeCosts[(int)b.northWest.biome] <= currentSteps && !list.Contains(b.northWest.positionInArray))
+            if (GlobalData.getBiomeCost(b.northWest.biome, b.northWest.positionInArray, GlobalData.currentAgentTurn) <= currentSteps && !list.Contains(b.northWest.positionInArray))
             {
                 auxSteps = currentSteps;
                 List<int> newList = copyList(list);
                 newList.Add(b.northWest.positionInArray);
-                auxSteps -= GlobalData.biomeCosts[(int)b.northWest.biome];
+                auxSteps -= GlobalData.getBiomeCost(b.northWest.biome, b.northWest.positionInArray, GlobalData.currentAgentTurn);
                 if (b.northWest.positionInArray == numTarget) { candidates.Add(newList); }
                 visitCellTarget(newList, b.northWest, numTarget, auxSteps);
             }
@@ -524,12 +524,12 @@ public class WorldScript : MonoBehaviour {
 
         if (b.north != null)
         {
-            if (GlobalData.biomeCosts[(int)b.north.biome] <= currentSteps && !list.Contains(b.north.positionInArray))
+            if (GlobalData.getBiomeCost(b.north.biome, b.north.positionInArray, GlobalData.currentAgentTurn) <= currentSteps && !list.Contains(b.north.positionInArray))
             {
                 auxSteps = currentSteps;
                 List<int> newList = copyList(list);
                 newList.Add(b.north.positionInArray);
-                auxSteps -= GlobalData.biomeCosts[(int)b.north.biome];
+                auxSteps -= GlobalData.getBiomeCost(b.north.biome, b.north.positionInArray, GlobalData.currentAgentTurn);
                 if (b.north.positionInArray == numTarget) { candidates.Add(newList); }
                 visitCellTarget(newList, b.north, numTarget, auxSteps);
             }
@@ -537,12 +537,12 @@ public class WorldScript : MonoBehaviour {
 
         if (b.northEast != null)
         {
-            if (GlobalData.biomeCosts[(int)b.northEast.biome] <= currentSteps && !list.Contains(b.northEast.positionInArray))
+            if (GlobalData.getBiomeCost(b.northEast.biome, b.northEast.positionInArray, GlobalData.currentAgentTurn) <= currentSteps && !list.Contains(b.northEast.positionInArray))
             {
                 auxSteps = currentSteps;
                 List<int> newList = copyList(list);
                 newList.Add(b.northEast.positionInArray);
-                auxSteps -= GlobalData.biomeCosts[(int)b.northEast.biome];
+                auxSteps -= GlobalData.getBiomeCost(b.northEast.biome, b.northEast.positionInArray, GlobalData.currentAgentTurn);
                 if (b.northEast.positionInArray == numTarget) { candidates.Add(newList); }
                 visitCellTarget(newList, b.northEast, numTarget, auxSteps);
             }
@@ -551,12 +551,12 @@ public class WorldScript : MonoBehaviour {
         // SOUTH
         if (b.southWest != null)
         {
-            if (GlobalData.biomeCosts[(int)b.southWest.biome] <= currentSteps && !list.Contains(b.southWest.positionInArray))
+            if (GlobalData.getBiomeCost(b.southWest.biome, b.southWest.positionInArray, GlobalData.currentAgentTurn) <= currentSteps && !list.Contains(b.southWest.positionInArray))
             {
                 auxSteps = currentSteps;
                 List<int> newList = copyList(list);
                 newList.Add(b.southWest.positionInArray);
-                auxSteps -= GlobalData.biomeCosts[(int)b.southWest.biome];
+                auxSteps -= GlobalData.getBiomeCost(b.southWest.biome, b.southWest.positionInArray, GlobalData.currentAgentTurn);
                 if (b.southWest.positionInArray == numTarget) { candidates.Add(newList); }
                 visitCellTarget(newList, b.southWest, numTarget, auxSteps);
             }
@@ -564,12 +564,12 @@ public class WorldScript : MonoBehaviour {
 
         if (b.south != null)
         {
-            if (GlobalData.biomeCosts[(int)b.south.biome] <= currentSteps && !list.Contains(b.south.positionInArray))
+            if (GlobalData.getBiomeCost(b.south.biome, b.south.positionInArray, GlobalData.currentAgentTurn) <= currentSteps && !list.Contains(b.south.positionInArray))
             {
                 auxSteps = currentSteps;
                 List<int> newList = copyList(list);
                 newList.Add(b.south.positionInArray);
-                auxSteps -= GlobalData.biomeCosts[(int)b.south.biome];
+                auxSteps -= GlobalData.getBiomeCost(b.south.biome, b.south.positionInArray, GlobalData.currentAgentTurn);
                 if (b.south.positionInArray == numTarget) { candidates.Add(newList); }
                 visitCellTarget(newList, b.south, numTarget, auxSteps);
             }
@@ -577,12 +577,12 @@ public class WorldScript : MonoBehaviour {
 
         if (b.southEast != null)
         {
-            if (GlobalData.biomeCosts[(int)b.southEast.biome] <= currentSteps && !list.Contains(b.southEast.positionInArray))
+            if (GlobalData.getBiomeCost(b.southEast.biome, b.southEast.positionInArray, GlobalData.currentAgentTurn) <= currentSteps && !list.Contains(b.southEast.positionInArray))
             {
                 auxSteps = currentSteps;
                 List<int> newList = copyList(list);
                 newList.Add(b.southEast.positionInArray);
-                auxSteps -= GlobalData.biomeCosts[(int)b.southEast.biome];
+                auxSteps -= GlobalData.getBiomeCost(b.southEast.biome, b.southEast.positionInArray, GlobalData.currentAgentTurn);
                 if (b.southEast.positionInArray == numTarget) { candidates.Add(newList); }
                 visitCellTarget(newList, b.southEast, numTarget, auxSteps);
             }
@@ -606,6 +606,32 @@ public class WorldScript : MonoBehaviour {
         return newList;
     }
 
+
+    void useTurnIA() {
+
+        List<int> allBoard = new List<int>();
+        for (int i = 0; i < boardCells.Length; i++) {
+            allBoard.Add(i);
+        }
+        int longTermObjective = bestObjective(allBoard, GlobalData.currentAgentTurn);
+
+        reachables = Dijkstra();
+        int shortTermObjective = bestObjective(reachables, GlobalData.currentAgentTurn);
+
+        if (GlobalData.online) {
+            GetComponent<NetworkView>().RPC("moveAgentRPC", RPCMode.All, GlobalData.currentAgentTurn, reachables[shortTermObjective]);
+        }
+        else {
+            moveAgent(GlobalData.currentAgentTurn, reachables[shortTermObjective]);
+        }
+
+        usedTurn = true;
+    }
+
+    int bestObjective(List<int> availableCells, int agent) {
+        int aux = Random.Range(0, availableCells.Count);
+        return aux;
+    }
 
 
     // Update is called once per frame
@@ -655,7 +681,7 @@ public class WorldScript : MonoBehaviour {
             {
                 for (int i = 0; i < boardCells.Length; i++)
                 {
-                    if (!reachables.Contains(i))
+                    if (!reachables.Contains(i) && i != GlobalData.agents[GlobalData.currentAgentTurn].currentCell)
                     {
                         float aux = Mathf.Lerp(boardCells[i].root.GetComponent<SpriteRenderer>().color.r, 0.3f, Time.deltaTime * 5f);
                         boardCells[i].root.GetComponent<SpriteRenderer>().color = new Color(aux, aux, aux, 1f);
@@ -771,25 +797,16 @@ public class WorldScript : MonoBehaviour {
 
         if (phase == 2 && movingList == null && GlobalData.agents[GlobalData.currentAgentTurn].IA && (int.Parse(Network.player.ToString()) == 0 || !GlobalData.online))
         {
+            // LE TOCA A LA IA
             thinkingIA -= Time.deltaTime;
 
             if (thinkingIA <= 0f) {
-                if (GlobalData.online) { 
-                    reachables = Dijkstra();
-                    int aux = Random.Range(0, reachables.Count);
-                    GetComponent<NetworkView>().RPC("moveAgentRPC", RPCMode.All, GlobalData.currentAgentTurn, reachables[aux]);
-                    usedTurn = true;
-                }
-                else { 
-                    reachables = Dijkstra();
-                    int aux = Random.Range(0, reachables.Count);
-                    moveAgent(GlobalData.currentAgentTurn, reachables[aux]);
-                    usedTurn = true;
-                }
+
+                useTurnIA();
                 thinkingIA = 0.5f + Random.Range(0f, 0.5f);
+
             }
         }
-
 
         if (phase == 0)
         {
@@ -1090,19 +1107,6 @@ public class WorldScript : MonoBehaviour {
                     lastDPadX = Input.GetAxis("DPad1");
                     lastDPadY = Input.GetAxis("DPad2");
                 }
-                /*
-                if (GlobalData.OS == "Mac")
-                {
-                    // MAC
-                    // NOT IMPLEMENTED
-                }
-                if (GlobalData.OS == "Linux")
-                {
-                    // LINUX
-                    DPadX = Input.GetAxis("DPad2");
-                    DPadY = Input.GetAxis("DPad3");
-                }
-                */
 
             }
             else
@@ -1143,7 +1147,7 @@ public class WorldScript : MonoBehaviour {
                             selected = boardCells[i];
                         }
 
-                        if (GlobalData.currentAgentTurn == GlobalData.myAgent && ClickedOn(boardCells[i].root) && reachables.Contains(i))
+                        if (GlobalData.currentAgentTurn == GlobalData.myAgent && ClickedOn(boardCells[i].root) && (reachables.Contains(i) || i == GlobalData.agents[GlobalData.currentAgentTurn].currentCell))
                         {
 
                             clickedCell = i;
@@ -1345,6 +1349,7 @@ public class WorldScript : MonoBehaviour {
         GlobalData.agents[agent].cellChampion = Instantiate(Resources.Load("Prefabs/Champion")) as GameObject;
         GlobalData.agents[agent].cellChampion.name = "Champion_" + agent;
         GlobalData.agents[agent].cellChampion.transform.parent = GameObject.Find("Champions").transform;
+        GlobalData.agents[agent].sanctuary = currentCell;
 
         if (num == 0) {
             positionCell(b, 2, 3);

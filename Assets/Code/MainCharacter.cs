@@ -12,6 +12,7 @@ public class MainCharacter : Character {
     public NetworkPlayer player;
     public bool IA = false;
     public int currentCell;
+    public int sanctuary;
     public GameObject cellChampion;
 
 	public MainCharacter(int ID, string Name, float MaxHealth, float MaxIP, Class OwnClass)

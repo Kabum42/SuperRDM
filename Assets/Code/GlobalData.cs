@@ -22,7 +22,7 @@ public static class GlobalData {
     public static Color color5 = new Color(1f, 1f, 0.62f);
     public static Color[] colorCharacters = {color0, color1, color2, color3, color4, color5};
     public static string[] biomeNames;
-    public static int[] biomeCosts;
+    private static int[] biomeCosts;
 
 	public static EventCharacter[] RandomEnemies = new EventCharacter[3];
 	public static Skill[] Skills = new Skill[24];
@@ -85,6 +85,15 @@ public static class GlobalData {
         //Language.currentLanguage = Language.Spanish;
 
 	}
+
+    public static int getBiomeCost(Biome biome, int position, int agent) {
+        
+        if (biome == Biome.Sanctuary && position != GlobalData.agents[agent].sanctuary) {
+            return 42;
+        }
+        
+        return biomeCosts[(int)biome];
+    }
 
 	private static void GenerateSkills(){
 		Skills [0] = new Skill (0, "Hack", 30, 0, 20, false);
