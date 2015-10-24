@@ -619,18 +619,51 @@ public class WorldScript : MonoBehaviour {
         int shortTermObjective = bestObjective(reachables, GlobalData.currentAgentTurn);
 
         if (GlobalData.online) {
-            GetComponent<NetworkView>().RPC("moveAgentRPC", RPCMode.All, GlobalData.currentAgentTurn, reachables[shortTermObjective]);
+            GetComponent<NetworkView>().RPC("moveAgentRPC", RPCMode.All, GlobalData.currentAgentTurn, shortTermObjective);
         }
         else {
-            moveAgent(GlobalData.currentAgentTurn, reachables[shortTermObjective]);
+            moveAgent(GlobalData.currentAgentTurn, shortTermObjective);
         }
 
         usedTurn = true;
     }
 
     int bestObjective(List<int> availableCells, int agent) {
-        int aux = Random.Range(0, availableCells.Count);
-        return aux;
+
+        int bestAux = -1;
+        int bestValue = -1;
+
+        for (int i = 0; i < availableCells.Count; i++) {
+            if (cellValue(availableCells[i], agent) > bestValue) {
+                bestAux = i;
+                bestValue = cellValue(availableCells[i], agent);
+            }
+        }
+        return availableCells[bestAux];
+    }
+
+    int cellValue(int cell, int agent) {
+
+        // SI TIENE LA VIDA MUY BAJA
+        if (false && cell == GlobalData.agents[agent].sanctuary) {
+            return 100;
+        }
+        // SI TIENE NIVEL 10 o MAS
+        if (false && boardCells[cell].biome == Biome.TheEvil) {
+            return 99;
+        }
+
+        // SI ESA CASILLA TIENE MISION
+        if (false) {
+            return 98;
+        }
+
+        // SI ESA CASILLA NO ESTA EXHAUSTA
+        if (true) {
+            return GlobalData.getBiomeCost(boardCells[cell].biome, cell, GlobalData.currentAgentTurn);
+        }
+
+        return 0;
     }
 
 
