@@ -62,6 +62,7 @@
      <Compile Include="Assets\Code\MenuScript.cs" />
      <Compile Include="Assets\Code\Mission.cs" />
      <Compile Include="Assets\Code\NetworkManager.cs" />
+     <Compile Include="Assets\Code\PreludeScript.cs" />
      <Compile Include="Assets\Code\PreparationScript.cs" />
      <Compile Include="Assets\Code\Skill.cs" />
      <Compile Include="Assets\Code\WorldScript.cs" />
