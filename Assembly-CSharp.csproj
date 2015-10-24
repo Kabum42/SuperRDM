@@ -66,6 +66,7 @@
      <Compile Include="Assets\Code\Skill.cs" />
      <Compile Include="Assets\Code\WorldScript.cs" />
      <None Include="Assets\Resources\Fonts\Comfortaa\OFL.txt" />
+     <None Include="Assets\Resources\Languages.txt" />
  <Reference Include="UnityEngine.UI">
  <HintPath>E:/Programas/Unity2/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
  </Reference>
