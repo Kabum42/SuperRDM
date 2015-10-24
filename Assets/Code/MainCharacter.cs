@@ -12,6 +12,7 @@ public class MainCharacter : Character {
     public NetworkPlayer player;
     public bool IA = false;
     public int currentCell;
+    public int sanctuary;
     public GameObject cellChampion;
 
 	public MainCharacter(int ID, string Name, float MaxHealth, float MaxIP, Class OwnClass)
@@ -21,6 +22,9 @@ public class MainCharacter : Character {
 		this.MaxHealth = MaxHealth;
 		this.MaxIPBar = MaxIP;
 		this.OwnClass = OwnClass;
+
+        MaxMP = 6;
+        CurrentMP = MaxMP;
 
 		switch (OwnClass.getName ()) {
 			case "Boar Ryder":
@@ -33,7 +37,17 @@ public class MainCharacter : Character {
 
     public int getCurrentSteps()
     {
-        return 6;
+        return CurrentMP;
+    }
+
+    public void setCurrentSteps(int n)
+    {
+        CurrentMP = n;
+    }
+
+    public int getMaxSteps()
+    {
+        return MaxMP;
     }
 
 	public void Interact()

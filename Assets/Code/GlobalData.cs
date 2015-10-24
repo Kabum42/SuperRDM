@@ -4,6 +4,7 @@ using System.Collections;
 public static class GlobalData {
 
     public static bool started = false;
+    public static GameObject worldObject = null;
 	// public static Events[] Event;
 	public static string[] NameItems;
 	public static int MaxEnemies;
@@ -21,7 +22,7 @@ public static class GlobalData {
     public static Color color5 = new Color(1f, 1f, 0.62f);
     public static Color[] colorCharacters = {color0, color1, color2, color3, color4, color5};
     public static string[] biomeNames;
-    public static int[] biomeCosts;
+    private static int[] biomeCosts;
 
 	public static EventCharacter[] RandomEnemies = new EventCharacter[3];
 	public static Skill[] Skills = new Skill[24];
@@ -85,6 +86,15 @@ public static class GlobalData {
 
 	}
 
+    public static int getBiomeCost(Biome biome, int position, int agent) {
+        
+        if (biome == Biome.Sanctuary && position != GlobalData.agents[agent].sanctuary) {
+            return 42;
+        }
+        
+        return biomeCosts[(int)biome];
+    }
+
 	private static void GenerateSkills(){
 		Skills [0] = new Skill (0, "Hack", 30, 0, 20, false);
 		Skills [1] = new Skill (1, "Axe Throw", 60, 0, 30, true);
@@ -94,14 +104,17 @@ public static class GlobalData {
 
 	private static void GenerateClasses(){
 		Classes [0] = new Class (0, "Boar Ryder", Skills [0], Skills [1], Skills [2]);
+        Classes [1] = new Class (1, "Pilumantic", Skills [0], Skills [1], Skills [2]);
+        Classes [2] = new Class (2, "Dreamwalker", Skills [0], Skills [1], Skills [2]);
+        Classes [3] = new Class (3, "Henmancer", Skills [0], Skills [1], Skills [2]);
+        Classes [4] = new Class (4, "Disembodied", Skills [0], Skills [1], Skills [2]);
+        Classes [5] = new Class (5, "Black Shield", Skills [0], Skills [1], Skills [2]);
+
 		Classes [6] = new Class (6, "Wolf", null, null, null);
 	}
 
 
         
-
-        
-
 
 	private static void GenerateEnemies (){
 		Biome newBiome;
@@ -110,6 +123,18 @@ public static class GlobalData {
 		RandomEnemies[1] = new EventCharacter (2, "Wolf", 50, 100, Classes [6], Biome.Forest);
 
 	}
-	
+
+
+
+    public static void Battle()
+    {
+        worldObject.SetActive(false);
+        Application.LoadLevelAdditive("Battle");
+    }
+
+    public static void World()
+    {
+        worldObject.SetActive(true);
+    }
 
 }

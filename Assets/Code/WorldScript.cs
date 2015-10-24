@@ -9,6 +9,10 @@ public class WorldScript : MonoBehaviour {
     private int currentCell = 0;
     private int[] cellsPerRing;
 
+    private BoardCell[] auxSanctuaryCells = new BoardCell[6];
+    private List<int> auxSanctuaryAvailable = new List<int> { 0, 1, 2, 3, 4, 5 };
+    private int selectedSanctuaries = 0;
+
     private float cellWidth = 1.30f;
     private float cellHeight = 1.51f;
 
@@ -22,11 +26,16 @@ public class WorldScript : MonoBehaviour {
     private GameObject fading;
     private AudioSource musicWorld;
     private GameObject selectedSprite;
+    private int clickedCell = -1;
     private bool usedDijkstra = false;
+    private bool usedAction = false;
+    private bool usedTurn = false;
     private List<BoardCell> unvisited;
     private int[] distances;
     private List<List<int>> candidates;
     private List<int> reachables;
+    private int lastDijkstraTargetSteps = 0;
+    private int lastTurn = -1;
 
     private float lastDPadX = 0f;
     private float lastDPadY = 0f;
@@ -50,17 +59,18 @@ public class WorldScript : MonoBehaviour {
     private float movingDelta = 0f;
     private List<int> movingList = null;
     private int previousAuxPosition = -1;
+    private float movingDelay = 0.25f;
 
     private GameObject ribbon;
     private GameObject ribbonOver;
     private bool ribbonAppearing = false;
     private AudioSource ribbonSound;
 
-    private GameObject actionWalk;
-    private GameObject actionAttack;
-    private GameObject actionHeal;
-    private GameObject actionLook;
-    private GameObject actionSail;
+    private GameObject action1;
+    private GameObject action1Option1;
+    private GameObject action2;
+    private GameObject action2Option1;
+    private GameObject action2Option2;
 
     private float thinkingIA = 1f;
 
@@ -72,6 +82,8 @@ public class WorldScript : MonoBehaviour {
         {
             GlobalData.Start();
         }
+
+        GlobalData.worldObject = GameObject.Find("World");
 
         //boardCells = new BoardCell[37];
 
@@ -105,16 +117,13 @@ public class WorldScript : MonoBehaviour {
         ribbonSound.volume = 1f;
         ribbonSound.playOnAwake = false;
 
-        actionAttack = GameObject.Find("Attack");
-        actionAttack.SetActive(false);
-        actionHeal = GameObject.Find("Heal");
-        actionHeal.SetActive(false);
-        actionLook = GameObject.Find("Look");
-        actionLook.SetActive(false);
-        actionSail = GameObject.Find("Sail");
-        actionSail.SetActive(false);
-        actionWalk = GameObject.Find("Walk");
-        actionWalk.SetActive(false);
+        action1 = GameObject.Find("Action1");
+        action1Option1 = GameObject.Find("Action1/Option1");
+        action1.SetActive(false);
+        action2 = GameObject.Find("Action2");
+        action2Option1 = GameObject.Find("Action2/Option1");
+        action2Option2 = GameObject.Find("Action2/Option2");
+        action2.SetActive(false);
 
         UIAgents = new GameObject[GlobalData.activeAgents];
 
@@ -138,6 +147,7 @@ public class WorldScript : MonoBehaviour {
         board = new GameObject();
         board.name = "Board";
         board.transform.position = new Vector3(0f, 0f, 0f);
+        board.transform.parent = GlobalData.worldObject.transform;
 
         for (int i = 0; i < numCells; i++)
         {
@@ -161,15 +171,61 @@ public class WorldScript : MonoBehaviour {
                 g.name = "UIAgent" + i;
                 g.transform.parent = GameObject.Find("UIAgents").transform;
                 g.transform.FindChild("PictureHolder").gameObject.GetComponent<SpriteRenderer>().color = GlobalData.colorCharacters[i];
+
+                string currentLegend = "barbarian";
+                if (GlobalData.agents[i].getOwnClass() == GlobalData.Classes[0]) { currentLegend = "barbarian"; }
+                else if (GlobalData.agents[i].getOwnClass() == GlobalData.Classes[1]) { currentLegend = "pilumantic"; }
+                else if (GlobalData.agents[i].getOwnClass() == GlobalData.Classes[2]) { currentLegend = "dreamwalker"; }
+                else if (GlobalData.agents[i].getOwnClass() == GlobalData.Classes[3]) { currentLegend = "henmancer"; }
+                else if (GlobalData.agents[i].getOwnClass() == GlobalData.Classes[4]) { currentLegend = "disembodied"; }
+                else if (GlobalData.agents[i].getOwnClass() == GlobalData.Classes[5]) { currentLegend = "buckler"; }
+
+                g.transform.FindChild("Legend").GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Legends/"+currentLegend);
+
                 UIAgents[i] = g;
             }
         }
 
-        
-        for (int i = 0; i < GlobalData.activeAgents; i++)
+        for (int num = 0; num < auxSanctuaryCells.Length; num++)
         {
-            AddSanctuary(i, i);
+            BoardCell b = new BoardCell();
+            b.root = Instantiate(Resources.Load("Prefabs/BoardCell")) as GameObject;
+            b.text = b.root.transform.FindChild("Text").gameObject;
+            b.text.SetActive(false);
+            b.ring = 4;
+            b.changeBiome(Biome.Sanctuary);
+            b.root.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("BoardCells/" + GlobalData.biomeNames[(int)Biome.Sanctuary]);
+            b.root.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f);
+            b.root.name = "Cell_Aux" + 4 + "_" + num;
+
+            auxSanctuaryCells[num] = b;
+
+            if (num == 0)
+            {
+                positionCell(b, 2, 3);
+            }
+            else if (num == 1)
+            {
+                positionCell(b, 4, 0);
+            }
+            else if (num == 2)
+            {
+                positionCell(b, 2, -3);
+            }
+            else if (num == 3)
+            {
+                positionCell(b, -2, -3);
+            }
+            else if (num == 4)
+            {
+                positionCell(b, -4, 0);
+            }
+            else if (num == 5)
+            {
+                positionCell(b, -2, 3);
+            }
         }
+
 
 	}
 
@@ -212,6 +268,7 @@ public class WorldScript : MonoBehaviour {
             movingAgent = agent;
             movingDelta = 0f;
             movingList = path;
+            GlobalData.agents[agent].setCurrentSteps(GlobalData.agents[agent].getCurrentSteps() -lastDijkstraTargetSteps);
 
         }
 
@@ -238,7 +295,6 @@ public class WorldScript : MonoBehaviour {
 
     void nextTurn()
     {
-
         int auxOrder = 0;
         for (int i = 0; i < GlobalData.activeAgents; i++)
         {
@@ -247,8 +303,48 @@ public class WorldScript : MonoBehaviour {
         auxOrder++;
         if (auxOrder > GlobalData.activeAgents - 1) { auxOrder = 0; }
         GlobalData.currentAgentTurn = GlobalData.order[auxOrder];
+        GlobalData.agents[GlobalData.currentAgentTurn].setCurrentSteps(GlobalData.agents[GlobalData.currentAgentTurn].getMaxSteps());
         usedDijkstra = false;
+        usedAction = false;
+        usedTurn = false;
+        clickedCell = -1;
+    }
 
+    void previousTurn()
+    {
+        int auxOrder = 0;
+        for (int i = 0; i < GlobalData.activeAgents; i++)
+        {
+            if (GlobalData.currentAgentTurn == GlobalData.order[i]) { auxOrder = i; }
+        }
+        auxOrder--;
+        if (auxOrder < 0) { auxOrder = GlobalData.activeAgents - 1; }
+        GlobalData.currentAgentTurn = GlobalData.order[auxOrder];
+        GlobalData.agents[GlobalData.currentAgentTurn].setCurrentSteps(GlobalData.agents[GlobalData.currentAgentTurn].getMaxSteps());
+        usedDijkstra = false;
+        usedAction = false;
+        usedTurn = false;
+        clickedCell = -1;
+    }
+
+    [RPC]
+    void sanctuaryRequestRPC(NetworkPlayer player, int num)
+    {
+
+        if (phase == 1 && GlobalData.agents[GlobalData.currentAgentTurn].player == player && GlobalData.agents[GlobalData.currentAgentTurn].cellChampion == null)
+        {
+
+            // HA SIDO UN REQUEST VALIDO Y LEGAL
+            GetComponent<NetworkView>().RPC("sanctuaryRPC", RPCMode.All, GlobalData.currentAgentTurn, num);
+
+        }
+
+    }
+
+    [RPC]
+    void sanctuaryRPC(int agent, int num)
+    {
+        AddSanctuary(agent, num);
     }
 
     private void RandomizeTurns()
@@ -274,7 +370,7 @@ public class WorldScript : MonoBehaviour {
 
 
         GlobalData.currentAgentTurn = (int) Mathf.Ceil(Hacks.BinaryPerlin(0, GlobalData.order.Length-1, 3, 0.23425f + startingPerlin, GlobalData.boardSeed));
-        Debug.Log(GlobalData.currentAgentTurn);
+        //Debug.Log(GlobalData.currentAgentTurn);
 
     }
 
@@ -304,6 +400,7 @@ public class WorldScript : MonoBehaviour {
             }
         }
 
+        reachables.Remove(GlobalData.agents[GlobalData.currentAgentTurn].currentCell);
         return reachables;
     }
 
@@ -313,16 +410,15 @@ public class WorldScript : MonoBehaviour {
         if (unvisited.Contains(b)) {
             unvisited.Remove(b);
         }
-        
 
         // CHANGE DISTANCES
-        if (b.northWest != null && distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.northWest.biome] < distances[b.northWest.positionInArray]) { distances[b.northWest.positionInArray] = distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.northWest.biome]; visitCell(b.northWest);  }
-        if (b.north != null && distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.north.biome] < distances[b.north.positionInArray]) { distances[b.north.positionInArray] = distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.north.biome]; visitCell(b.north);  }
-        if (b.northEast != null && distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.northEast.biome] < distances[b.northEast.positionInArray]) { distances[b.northEast.positionInArray] = distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.northEast.biome]; visitCell(b.northEast);  }
+        if (b.northWest != null && distances[b.positionInArray] + GlobalData.getBiomeCost(b.northWest.biome, b.northWest.positionInArray, GlobalData.currentAgentTurn) < distances[b.northWest.positionInArray]) { distances[b.northWest.positionInArray] = distances[b.positionInArray] + GlobalData.getBiomeCost(b.northWest.biome, b.northWest.positionInArray, GlobalData.currentAgentTurn); visitCell(b.northWest);  }
+        if (b.north != null && distances[b.positionInArray] + GlobalData.getBiomeCost(b.north.biome, b.north.positionInArray, GlobalData.currentAgentTurn) < distances[b.north.positionInArray]) { distances[b.north.positionInArray] = distances[b.positionInArray] + GlobalData.getBiomeCost(b.north.biome, b.north.positionInArray, GlobalData.currentAgentTurn); visitCell(b.north);  }
+        if (b.northEast != null && distances[b.positionInArray] + GlobalData.getBiomeCost(b.northEast.biome, b.northEast.positionInArray, GlobalData.currentAgentTurn) < distances[b.northEast.positionInArray]) { distances[b.northEast.positionInArray] = distances[b.positionInArray] + GlobalData.getBiomeCost(b.northEast.biome, b.northEast.positionInArray, GlobalData.currentAgentTurn); visitCell(b.northEast);  }
 
-        if (b.southWest != null && distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.southWest.biome] < distances[b.southWest.positionInArray]) { distances[b.southWest.positionInArray] = distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.southWest.biome]; visitCell(b.southWest);  }
-        if (b.south != null && distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.south.biome] < distances[b.south.positionInArray]) { distances[b.south.positionInArray] = distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.south.biome]; visitCell(b.south);  }
-        if (b.southEast != null && distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.southEast.biome] < distances[b.southEast.positionInArray]) { distances[b.southEast.positionInArray] = distances[b.positionInArray] + GlobalData.biomeCosts[(int)b.southEast.biome]; visitCell(b.southEast);  }
+        if (b.southWest != null && distances[b.positionInArray] + GlobalData.getBiomeCost(b.southWest.biome, b.southWest.positionInArray, GlobalData.currentAgentTurn) < distances[b.southWest.positionInArray]) { distances[b.southWest.positionInArray] = distances[b.positionInArray] + GlobalData.getBiomeCost(b.southWest.biome, b.southWest.positionInArray, GlobalData.currentAgentTurn); visitCell(b.southWest);  }
+        if (b.south != null && distances[b.positionInArray] + GlobalData.getBiomeCost(b.south.biome, b.south.positionInArray, GlobalData.currentAgentTurn) < distances[b.south.positionInArray]) { distances[b.south.positionInArray] = distances[b.positionInArray] + GlobalData.getBiomeCost(b.south.biome, b.south.positionInArray, GlobalData.currentAgentTurn); visitCell(b.south);  }
+        if (b.southEast != null && distances[b.positionInArray] + GlobalData.getBiomeCost(b.southEast.biome, b.southEast.positionInArray, GlobalData.currentAgentTurn) < distances[b.southEast.positionInArray]) { distances[b.southEast.positionInArray] = distances[b.positionInArray] + GlobalData.getBiomeCost(b.southEast.biome, b.southEast.positionInArray, GlobalData.currentAgentTurn); visitCell(b.southEast);  }
         
 
         // VISIT NEIGHBOURS
@@ -391,9 +487,9 @@ public class WorldScript : MonoBehaviour {
         for (int i = 0; i < candidates.Count; i++)
         {
             int currentSteps = 0;
-            for (int j = 0; j < candidates[i].Count; j++)
+            for (int j = 1; j < candidates[i].Count; j++)
             {
-                currentSteps += GlobalData.biomeCosts[(int)boardCells[candidates[i][j]].biome];
+                currentSteps += GlobalData.getBiomeCost(boardCells[candidates[i][j]].biome, boardCells[candidates[i][j]].positionInArray, GlobalData.currentAgentTurn);
             }
             if (currentSteps < bestSteps)
             {
@@ -401,6 +497,8 @@ public class WorldScript : MonoBehaviour {
                 bestList = candidates[i];
             }
         }
+
+        lastDijkstraTargetSteps = bestSteps;
 
         return bestList;
     }
@@ -413,12 +511,12 @@ public class WorldScript : MonoBehaviour {
         // NORTH
         if (b.northWest != null)
         {
-            if (GlobalData.biomeCosts[(int)b.northWest.biome] <= currentSteps && !list.Contains(b.northWest.positionInArray))
+            if (GlobalData.getBiomeCost(b.northWest.biome, b.northWest.positionInArray, GlobalData.currentAgentTurn) <= currentSteps && !list.Contains(b.northWest.positionInArray))
             {
                 auxSteps = currentSteps;
                 List<int> newList = copyList(list);
                 newList.Add(b.northWest.positionInArray);
-                auxSteps -= GlobalData.biomeCosts[(int)b.northWest.biome];
+                auxSteps -= GlobalData.getBiomeCost(b.northWest.biome, b.northWest.positionInArray, GlobalData.currentAgentTurn);
                 if (b.northWest.positionInArray == numTarget) { candidates.Add(newList); }
                 visitCellTarget(newList, b.northWest, numTarget, auxSteps);
             }
@@ -426,12 +524,12 @@ public class WorldScript : MonoBehaviour {
 
         if (b.north != null)
         {
-            if (GlobalData.biomeCosts[(int)b.north.biome] <= currentSteps && !list.Contains(b.north.positionInArray))
+            if (GlobalData.getBiomeCost(b.north.biome, b.north.positionInArray, GlobalData.currentAgentTurn) <= currentSteps && !list.Contains(b.north.positionInArray))
             {
                 auxSteps = currentSteps;
                 List<int> newList = copyList(list);
                 newList.Add(b.north.positionInArray);
-                auxSteps -= GlobalData.biomeCosts[(int)b.north.biome];
+                auxSteps -= GlobalData.getBiomeCost(b.north.biome, b.north.positionInArray, GlobalData.currentAgentTurn);
                 if (b.north.positionInArray == numTarget) { candidates.Add(newList); }
                 visitCellTarget(newList, b.north, numTarget, auxSteps);
             }
@@ -439,12 +537,12 @@ public class WorldScript : MonoBehaviour {
 
         if (b.northEast != null)
         {
-            if (GlobalData.biomeCosts[(int)b.northEast.biome] <= currentSteps && !list.Contains(b.northEast.positionInArray))
+            if (GlobalData.getBiomeCost(b.northEast.biome, b.northEast.positionInArray, GlobalData.currentAgentTurn) <= currentSteps && !list.Contains(b.northEast.positionInArray))
             {
                 auxSteps = currentSteps;
                 List<int> newList = copyList(list);
                 newList.Add(b.northEast.positionInArray);
-                auxSteps -= GlobalData.biomeCosts[(int)b.northEast.biome];
+                auxSteps -= GlobalData.getBiomeCost(b.northEast.biome, b.northEast.positionInArray, GlobalData.currentAgentTurn);
                 if (b.northEast.positionInArray == numTarget) { candidates.Add(newList); }
                 visitCellTarget(newList, b.northEast, numTarget, auxSteps);
             }
@@ -453,12 +551,12 @@ public class WorldScript : MonoBehaviour {
         // SOUTH
         if (b.southWest != null)
         {
-            if (GlobalData.biomeCosts[(int)b.southWest.biome] <= currentSteps && !list.Contains(b.southWest.positionInArray))
+            if (GlobalData.getBiomeCost(b.southWest.biome, b.southWest.positionInArray, GlobalData.currentAgentTurn) <= currentSteps && !list.Contains(b.southWest.positionInArray))
             {
                 auxSteps = currentSteps;
                 List<int> newList = copyList(list);
                 newList.Add(b.southWest.positionInArray);
-                auxSteps -= GlobalData.biomeCosts[(int)b.southWest.biome];
+                auxSteps -= GlobalData.getBiomeCost(b.southWest.biome, b.southWest.positionInArray, GlobalData.currentAgentTurn);
                 if (b.southWest.positionInArray == numTarget) { candidates.Add(newList); }
                 visitCellTarget(newList, b.southWest, numTarget, auxSteps);
             }
@@ -466,12 +564,12 @@ public class WorldScript : MonoBehaviour {
 
         if (b.south != null)
         {
-            if (GlobalData.biomeCosts[(int)b.south.biome] <= currentSteps && !list.Contains(b.south.positionInArray))
+            if (GlobalData.getBiomeCost(b.south.biome, b.south.positionInArray, GlobalData.currentAgentTurn) <= currentSteps && !list.Contains(b.south.positionInArray))
             {
                 auxSteps = currentSteps;
                 List<int> newList = copyList(list);
                 newList.Add(b.south.positionInArray);
-                auxSteps -= GlobalData.biomeCosts[(int)b.south.biome];
+                auxSteps -= GlobalData.getBiomeCost(b.south.biome, b.south.positionInArray, GlobalData.currentAgentTurn);
                 if (b.south.positionInArray == numTarget) { candidates.Add(newList); }
                 visitCellTarget(newList, b.south, numTarget, auxSteps);
             }
@@ -479,12 +577,12 @@ public class WorldScript : MonoBehaviour {
 
         if (b.southEast != null)
         {
-            if (GlobalData.biomeCosts[(int)b.southEast.biome] <= currentSteps && !list.Contains(b.southEast.positionInArray))
+            if (GlobalData.getBiomeCost(b.southEast.biome, b.southEast.positionInArray, GlobalData.currentAgentTurn) <= currentSteps && !list.Contains(b.southEast.positionInArray))
             {
                 auxSteps = currentSteps;
                 List<int> newList = copyList(list);
                 newList.Add(b.southEast.positionInArray);
-                auxSteps -= GlobalData.biomeCosts[(int)b.southEast.biome];
+                auxSteps -= GlobalData.getBiomeCost(b.southEast.biome, b.southEast.positionInArray, GlobalData.currentAgentTurn);
                 if (b.southEast.positionInArray == numTarget) { candidates.Add(newList); }
                 visitCellTarget(newList, b.southEast, numTarget, auxSteps);
             }
@@ -509,15 +607,77 @@ public class WorldScript : MonoBehaviour {
     }
 
 
+    void useTurnIA() {
+
+        List<int> allBoard = new List<int>();
+        for (int i = 0; i < boardCells.Length; i++) {
+            allBoard.Add(i);
+        }
+        int longTermObjective = bestObjective(allBoard, GlobalData.currentAgentTurn);
+
+        reachables = Dijkstra();
+        int shortTermObjective = bestObjective(reachables, GlobalData.currentAgentTurn);
+
+        if (GlobalData.online) {
+            GetComponent<NetworkView>().RPC("moveAgentRPC", RPCMode.All, GlobalData.currentAgentTurn, shortTermObjective);
+        }
+        else {
+            moveAgent(GlobalData.currentAgentTurn, shortTermObjective);
+        }
+
+        usedTurn = true;
+    }
+
+    int bestObjective(List<int> availableCells, int agent) {
+
+        int bestAux = -1;
+        int bestValue = -1;
+
+        for (int i = 0; i < availableCells.Count; i++) {
+            if (cellValue(availableCells[i], agent) > bestValue) {
+                bestAux = i;
+                bestValue = cellValue(availableCells[i], agent);
+            }
+        }
+        return availableCells[bestAux];
+    }
+
+    int cellValue(int cell, int agent) {
+
+        // SI TIENE LA VIDA MUY BAJA
+        if (false && cell == GlobalData.agents[agent].sanctuary) {
+            return 100;
+        }
+        // SI TIENE NIVEL 10 o MAS
+        if (false && boardCells[cell].biome == Biome.TheEvil) {
+            return 99;
+        }
+
+        // SI ESA CASILLA TIENE MISION
+        if (false) {
+            return 98;
+        }
+
+        // SI ESA CASILLA NO ESTA EXHAUSTA
+        if (true) {
+            return GlobalData.getBiomeCost(boardCells[cell].biome, cell, GlobalData.currentAgentTurn);
+        }
+
+        return 0;
+    }
+
 
     // Update is called once per frame
     void Update()
     {
 
-        if (GlobalData.currentAgentTurn == GlobalData.myAgent && !usedDijkstra && movingList == null)
+        if (phase == 2 && GlobalData.currentAgentTurn == GlobalData.myAgent && !usedDijkstra && movingList == null)
         {
             reachables = Dijkstra();
+        }
 
+        if (lastTurn != GlobalData.currentAgentTurn && GlobalData.currentAgentTurn == GlobalData.myAgent)
+        {
             ribbon.transform.position = new Vector3(0f, 8f, -4f);
             ribbon.SetActive(true);
             ribbonOver.SetActive(true);
@@ -526,6 +686,7 @@ public class WorldScript : MonoBehaviour {
             ribbonAppearing = true;
             ribbonSound.Play();
         }
+        lastTurn = GlobalData.currentAgentTurn;
 
         if (ribbon.activeInHierarchy) {
             if (ribbonAppearing) {
@@ -547,21 +708,34 @@ public class WorldScript : MonoBehaviour {
         }
 
         // BRIGHTNESS CELLS
-        if (usedDijkstra) {
-            for (int i = 0; i < boardCells.Length; i++)
+        if (phase == 2)
+        {
+            if (usedDijkstra && GlobalData.currentAgentTurn == GlobalData.myAgent && reachables != null)
             {
-                if (!reachables.Contains(i)) {
-                    float aux = Mathf.Lerp(boardCells[i].root.GetComponent<SpriteRenderer>().color.r, 0.3f, Time.deltaTime*5f);
+                for (int i = 0; i < boardCells.Length; i++)
+                {
+                    if (!reachables.Contains(i) && i != GlobalData.agents[GlobalData.currentAgentTurn].currentCell)
+                    {
+                        float aux = Mathf.Lerp(boardCells[i].root.GetComponent<SpriteRenderer>().color.r, 0.3f, Time.deltaTime * 5f);
+                        boardCells[i].root.GetComponent<SpriteRenderer>().color = new Color(aux, aux, aux, 1f);
+                    }
+                }
+                float aux2 = Mathf.Lerp(boardCells[GlobalData.agents[GlobalData.currentAgentTurn].currentCell].root.GetComponent<SpriteRenderer>().color.r, 1f, Time.deltaTime * 5f);
+                boardCells[GlobalData.agents[GlobalData.currentAgentTurn].currentCell].root.GetComponent<SpriteRenderer>().color = new Color(aux2, aux2, aux2, 1f);
+            }
+            else
+            {
+                for (int i = 0; i < boardCells.Length; i++)
+                {
+                    float aux = Mathf.Lerp(boardCells[i].root.GetComponent<SpriteRenderer>().color.r, 1f, Time.deltaTime * 5f);
                     boardCells[i].root.GetComponent<SpriteRenderer>().color = new Color(aux, aux, aux, 1f);
                 }
             }
-        } else {
-            for (int i = 0; i < boardCells.Length; i++)
-            {
-                float aux = Mathf.Lerp(boardCells[i].root.GetComponent<SpriteRenderer>().color.r, 1f, Time.deltaTime*5f);
-                boardCells[i].root.GetComponent<SpriteRenderer>().color = new Color(aux, aux, aux, 1f);
-            }
         }
+
+        
+
+
         
 
         if (Input.GetKey(KeyCode.Return))
@@ -573,7 +747,7 @@ public class WorldScript : MonoBehaviour {
         if (Input.GetKeyDown(KeyCode.Space) && GlobalData.currentAgentTurn == GlobalData.myAgent)
         {
 
-            //NextTurn();
+            usedTurn = true;
             
         }
 
@@ -596,17 +770,28 @@ public class WorldScript : MonoBehaviour {
             GlobalData.agents[movingAgent].currentCell = movingList[auxPosition];
 
             if (auxPosition == movingList.Count-1) {
-                movingAgent = -1;
-                movingDelta = 0f;
-                movingList = null;
-                previousAuxPosition = -1;
+
+                movingDelay -= Time.deltaTime;
+
+                if (movingDelay <= 0f)
+                {
+                    movingAgent = -1;
+                    movingDelta = 0f;
+                    movingList = null;
+                    previousAuxPosition = -1;
+                    movingDelay = timeToMove;
+                    usedDijkstra = false;
+                }
             }
 
         }
 
-        for (int i = 0; i < GlobalData.activeAgents; i++)
+        if (phase == 2)
         {
-            GlobalData.agents[i].cellChampion.transform.position = new Vector3(Mathf.Lerp(GlobalData.agents[i].cellChampion.transform.position.x, boardCells[GlobalData.agents[i].currentCell].root.transform.position.x, Time.deltaTime * 10f), Mathf.Lerp(GlobalData.agents[i].cellChampion.transform.position.y, boardCells[GlobalData.agents[i].currentCell].root.transform.position.y, Time.deltaTime * 10f), GlobalData.agents[i].cellChampion.transform.position.z);
+            for (int i = 0; i < GlobalData.activeAgents; i++)
+            {
+                GlobalData.agents[i].cellChampion.transform.position = new Vector3(Mathf.Lerp(GlobalData.agents[i].cellChampion.transform.position.x, boardCells[GlobalData.agents[i].currentCell].root.transform.position.x, Time.deltaTime * 10f), Mathf.Lerp(GlobalData.agents[i].cellChampion.transform.position.y, boardCells[GlobalData.agents[i].currentCell].root.transform.position.y, Time.deltaTime * 10f), GlobalData.agents[i].cellChampion.transform.position.z);
+            }
         }
 
         // Place UI Agents
@@ -643,36 +828,18 @@ public class WorldScript : MonoBehaviour {
         }
         
 
-        if (movingList == null && GlobalData.agents[GlobalData.currentAgentTurn].IA && (int.Parse(Network.player.ToString()) == 0 || !GlobalData.online))
+        if (phase == 2 && movingList == null && GlobalData.agents[GlobalData.currentAgentTurn].IA && (int.Parse(Network.player.ToString()) == 0 || !GlobalData.online))
         {
+            // LE TOCA A LA IA
             thinkingIA -= Time.deltaTime;
 
             if (thinkingIA <= 0f) {
-                if (GlobalData.online) { 
-                    reachables = Dijkstra();
-                    int aux = Random.Range(0, reachables.Count);
-                    GetComponent<NetworkView>().RPC("moveAgentRPC", RPCMode.All, GlobalData.currentAgentTurn, reachables[aux]);
-                    GetComponent<NetworkView>().RPC("nextTurnRPC", RPCMode.All);
-                    reachables = null; 
-                }
-                else { 
-                    reachables = Dijkstra();
-                    int aux = Random.Range(0, reachables.Count);
-                    moveAgent(GlobalData.currentAgentTurn, reachables[aux]);
-                    nextTurn(); 
-                    reachables = null; 
-                }
-                thinkingIA = 1 + Random.Range(0f, 1f);
+
+                useTurnIA();
+                thinkingIA = 0.5f + Random.Range(0f, 0.5f);
+
             }
         }
-
-		if (Input.GetKey(KeyCode.Space))
-		{
-			Application.LoadLevel("Battle");
-		}
-
-        //Debug.Log(boardCells[1].south);
-        //boardCells[1].south.root.transform.position = boardCells[1].south.root.transform.position + new Vector3(0f, 0.02f, 0f);
 
         if (phase == 0)
         {
@@ -692,11 +859,162 @@ public class WorldScript : MonoBehaviour {
         else if (phase == 1)
         {
             // TIME TO SELECT YOUR SANCTUARY
-            phase = 2;
+
+            if (selectedSanctuaries == GlobalData.activeAgents)
+            {
+                int bla = auxSanctuaryAvailable.Count;
+                for (int i = 0; i < bla; i++)
+                {
+                    int aux = auxSanctuaryAvailable[0];
+                    auxSanctuaryAvailable.Remove(aux);
+                    Destroy(auxSanctuaryCells[aux].root);
+                    auxSanctuaryCells[aux] = null;
+                }
+
+                GlobalData.agents[GlobalData.currentAgentTurn].setCurrentSteps(GlobalData.agents[GlobalData.currentAgentTurn].getMaxSteps());
+                usedDijkstra = false;
+                usedAction = false;
+                usedTurn = false;
+                clickedCell = -1;
+
+                for (int i = 0; i < boardCells.Length; i++)
+                {
+                    float aux = Mathf.Lerp(boardCells[i].root.GetComponent<SpriteRenderer>().color.r, 1f, Time.deltaTime * 5f);
+                    boardCells[i].root.GetComponent<SpriteRenderer>().color = new Color(aux, aux, aux, 1f);
+                }
+
+                if (boardCells[0].root.GetComponent<SpriteRenderer>().color.r >= 0.99f) {
+                    phase = 2;
+                }
+                
+            }
+            else
+            {
+
+                for (int i = 0; i < boardCells.Length; i++)
+                {
+                    float aux = Mathf.Lerp(boardCells[i].root.GetComponent<SpriteRenderer>().color.r, 0.3f, Time.deltaTime * 5f);
+                    boardCells[i].root.GetComponent<SpriteRenderer>().color = new Color(aux, aux, aux, 1f);
+                }
+
+                if (GlobalData.online)
+                {
+                    if (int.Parse(Network.player.ToString()) == 0)
+                    {
+                        // ES EL SERVER
+                        if (GlobalData.myAgent == GlobalData.currentAgentTurn)
+                        {
+                            // ES EL SERVER Y LE TOCA A EL
+                            selectedSprite.SetActive(false);
+
+                            for (int i = 0; i < auxSanctuaryAvailable.Count; i++)
+                            {
+
+                                if (isOver(auxSanctuaryCells[auxSanctuaryAvailable[i]].root))
+                                {
+                                    selectedSprite.SetActive(true);
+                                    selectedSprite.transform.position = new Vector3(auxSanctuaryCells[auxSanctuaryAvailable[i]].root.transform.position.x, auxSanctuaryCells[auxSanctuaryAvailable[i]].root.transform.position.y, selectedSprite.transform.position.z);
+                                }
+
+                                if (ClickedOn(auxSanctuaryCells[auxSanctuaryAvailable[i]].root))
+                                {
+
+                                    int aux = auxSanctuaryAvailable[i];
+                                    GetComponent<NetworkView>().RPC("sanctuaryRPC", RPCMode.All, GlobalData.myAgent, aux);
+                                    break;
+
+                                }
+
+                            }
+                        }
+                        else if (GlobalData.agents[GlobalData.currentAgentTurn].IA)
+                        {
+                            // ES EL SERVER Y LE TOCA A LA IA
+                            thinkingIA -= Time.deltaTime;
+
+                            if (thinkingIA <= 0f)
+                            {
+
+                                int aux = auxSanctuaryAvailable[Random.Range(0, auxSanctuaryAvailable.Count)];
+                                GetComponent<NetworkView>().RPC("sanctuaryRPC", RPCMode.All, GlobalData.currentAgentTurn, aux);
+
+                                thinkingIA = 0.5f + Random.Range(0f, 0.5f);
+                            }
+                        }
+
+                    }
+                    else if (GlobalData.myAgent == GlobalData.currentAgentTurn)
+                    {
+                        // ES UN CLIENTE
+                        selectedSprite.SetActive(false);
+
+                        for (int i = 0; i < auxSanctuaryAvailable.Count; i++)
+                        {
+
+                            if (isOver(auxSanctuaryCells[auxSanctuaryAvailable[i]].root))
+                            {
+                                selectedSprite.SetActive(true);
+                                selectedSprite.transform.position = new Vector3(auxSanctuaryCells[auxSanctuaryAvailable[i]].root.transform.position.x, auxSanctuaryCells[auxSanctuaryAvailable[i]].root.transform.position.y, selectedSprite.transform.position.z);
+                            }
+
+                            if (ClickedOn(auxSanctuaryCells[auxSanctuaryAvailable[i]].root))
+                            {
+
+                                int aux = auxSanctuaryAvailable[i];
+                                GetComponent<NetworkView>().RPC("sanctuaryRequestRPC", RPCMode.All, Network.player, aux);
+                                break;
+
+                            }
+
+                        }
+
+                    }
+                }
+                else
+                {
+                    if (GlobalData.agents[GlobalData.currentAgentTurn].IA && GlobalData.agents[GlobalData.currentAgentTurn].cellChampion == null)
+                    {
+                        // ES LA IA
+                        thinkingIA -= Time.deltaTime;
+
+                        if (thinkingIA <= 0f) {
+
+                            int aux = auxSanctuaryAvailable[Random.Range(0, auxSanctuaryAvailable.Count)];
+                            AddSanctuary(GlobalData.currentAgentTurn, aux);
+
+                            thinkingIA = 0.5f +Random.Range(0f, 0.5f);
+                        }
+
+                    }
+                    else
+                    {
+                        // ES EL JUGADOR
+                        selectedSprite.SetActive(false);
+
+                        for (int i = 0; i < auxSanctuaryAvailable.Count; i++) {
+
+                            if (isOver(auxSanctuaryCells[auxSanctuaryAvailable[i]].root)) {
+                                selectedSprite.SetActive(true);
+                                selectedSprite.transform.position = new Vector3(auxSanctuaryCells[auxSanctuaryAvailable[i]].root.transform.position.x, auxSanctuaryCells[auxSanctuaryAvailable[i]].root.transform.position.y, selectedSprite.transform.position.z);
+                            }
+
+                            if (ClickedOn(auxSanctuaryCells[auxSanctuaryAvailable[i]].root)) {
+
+                                int aux = auxSanctuaryAvailable[i];
+                                AddSanctuary(GlobalData.currentAgentTurn, aux);
+                                break;
+
+                            }
+
+                        }
+
+                    }
+                }
+            }
+
         }
         else if (movingList == null)
         {
-
 
             if (Hacks.ControllerAnyConnected())
             {
@@ -822,71 +1140,62 @@ public class WorldScript : MonoBehaviour {
                     lastDPadX = Input.GetAxis("DPad1");
                     lastDPadY = Input.GetAxis("DPad2");
                 }
-                /*
-                if (GlobalData.OS == "Mac")
-                {
-                    // MAC
-                    // NOT IMPLEMENTED
-                }
-                if (GlobalData.OS == "Linux")
-                {
-                    // LINUX
-                    DPadX = Input.GetAxis("DPad2");
-                    DPadY = Input.GetAxis("DPad3");
-                }
-                */
-
-
 
             }
             else
             {
                 // CONTROLLER NOT PLUGGED
+
                 selectedSprite.SetActive(false);
 
-                for (int i = 0; i < boardCells.Length; i++)
+                if (action1.activeInHierarchy && ClickedOn(action1Option1))
                 {
-                    if (isOver(boardCells[i].root))
+                    clickedCell = -1;
+                    usedAction = true;
+                }
+                else if (action2.activeInHierarchy && ClickedOn(action2Option1))
+                {
+                    moveTo(clickedCell);
+                    clickedCell = -1;
+                    usedAction = true;
+                }
+                else if (action2.activeInHierarchy && ClickedOn(action2Option2))
+                {
+                    moveTo(clickedCell);
+                    clickedCell = -1;
+                }
+                else
+                {
+
+                    if (Input.GetMouseButtonUp(0))
                     {
-                        selectedSprite.SetActive(true);
-                        selected = boardCells[i];
+                        clickedCell = -1;
                     }
 
-                    if (GlobalData.currentAgentTurn == GlobalData.myAgent && ClickedOn(boardCells[i].root) && reachables.Contains(i))
+                    for (int i = 0; i < boardCells.Length; i++)
                     {
-                        // MOVE TO THE CELL??
-                        if (GlobalData.online)
+                        if (isOver(boardCells[i].root))
                         {
-                            if (int.Parse(Network.player.ToString()) == 0)
-                            {
-                                // ES EL SERVER
-                                List<int> path = DijkstraTarget(i, GlobalData.agents[GlobalData.currentAgentTurn]);
-
-                                if (path != null) {
-                                    GetComponent<NetworkView>().RPC("moveAgentRPC", RPCMode.All, GlobalData.myAgent, path[path.Count-1]);
-                                    GetComponent<NetworkView>().RPC("nextTurnRPC", RPCMode.All);
-                                }
-
-                            }
-                            else
-                            {
-                                // ES UN CLIENTE
-                                GetComponent<NetworkView>().RPC("moveRequestRPC", RPCMode.Server, Network.player, i);
-                                GetComponent<NetworkView>().RPC("nextTurnRequestRPC", RPCMode.Server, Network.player);
-                            }
+                            selectedSprite.SetActive(true);
+                            selected = boardCells[i];
                         }
-                        else
-                        {
-                            List<int> path = DijkstraTarget(i, GlobalData.agents[GlobalData.currentAgentTurn]);
 
-                            if (path != null) {
-                                moveAgent(GlobalData.myAgent, path[path.Count-1]);
-                                nextTurn();
-                            }
-                            
+                        if (GlobalData.currentAgentTurn == GlobalData.myAgent && ClickedOn(boardCells[i].root) && (reachables.Contains(i) || i == GlobalData.agents[GlobalData.currentAgentTurn].currentCell))
+                        {
+
+                            clickedCell = i;
+
+                            Hacks.SpriteRendererAlpha(action1, 0f);
+                            Hacks.SpriteRendererAlpha(action1Option1, 0f);
+
+                            Hacks.SpriteRendererAlpha(action2, 0f);
+                            Hacks.SpriteRendererAlpha(action2Option1, 0f);
+                            Hacks.SpriteRendererAlpha(action2Option2, 0f);
+
                         }
                     }
                 }
+
 
             }
 
@@ -894,10 +1203,169 @@ public class WorldScript : MonoBehaviour {
             {
                 selectedSprite.transform.position = new Vector3(selected.root.transform.position.x, selected.root.transform.position.y, selectedSprite.transform.position.z);
             }
+            if (clickedCell == -1)
+            {
+
+                if (action1.activeInHierarchy)
+                {
+                    Hacks.SpriteRendererAlpha(action1, Mathf.Lerp(action1.GetComponent<SpriteRenderer>().color.a, 0f, Time.deltaTime*10f));
+                    Hacks.SpriteRendererAlpha(action1Option1, action1.GetComponent<SpriteRenderer>().color.a);
+                    if (action1.GetComponent<SpriteRenderer>().color.a < 0.01f)
+                    {
+                        action1.SetActive(false);
+                    }
+                }
+
+                if (action2.activeInHierarchy)
+                {
+                    Hacks.SpriteRendererAlpha(action2, Mathf.Lerp(action2.GetComponent<SpriteRenderer>().color.a, 0f, Time.deltaTime * 10f));
+                    Hacks.SpriteRendererAlpha(action2Option1, action2.GetComponent<SpriteRenderer>().color.a);
+                    Hacks.SpriteRendererAlpha(action2Option2, action2.GetComponent<SpriteRenderer>().color.a);
+                    if (action2.GetComponent<SpriteRenderer>().color.a < 0.01f)
+                    {
+                        action2.SetActive(false);
+                    }
+                }
+                
+            }
+            else
+            {
+
+                if (clickedCell == GlobalData.agents[GlobalData.myAgent].currentCell)
+                {
+                    if (action2.activeInHierarchy)
+                    {
+                        Hacks.SpriteRendererAlpha(action2, 0f);
+                        Hacks.SpriteRendererAlpha(action2Option1, 0f);
+                        Hacks.SpriteRendererAlpha(action2Option2, 0f);
+                        action2.SetActive(false);
+                    }
+
+                    action1.SetActive(true);
+                    Hacks.SpriteRendererAlpha(action1, (float)Mathf.Lerp(action1.GetComponent<SpriteRenderer>().color.a, 1f, Time.deltaTime * 5f));
+                    Hacks.SpriteRendererAlpha(action1Option1, action1.GetComponent<SpriteRenderer>().color.a);
+                    action1.transform.position = new Vector3(boardCells[clickedCell].root.transform.position.x, boardCells[clickedCell].root.transform.position.y + 0.7f, action1.transform.position.z);
+                
+                    if (isOver(action1Option1)) {
+                        action1Option1.GetComponent<SpriteRenderer>().color = new Color(0.7f, 0.7f, 0.7f, action1Option1.GetComponent<SpriteRenderer>().color.a);
+                    }
+                    else {
+                        action1Option1.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, action1Option1.GetComponent<SpriteRenderer>().color.a);
+                    }
+
+                }
+                else
+                {
+
+                    if (action1.activeInHierarchy)
+                    {
+                        Hacks.SpriteRendererAlpha(action1, 0f);
+                        Hacks.SpriteRendererAlpha(action1Option1, 0f);
+                        action1.SetActive(false);
+                    }
+
+                    action2.SetActive(true);
+                    Hacks.SpriteRendererAlpha(action2, (float)Mathf.Lerp(action2.GetComponent<SpriteRenderer>().color.a, 1f, Time.deltaTime * 5f));
+                    Hacks.SpriteRendererAlpha(action2Option1, action2.GetComponent<SpriteRenderer>().color.a);
+                    Hacks.SpriteRendererAlpha(action2Option2, action2.GetComponent<SpriteRenderer>().color.a);
+                    action2.transform.position = new Vector3(boardCells[clickedCell].root.transform.position.x, boardCells[clickedCell].root.transform.position.y + 0.7f, action2.transform.position.z);
+
+                    if (isOver(action2Option1))
+                    {
+                        action2Option1.GetComponent<SpriteRenderer>().color = new Color(0.7f, 0.7f, 0.7f, action2Option1.GetComponent<SpriteRenderer>().color.a);
+                    }
+                    else
+                    {
+                        action2Option1.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, action2Option1.GetComponent<SpriteRenderer>().color.a);
+                    }
+
+
+                    if (isOver(action2Option2))
+                    {
+                        action2Option2.GetComponent<SpriteRenderer>().color = new Color(0.7f, 0.7f, 0.7f, action2Option2.GetComponent<SpriteRenderer>().color.a);
+                    }
+                    else
+                    {
+                        action2Option2.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, action2Option2.GetComponent<SpriteRenderer>().color.a);
+                    }
+
+                }
+
+                
+            }
 
         }
 
 
+        
+        if (movingList == null)
+        {
+            if (usedTurn)
+            {
+                if (GlobalData.online)
+                {
+                    if (int.Parse(Network.player.ToString()) == 0)
+                    {
+                        // ES EL SERVER
+                        GetComponent<NetworkView>().RPC("nextTurnRPC", RPCMode.All);
+                    }
+                    else
+                    {
+                        // ES UN CLIENTE
+                        GetComponent<NetworkView>().RPC("nextTurnRequestRPC", RPCMode.Server, Network.player);
+                    }
+                }
+                else
+                {
+                    nextTurn();
+                }
+            }
+            else if (usedAction)
+            {
+                usedTurn = true;
+                //Application.LoadLevel("Battle");
+                GlobalData.Battle();
+            }
+        }
+        
+
+    }
+
+    void moveTo(int i)
+    {
+
+        if (GlobalData.online)
+        {
+            if (int.Parse(Network.player.ToString()) == 0)
+            {
+                // ES EL SERVER
+                List<int> path = DijkstraTarget(i, GlobalData.agents[GlobalData.currentAgentTurn]);
+
+                if (path != null) {
+                    GetComponent<NetworkView>().RPC("moveAgentRPC", RPCMode.All, GlobalData.myAgent, path[path.Count-1]);
+                    reachables = null;
+                }
+
+            }
+            else
+            {
+                // ES UN CLIENTE
+                GetComponent<NetworkView>().RPC("moveRequestRPC", RPCMode.Server, Network.player, i);
+                reachables = null;
+            }
+        }
+        else
+        {
+            List<int> path = DijkstraTarget(i, GlobalData.agents[GlobalData.currentAgentTurn]);
+
+            if (path != null) {
+                moveAgent(GlobalData.myAgent, path[path.Count-1]);
+                //usedTurn = true;
+                reachables = null;
+            }
+                            
+        }
+        
     }
 
     void AddSanctuary(int agent, int num)
@@ -914,6 +1382,7 @@ public class WorldScript : MonoBehaviour {
         GlobalData.agents[agent].cellChampion = Instantiate(Resources.Load("Prefabs/Champion")) as GameObject;
         GlobalData.agents[agent].cellChampion.name = "Champion_" + agent;
         GlobalData.agents[agent].cellChampion.transform.parent = GameObject.Find("Champions").transform;
+        GlobalData.agents[agent].sanctuary = currentCell;
 
         if (num == 0) {
             positionCell(b, 2, 3);
@@ -953,6 +1422,16 @@ public class WorldScript : MonoBehaviour {
         GlobalData.agents[agent].cellChampion.transform.position = new Vector3(boardCells[GlobalData.agents[agent].currentCell].root.transform.position.x, boardCells[GlobalData.agents[agent].currentCell].root.transform.position.y, GlobalData.agents[agent].cellChampion.transform.position.z);
 
         currentCell++;
+
+        auxSanctuaryAvailable.Remove(num);
+        Destroy(auxSanctuaryCells[num].root);
+        auxSanctuaryCells[num] = null;
+        selectedSanctuaries++;
+
+        if (selectedSanctuaries < GlobalData.activeAgents)
+        {
+            previousTurn();
+        }
 
     }
 

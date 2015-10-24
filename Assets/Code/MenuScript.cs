@@ -191,26 +191,6 @@ public class MenuScript : MonoBehaviour {
                             Hacks.SpriteRendererAlpha(fading, 1f);
                         }
                     }
-                    if (GlobalData.OS == "Mac")
-                    {
-                        // MAC
-                        if (Input.GetKeyDown("joystick button 16"))
-                        {
-                            transition = 0f;
-                            phase = 1;
-                            menuOk.Play();
-                        }
-                    }
-                    if (GlobalData.OS == "Linux")
-                    {
-                        // LINUX
-                        if (Input.GetKeyDown("joystick button 0"))
-                        {
-                            transition = 0f;
-                            phase = 1;
-                            menuOk.Play();
-                        }
-                    }
                 }
                 else
                 {

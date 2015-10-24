@@ -96,5 +96,9 @@ public class Character {
 		this.PreviousHealth = PreviousHealth;
 	}
 
+	public Class getOwnClass() {
+		return OwnClass;
+	}
+
 	
 }
