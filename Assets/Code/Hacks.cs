@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public static class Hacks {
 
@@ -60,5 +61,34 @@ public static class Hacks {
         }
         return false;
     }
+
+
+	// TEXT
+	public static string TextMultilineCentered(GameObject g, string s) {
+
+		string result = "";
+		string[] lines = s.Split('\n');
+		float maxSizeX = 0f;
+
+		for (int i = 0; i < lines.Length; i++) {
+			g.GetComponent<TextMesh>().text = lines[i];
+			if (g.GetComponent<Renderer>().bounds.size.x > maxSizeX) {
+				maxSizeX = g.GetComponent<Renderer>().bounds.size.x;
+			}
+		}
+
+		for (int i = 0; i < lines.Length; i++) {
+			g.GetComponent<TextMesh>().text = lines[i];
+			while (g.GetComponent<Renderer>().bounds.size.x < maxSizeX) {
+				lines[i] = " "+lines[i]+" "; 
+				g.GetComponent<TextMesh>().text = lines[i];
+			}
+			result += lines[i];
+			if (i < lines.Length-1) { result += "\n"; }
+		}
+
+		return result;
+
+	}
 
 }

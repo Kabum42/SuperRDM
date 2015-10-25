@@ -12,6 +12,8 @@ public class TalkScript : MonoBehaviour {
 	private GameObject background;
 	private GameObject bubble;
 
+	private string target;
+
 	// Use this for initialization
 	void Start () {
 
@@ -28,17 +30,19 @@ public class TalkScript : MonoBehaviour {
 	        textSounds[i].pitch = 1.1f;
 	        textSounds[i].Play();
 		}
-	
+
+		target = "Hello bro, my name is Ron.\nAnd this is a test.\nMulti-line test."; //\nYeah nigga\nMudafuccking Ron\nOh Yeah";
+		target = Hacks.TextMultilineCentered (test, target);
+
 	}
 	
 	// Update is called once per frame
 	void Update () {
 
-		string target = "Hello bro, my name is Ron\n Ron Weasley, HAHAHAHA !!!"; //\nYeah nigga\nMudafuccking Ron\nOh Yeah";
 
 		string currentString = test.GetComponent<TextMesh>().text;
 		test.GetComponent<TextMesh> ().text = target;
-		bubble.transform.localScale = new Vector3(test.GetComponent<Renderer> ().bounds.size.x*0.8f, (test.GetComponent<Renderer> ().bounds.size.y +1f)*0.8f, 1f) ;
+		bubble.transform.localScale = new Vector3(test.GetComponent<Renderer> ().bounds.size.x*0.8f, test.GetComponent<Renderer> ().bounds.size.y*(0.8f+0.2f), 1f) ;
 		bubble.transform.position = new Vector3(test.GetComponent<Renderer> ().bounds.center.x, test.GetComponent<Renderer> ().bounds.center.y, bubble.transform.position.z);
 		//background.transform.localScale = test.GetComponent<Renderer> ().bounds.size*105f;
 		//background.transform.position = new Vector3(test.GetComponent<Renderer> ().bounds.center.x, test.GetComponent<Renderer> ().bounds.center.y, background.transform.position.z);
@@ -51,6 +55,11 @@ public class TalkScript : MonoBehaviour {
 			if (timer > 0.05f) {
 
 				currentLetter++;
+
+				while(currentLetter < target.Length-1 && target[currentLetter] == ' ') {
+					currentLetter++;
+				}
+
 				timer = 0f;
 				test.GetComponent<TextMesh>().text = target.Substring(0, currentLetter);
 
