@@ -66,6 +66,9 @@ public static class Hacks {
 	// TEXT
 	public static string TextMultilineCentered(GameObject g, string s) {
 
+
+        string previousString = g.GetComponent<TextMesh>().text;
+
 		string result = "";
 		string[] lines = s.Split('\n');
 		float maxSizeX = 0f;
@@ -86,6 +89,8 @@ public static class Hacks {
 			result += lines[i];
 			if (i < lines.Length-1) { result += "\n"; }
 		}
+
+        g.GetComponent<TextMesh>().text = previousString;
 
 		return result;
 
