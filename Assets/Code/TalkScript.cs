@@ -31,7 +31,7 @@ public class TalkScript : MonoBehaviour {
 	        textSounds[i].Play();
 		}
 
-		target = "Hello bro, my name is Ron.\nAnd this is a test.\nMulti-line test."; //\nYeah nigga\nMudafuccking Ron\nOh Yeah";
+        target = "Ron\nRon\nRon\nRon\nRon\nRon";
 		target = Hacks.TextMultilineCentered (test, target);
 
 	}
@@ -42,7 +42,11 @@ public class TalkScript : MonoBehaviour {
 
 		string currentString = test.GetComponent<TextMesh>().text;
 		test.GetComponent<TextMesh> ().text = target;
-		bubble.transform.localScale = new Vector3(test.GetComponent<Renderer> ().bounds.size.x*0.8f, test.GetComponent<Renderer> ().bounds.size.y*(0.8f+0.2f), 1f) ;
+        float scaleX = test.GetComponent<Renderer>().bounds.size.x;
+        float scaleY = test.GetComponent<Renderer>().bounds.size.y;
+        if (scaleX < scaleY * 0.5f) { scaleX = scaleY * 0.5f; }
+        if (scaleY < scaleX * 0.25f) { scaleY = scaleX * 0.25f; }
+		bubble.transform.localScale = new Vector3(scaleX*0.8f, scaleY*0.8f, 1f) ;
 		bubble.transform.position = new Vector3(test.GetComponent<Renderer> ().bounds.center.x, test.GetComponent<Renderer> ().bounds.center.y, bubble.transform.position.z);
 		//background.transform.localScale = test.GetComponent<Renderer> ().bounds.size*105f;
 		//background.transform.position = new Vector3(test.GetComponent<Renderer> ().bounds.center.x, test.GetComponent<Renderer> ().bounds.center.y, background.transform.position.z);
