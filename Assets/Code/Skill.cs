@@ -25,36 +25,53 @@ public class Skill {
 
 	public void Activate(int Attacker, ref Character[] CharactersInBattle, int EnemyFocused)
 	{
-		Debug.Log ("Attacker: " + CharactersInBattle [Attacker].getName ());
+		int StackedNumber;
 		switch (this.Name) {
+
+			// Boar Ryder abilities
 			case "Hack":
+				StackedNumber = CharactersInBattle[Attacker].getStackedNumberEffect("Anger Management");
 				for (int i = 0; i<CharactersInBattle.Length; i++){
 					if (CharactersInBattle[i] != null){
 						if (!CharactersInBattle[i].getAerial() && (CharactersInBattle[Attacker].getBottom() != CharactersInBattle[i].getBottom ())){
 							Debug.Log ("Defender: " + CharactersInBattle [i].getName ());
-							CharactersInBattle[i].setCurrentHealth(CharactersInBattle[i].getCurrentHealth()- Damage);
+							CharactersInBattle[i].setCurrentHealth(CharactersInBattle[i].getCurrentHealth()- (Damage + 4*StackedNumber));
 							CharactersInBattle[Attacker].setProgressIPBar(CharactersInBattle[Attacker].getProgressIPBar() - CostIP);
 							break;
 						}
 					}
 				}
+				if (StackedNumber < 5){
+					CharactersInBattle[Attacker].setStackedNumberEffect("Anger Management", StackedNumber+1);
+				}
 				break;
 
 			case "Axe Throw":
-				CharactersInBattle[EnemyFocused].setCurrentHealth(CharactersInBattle[EnemyFocused].getCurrentHealth()- Damage);
+				StackedNumber = CharactersInBattle[Attacker].getStackedNumberEffect("Anger Management");
+				CharactersInBattle[EnemyFocused].setCurrentHealth(CharactersInBattle[EnemyFocused].getCurrentHealth()- (Damage + 4*StackedNumber));
 				CharactersInBattle[Attacker].setProgressIPBar(CharactersInBattle[Attacker].getProgressIPBar() - CostIP);
+				if (StackedNumber < 5){
+					CharactersInBattle[Attacker].setStackedNumberEffect("Anger Management", StackedNumber+1);
+				}
 				break;
 
 			case "Wild Roar":
+				StackedNumber = CharactersInBattle[Attacker].getStackedNumberEffect("Anger Management");
 				for (int i = 0; i<CharactersInBattle.Length; i++){
 					if (CharactersInBattle[i] != null){
 						if (CharactersInBattle[Attacker].getBottom() != CharactersInBattle[i].getBottom ()){
-							CharactersInBattle[i].setCurrentHealth(CharactersInBattle[i].getCurrentHealth()- Damage);
+							CharactersInBattle[i].setCurrentHealth(CharactersInBattle[i].getCurrentHealth()- ((Damage*StackedNumber) + 4*StackedNumber));
+							CharactersInBattle[i].setProgressIPBar(CharactersInBattle[i].getProgressIPBar() - (StackedNumber*20));
 						}
 					}
 				}
-				CharactersInBattle[Attacker].setProgressIPBar(CharactersInBattle[Attacker].getProgressIPBar() - CostIP);	
+				CharactersInBattle[Attacker].setProgressIPBar(CharactersInBattle[Attacker].getProgressIPBar() - CostIP);
+				CharactersInBattle[Attacker].setStackedNumberEffect("Anger Management", StackedNumber/2);
 				break;
+
+			//
+
+
 		}
 	}
 

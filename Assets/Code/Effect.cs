@@ -9,13 +9,31 @@ public class Effect {
 	private int Duration;
 	private int DamageValue;
 	
-	public Effect()
+	public Effect(int ID, string Name, int StackedNumber, int Duration, int DamageValue)
 	{
-		Debug.Log("Effect created");
+		this.ID = ID;
+		this.Name = Name;
+		this.StackedNumber = StackedNumber;
+		this.Duration = Duration;
+		this.DamageValue = DamageValue;
 	}
 	
 	public void Update()
 	{
+	}
+
+	// Getters and Setters
+
+	public string getName(){
+		return this.Name;
+	}
+
+	public void setStackedNumber(int StackedNumber){
+		this.StackedNumber = StackedNumber;
+	}
+
+	public int getStackedNumber(){
+		return StackedNumber;
 	}
 }
 

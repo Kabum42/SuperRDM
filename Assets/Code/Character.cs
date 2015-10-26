@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class Character {
@@ -10,9 +10,10 @@ public class Character {
 	protected float MaxHealth;
 	protected float ProgressIPBar;
 	protected float MaxIPBar;
-	protected Stack CurrentEffects;
+	protected Effect[] CurrentEffects = new Effect[6];
 	protected bool Aerial;
 	protected Class OwnClass;
+	protected int LastSkillUsed;
 	protected bool Bottom;
 
 	public Character()
@@ -32,6 +33,7 @@ public class Character {
 	public void UseSkill(int SkillSelected, int Attacker, ref Character[] CharactersInBattle, int EnemyFocused)
 	{
 		OwnClass.UseSkill (SkillSelected, Attacker, ref CharactersInBattle, EnemyFocused);
+		LastSkillUsed = SkillSelected;
 	}
 
 	public string getSkillName(int position){
@@ -40,6 +42,31 @@ public class Character {
 
 	public bool CheckEnemies(int position){
 		return OwnClass.CheckEnemiesSkill (position);
+	}
+
+	public int getStackedNumberEffect(string Name){
+		int position;
+		for (position = 0; position< CurrentEffects.Length; position++){
+			if (CurrentEffects[position].getName() == Name){
+				return CurrentEffects[position].getStackedNumber(); 
+			}
+		}
+
+		return 0;
+	}
+
+	public void setStackedNumberEffect(string Name, int StackedNumber){
+		int position;
+		for (position = 0; position< CurrentEffects.Length; position++){
+			if (CurrentEffects[position].getName() == Name){
+				CurrentEffects[position].setStackedNumber(StackedNumber); 
+				break;
+			}
+		}
+	}
+
+	public string getLastSkillUsed(){
+		return OwnClass.getSkillName (LastSkillUsed);
 	}
 
 	// Getters and Setters

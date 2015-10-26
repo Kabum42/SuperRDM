@@ -66,7 +66,8 @@ public static class GlobalData {
 		GenerateSkills ();
 		GenerateClasses ();
 		GenerateEnemies ();
-		agents[0] = new MainCharacter(0, "Player1", 175, 100, GlobalData.Classes[0]);
+		agents[0] = new MainCharacter(0, "Player1", 350, 100, GlobalData.Classes[0]);
+		agents[1] = new MainCharacter(0, "Player2", 175, 100, GlobalData.Classes[0]);
 
         biomeCosts = new int[11];
         biomeCosts[(int)Biome.Sanctuary] = 1;

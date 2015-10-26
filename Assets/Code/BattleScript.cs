@@ -6,6 +6,7 @@ public class BattleScript : MonoBehaviour {
 	private static int MaxCharacters = 6;
 	private int ActualCharacters = 0;
 	private Character[] CurrentCharacters = new Character[MaxCharacters];
+	private MainCharacter Player;
 	private int MaxTop;
 	private int MaxBottom;
 	private int[] PositionTops = new int[3];
@@ -44,6 +45,7 @@ public class BattleScript : MonoBehaviour {
 		CheckPositions ();
 		UpdateInformation ();
 		LogCharacters ();
+		Player = (MainCharacter) CurrentCharacters [PlayerCharacter];
 
 	}
 	
@@ -70,7 +72,6 @@ public class BattleScript : MonoBehaviour {
 					if (TimerTurn > 1) {
 						TimerTurn = 0;
 						Turn ();
-						LogCharacters ();
 						SelectedSkill = false;
 					}
 				} 
@@ -99,7 +100,7 @@ public class BattleScript : MonoBehaviour {
 		CurrentCharacters [0] = GlobalData.agents [0];
 		CurrentCharacters [0].setBottom (true);
 
-		CurrentCharacters [1] = GlobalData.RandomEnemies [0];
+		CurrentCharacters [1] = GlobalData.agents [1];
 		CurrentCharacters [1].setBottom (false);
 
 		CurrentCharacters [2] = GlobalData.RandomEnemies [1];
@@ -268,7 +269,7 @@ public class BattleScript : MonoBehaviour {
 	void Turn(){
 		Attack ();
 		SkillUsed.GetComponent<TextMesh>().text = CurrentCharacters[CharacterTurn].getName() + " used: " 
-				+ CurrentCharacters[CharacterTurn].getSkillName(SkillSelected);
+				+ CurrentCharacters[CharacterTurn].getLastSkillUsed();
 		UpdateHealth = true;
 	}
 
@@ -278,11 +279,18 @@ public class BattleScript : MonoBehaviour {
 			CurrentCharacters [CharacterTurn].UseSkill (SkillSelected, CharacterTurn, ref CurrentCharacters, CurrentEnemy);
 		} 
 		else {
-			if (NeedEnemy){
-				CurrentEnemy = PositionTops[CurrentEnemy];
-				NeedEnemy = false;
+			if (CharacterTurn == PlayerCharacter){
+				if (NeedEnemy){
+					CurrentEnemy = PositionTops[CurrentEnemy];
+					NeedEnemy = false;
+				}
+				CurrentCharacters [CharacterTurn].UseSkill (SkillSelected, CharacterTurn, ref CurrentCharacters, CurrentEnemy);
 			}
-			CurrentCharacters [CharacterTurn].UseSkill (SkillSelected, CharacterTurn, ref CurrentCharacters, CurrentEnemy);
+			else {
+				MainCharacter CurrentNPC = (MainCharacter) CurrentCharacters[CharacterTurn];
+				CurrentNPC.ApplyEnemyIA(CharacterTurn, ref CurrentCharacters);
+			}
+			Debug.Log (CurrentCharacters[CharacterTurn].getName() + " passive: " + CurrentCharacters[CharacterTurn].getStackedNumberEffect("Anger Management"));
 		}
 
 	}
@@ -314,6 +322,9 @@ public class BattleScript : MonoBehaviour {
 		for (int i = 0; i<ActualCharacters; i++) {
 			if (CurrentCharacters[i] != null){
 				if (CurrentCharacters[i].getCurrentHealth() <= 0){
+					if (CurrentCharacters[i].getBottom () != CurrentCharacters[PlayerCharacter].getBottom ()){
+						Player.setExperience(70);
+					}
 					CurrentCharacters[i] = null;
 					CheckPositions();
 				}
