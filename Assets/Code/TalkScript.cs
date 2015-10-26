@@ -47,13 +47,14 @@ public class TalkScript : MonoBehaviour {
     {
         if (eventID == eventRon)
         {
-            //speakers[0] = JUGADOR;
-            //speakers[1] = RON;
+			speakers = new GameObject[2];
+            speakers[0] = GameObject.Find ("Player");
+            speakers[1] = GameObject.Find ("Ron");
 
             bubbles.Add(new Bubble(1, 0, "Hi bro, my name is Ron Weasel.\nDid you see my friend, Harry the Otter?", new Vector2(3f, 3f), null));
             bubbles.Add(new Bubble(0, 1, "...", new Vector2(-3f, 3f), null));
-            bubbles.Add(new Bubble(1, 2, "Ron Ron Ron Ron\nRon Ron Ron Ron", new Vector2(3f, 3f), null));
-            bubbles.Add(new Bubble(1, 2, "Ronaldossss", new Vector2(-3f, 3f), null));
+            bubbles.Add(new Bubble(1, 2, "Ron Ron Ron Ron\nRon Ron Ron Ron", new Vector2(5f, 3f), null));
+            bubbles.Add(new Bubble(0, 2, "Ronaldossss", new Vector2(-5.5f, 2.5f), null));
         }
     }
 	
@@ -119,10 +120,24 @@ public class TalkScript : MonoBehaviour {
       	
 		float min = s.bubble.transform.localScale.x;
 		if (s.bubble.transform.localScale.y < min) { min = s.bubble.transform.localScale.y; }
+
+		Vector3 diff = s.triangle.transform.position - speakers [b.speaker].transform.position;
+		diff.Normalize();
+		
+		float rot_z = Mathf.Atan2(diff.y, diff.x) * Mathf.Rad2Deg;
+		
+		s.triangle.transform.rotation = Quaternion.Euler(0f, 0f, rot_z - 90);//speakers [b.speaker].transform;
+		s.triangle2.transform.rotation = s.triangle.transform.rotation;
+
 		s.triangle.transform.localScale = new Vector3(min/3f, min/3f, min/3f);
-		s.triangle.transform.position = new Vector3 (s.bubble.GetComponent<Renderer>().bounds.center.x, s.bubble.GetComponent<Renderer>().bounds.center.y - s.triangle.GetComponent<Renderer>().bounds.size.y/2f -s.bubble.GetComponent<Renderer>().bounds.size.y/2f +0.01f, s.triangle.transform.position.z);
+
+		Vector2 director = new Vector2 (speakers [b.speaker].transform.position.x -s.bubble.GetComponent<Renderer>().bounds.center.x, speakers [b.speaker].transform.position.y -s.bubble.GetComponent<Renderer>().bounds.center.y);
+		director.Normalize ();
+
+		s.triangle.transform.position = new Vector3 (s.bubble.GetComponent<Renderer>().bounds.center.x + (s.bubble.GetComponent<Renderer>().bounds.size.y/2f)*director.x, s.bubble.GetComponent<Renderer>().bounds.center.y  -s.bubble.GetComponent<Renderer>().bounds.size.y/2f , s.triangle.transform.position.z);
+
 		s.triangle2.transform.localScale = new Vector3 (s.triangle.transform.localScale.x + 0.035f, s.triangle.transform.localScale.y + 0.035f, s.triangle2.transform.localScale.z);
-		s.triangle2.transform.position = new Vector3 (s.triangle.transform.position.x, s.triangle.transform.position.y -0.04f, s.triangle2.transform.position.z);
+		s.triangle2.transform.position = new Vector3 (s.triangle.transform.position.x, s.triangle.transform.position.y, s.triangle2.transform.position.z) +s.triangle2.transform.up*-0.04f;
 
 		s.text.GetComponent<TextMesh>().text = currentString;
 
