@@ -18,9 +18,12 @@ public class TalkScript : MonoBehaviour {
     private GameObject[] speakers;
     private List<Bubble> bubbles = new List<Bubble>();
     private int currentBubble = 0;
+    private bool nextPhase = false;
     private int globalPhase = 0;
 
     private static int eventRon = 0;
+
+    private float lineWidth = 0.035f;
 
 	// Use this for initialization
 	void Start () {
@@ -54,25 +57,27 @@ public class TalkScript : MonoBehaviour {
             speakers[0] = GameObject.Find ("Player");
             speakers[1] = GameObject.Find ("Ron");
 
-            bubbles.Add(new Bubble(1, 0, "Hi bro, my name is Ron Weasel.\nDid you see my friend, Harry the Otter?", new Vector2(3f, 3f), null));
-            bubbles.Add(new Bubble(0, 1, "...", new Vector2(-3f, 3f), null));
-            bubbles.Add(new Bubble(1, 2, "Ron Ron Ron Ron\nRon Ron Ron Ron", new Vector2(5f, 3f), null));
-            bubbles.Add(new Bubble(0, 2, "", new Vector2(-5.5f, 2.5f), new string[]{"This is a long text to test something\nso looong", "EJEM", "OMG"}));
+            bubbles.Add(new Bubble(1, 0, 0, "Hi bro, my name is Ron Weasel.\nDid you see my friend, Harry the Otter?", new Vector2(3f, 3f), null));
+            bubbles.Add(new Bubble(0, 1, 1, "...", new Vector2(-3f, 3f), null));
+            bubbles.Add(new Bubble(1, 2, 3, "Ron Ron Ron Ron\nRon Ron Ron Ron???", new Vector2(5f, 3f), null));
+            bubbles.Add(new Bubble(0, 3, 3, "", new Vector2(-5.5f, 2.5f), new string[]{"This is a long text to test something\nso looong", "EJEM", "OMG"}));
         }
     }
 	
 	// Update is called once per frame
 	void Update () {
 
+        if (nextPhase)
+        {
+            globalPhase++;
+            nextPhase = false;
+        }
+
         int currentSpeechBubble = 0;
 
         for (int i = 0; i < bubbles.Count; i++)
         {
-            if (bubbles[i].phase > globalPhase)
-            {
-                break;
-            }
-            else if (bubbles[i].phase == globalPhase)
+            if (bubbles[i].beginPhase <= globalPhase && bubbles[i].endPhase >= globalPhase)
             {
 
                 if (bubbles[i].options == null)
@@ -130,7 +135,7 @@ public class TalkScript : MonoBehaviour {
         //if (scaleY < scaleX * 0.25f) { scaleY = scaleX * 0.25f; }
         s.bubble.transform.localScale = new Vector3(Mathf.Lerp(s.bubble.transform.localScale.x, (scaleX) * 0.7f, Time.deltaTime * 20f), Mathf.Lerp(s.bubble.transform.localScale.y, (scaleY) * 0.7f, Time.deltaTime * 20f), 1f);
         s.bubble.transform.position = new Vector3(s.text.GetComponent<Renderer>().bounds.center.x, s.text.GetComponent<Renderer>().bounds.center.y, s.bubble.transform.position.z);
-        s.bubble2.transform.localScale = new Vector3(s.bubble.transform.localScale.x + 0.035f, s.bubble.transform.localScale.y + 0.035f, s.bubble2.transform.localScale.z);
+        s.bubble2.transform.localScale = new Vector3(s.bubble.transform.localScale.x + lineWidth, s.bubble.transform.localScale.y + lineWidth, s.bubble2.transform.localScale.z);
         s.bubble2.transform.position = s.bubble.transform.position;
       	
 		float min = s.bubble.transform.localScale.x;
@@ -151,7 +156,7 @@ public class TalkScript : MonoBehaviour {
 
 		s.triangle.transform.position = new Vector3 (s.bubble.GetComponent<Renderer>().bounds.center.x + (s.bubble.GetComponent<Renderer>().bounds.size.y/2f)*director.x, s.bubble.GetComponent<Renderer>().bounds.center.y  -s.bubble.GetComponent<Renderer>().bounds.size.y/2f , s.triangle.transform.position.z);
 
-		s.triangle2.transform.localScale = new Vector3 (s.triangle.transform.localScale.x + 0.035f, s.triangle.transform.localScale.y + 0.035f, s.triangle2.transform.localScale.z);
+        s.triangle2.transform.localScale = new Vector3(s.triangle.transform.localScale.x + lineWidth, s.triangle.transform.localScale.y + lineWidth, s.triangle2.transform.localScale.z);
 		s.triangle2.transform.position = new Vector3 (s.triangle.transform.position.x, s.triangle.transform.position.y, s.triangle2.transform.position.z) +s.triangle2.transform.up*-0.04f;
 
 		s.text.GetComponent<TextMesh>().text = currentString;
@@ -166,16 +171,14 @@ public class TalkScript : MonoBehaviour {
                 }
                 else
                 {
-                    globalPhase = b.phase + 1;
-                    s.text.GetComponent<TextMesh>().text = "";
-                    s.currentLetter = 0;
+                    nextPhase = true;
 
-                    if (b.phase + 1 > currentBubble)
+                    if (globalPhase + 1 > b.endPhase)
                     {
-                        currentBubble = b.phase + 1;
+                        s.text.GetComponent<TextMesh>().text = "";
+                        s.currentLetter = 0;
+                        s.root.SetActive(false);
                     }
-
-                    s.root.SetActive(false);
 
                 }
             }
@@ -223,11 +226,18 @@ public class TalkScript : MonoBehaviour {
             o.corner2.transform.localScale = new Vector3(0f, 0f, 0f);
             o.corner3.transform.localScale = new Vector3(0f, 0f, 0f);
             o.corner4.transform.localScale = new Vector3(0f, 0f, 0f);
+            o.squareMiddleBack.transform.localScale = new Vector3(0f, 0f, 0f);
+            o.squareTopBack.transform.localScale = new Vector3(0f, 0f, 0f);
+            o.squareBottomBack.transform.localScale = new Vector3(0f, 0f, 0f);
+            o.corner1Back.transform.localScale = new Vector3(0f, 0f, 0f);
+            o.corner2Back.transform.localScale = new Vector3(0f, 0f, 0f);
+            o.corner3Back.transform.localScale = new Vector3(0f, 0f, 0f);
+            o.corner4Back.transform.localScale = new Vector3(0f, 0f, 0f);
             o.timer = -0.1f;
             o.root.SetActive(true);
         }
 
-        float scaleX = 0;
+        float scaleX = 0f;
         float scaleY = 0;
 
         for (int i = 0; i < b.options.Length; i++)
@@ -248,7 +258,40 @@ public class TalkScript : MonoBehaviour {
             o.optionText[i].transform.localPosition = new Vector3(-scaleX / 2f, o.optionText[i].transform.localPosition.y +scaleY/2f, o.optionText[i].transform.localPosition.z);
         }
 
+        scaleX += 0.5f;
+
         o.squareMiddle.transform.localScale = new Vector3(Mathf.Lerp(o.squareMiddle.transform.localScale.x, (scaleX) * 105f, Time.deltaTime * 20f), Mathf.Lerp(o.squareMiddle.transform.localScale.y, (scaleY) * 105f, Time.deltaTime * 20f), o.squareMiddle.transform.localScale.z);
+        o.squareMiddleBack.transform.localScale = new Vector3(o.squareMiddle.transform.localScale.x + lineWidth * 195f, o.squareMiddle.transform.localScale.y + lineWidth * 195f, o.squareMiddle.transform.localScale.z);
+
+        o.corner1.transform.localScale = new Vector3(Mathf.Lerp(o.corner1.transform.localScale.x, 0.2f, Time.deltaTime * 20f), Mathf.Lerp(o.corner1.transform.localScale.y, 0.2f, Time.deltaTime * 20f), 1f);
+        o.corner1.transform.position = new Vector3(+o.corner1.GetComponent<Renderer>().bounds.size.x / 2f - o.squareMiddle.GetComponent<Renderer>().bounds.size.x / 2f, o.corner1.GetComponent<Renderer>().bounds.size.y / 2f + o.squareMiddle.GetComponent<Renderer>().bounds.size.y / 2f, 0f);
+        o.corner1Back.transform.localScale = new Vector3(o.corner1.transform.localScale.x + lineWidth, o.corner1.transform.localScale.y + lineWidth, o.corner1.transform.localScale.z);
+        o.corner1Back.transform.position = new Vector3(o.corner1.transform.position.x, o.corner1.transform.position.y, o.corner1Back.transform.position.z);
+
+        o.corner2.transform.localScale = new Vector3(Mathf.Lerp(o.corner2.transform.localScale.x, -0.2f, Time.deltaTime * 20f), Mathf.Lerp(o.corner2.transform.localScale.y, 0.2f, Time.deltaTime * 20f), 1f);
+        o.corner2.transform.position = new Vector3(-o.corner2.GetComponent<Renderer>().bounds.size.x / 2f + o.squareMiddle.GetComponent<Renderer>().bounds.size.x / 2f, o.corner2.GetComponent<Renderer>().bounds.size.y / 2f + o.squareMiddle.GetComponent<Renderer>().bounds.size.y / 2f, 0f);
+        o.corner2Back.transform.localScale = new Vector3(o.corner2.transform.localScale.x - lineWidth, o.corner2.transform.localScale.y + lineWidth, o.corner2.transform.localScale.z);
+        o.corner2Back.transform.position = new Vector3(o.corner2.transform.position.x, o.corner2.transform.position.y, o.corner2Back.transform.position.z);
+
+        o.corner3.transform.localScale = new Vector3(Mathf.Lerp(o.corner3.transform.localScale.x, 0.2f, Time.deltaTime * 20f), Mathf.Lerp(o.corner3.transform.localScale.y, -0.2f, Time.deltaTime * 20f), 1f);
+        o.corner3.transform.position = new Vector3(o.corner3.GetComponent<Renderer>().bounds.size.x / 2f - o.squareMiddle.GetComponent<Renderer>().bounds.size.x / 2f, -o.corner3.GetComponent<Renderer>().bounds.size.y / 2f - o.squareMiddle.GetComponent<Renderer>().bounds.size.y / 2f, 0f);
+        o.corner3Back.transform.localScale = new Vector3(o.corner3.transform.localScale.x + lineWidth, o.corner3.transform.localScale.y - lineWidth, o.corner3.transform.localScale.z);
+        o.corner3Back.transform.position = new Vector3(o.corner3.transform.position.x, o.corner3.transform.position.y, o.corner3Back.transform.position.z);
+
+        o.corner4.transform.localScale = new Vector3(Mathf.Lerp(o.corner4.transform.localScale.x, -0.2f, Time.deltaTime * 20f), Mathf.Lerp(o.corner4.transform.localScale.y, -0.2f, Time.deltaTime * 20f), 1f);
+        o.corner4.transform.position = new Vector3(-o.corner4.GetComponent<Renderer>().bounds.size.x / 2f + o.squareMiddle.GetComponent<Renderer>().bounds.size.x / 2f, -o.corner4.GetComponent<Renderer>().bounds.size.y / 2f - o.squareMiddle.GetComponent<Renderer>().bounds.size.y / 2f, 0f);
+        o.corner4Back.transform.localScale = new Vector3(o.corner4.transform.localScale.x - lineWidth, o.corner4.transform.localScale.y - lineWidth, o.corner4.transform.localScale.z);
+        o.corner4Back.transform.position = new Vector3(o.corner4.transform.position.x, o.corner4.transform.position.y, o.corner4Back.transform.position.z);
+
+        o.squareTop.transform.localScale = new Vector3(Mathf.Lerp(o.squareTop.transform.localScale.x, (scaleX - o.corner1.GetComponent<Renderer>().bounds.size.x * 1.9f) * 105f, Time.deltaTime * 20f), Mathf.Lerp(o.squareTop.transform.localScale.y, 0.4f * 105f * 0.96f, Time.deltaTime * 20f), o.squareTop.transform.localScale.z);
+        o.squareTop.transform.position = new Vector3(0f, o.squareTop.GetComponent<Renderer>().bounds.size.y / 2f*0.98f + o.squareMiddle.GetComponent<Renderer>().bounds.size.y / 2f, 0f);
+        o.squareTopBack.transform.localScale = new Vector3(o.squareTop.transform.localScale.x + lineWidth * 195f, o.squareTop.transform.localScale.y + lineWidth * 195f, o.squareTopBack.transform.localScale.z);
+        o.squareTopBack.transform.position = new Vector3(o.squareTop.transform.position.x, o.squareTop.transform.position.y, o.squareTopBack.transform.position.z);
+
+        o.squareBottom.transform.localScale = new Vector3(Mathf.Lerp(o.squareBottom.transform.localScale.x, (scaleX - o.corner1.GetComponent<Renderer>().bounds.size.x * 1.9f) * 105f, Time.deltaTime * 20f), Mathf.Lerp(o.squareBottom.transform.localScale.y, 0.4f * 105f * 0.96f, Time.deltaTime * 20f), o.squareBottom.transform.localScale.z);
+        o.squareBottom.transform.position = new Vector3(0f, -o.squareBottom.GetComponent<Renderer>().bounds.size.y / 2f * 0.98f - o.squareMiddle.GetComponent<Renderer>().bounds.size.y / 2f, 0f);
+        o.squareBottomBack.transform.localScale = new Vector3(o.squareBottom.transform.localScale.x + lineWidth * 195f, o.squareBottom.transform.localScale.y + lineWidth * 195f, o.squareBottomBack.transform.localScale.z);
+        o.squareBottomBack.transform.position = new Vector3(o.squareBottom.transform.position.x, o.squareBottom.transform.position.y, o.squareBottomBack.transform.position.z);
 
         /*
         string target = b.text;
@@ -345,15 +388,17 @@ public class TalkScript : MonoBehaviour {
     {
 
         public int speaker;
-        public int phase;
+        public int beginPhase;
+        public int endPhase;
         public string text;
         public Vector2 position;
         public string[] options;
 
-        public Bubble(int auxSpeaker, int auxPhase, string auxText, Vector2 auxPosition, string[] auxOptions)
+        public Bubble(int auxSpeaker, int auxBeginPhase, int auxEndPhase, string auxText, Vector2 auxPosition, string[] auxOptions)
         {
             speaker = auxSpeaker;
-            phase = auxPhase;
+            beginPhase = auxBeginPhase;
+            endPhase = auxEndPhase;
             text = Hacks.TextMultilineCentered(speechBubblePool[0].text, auxText);
             position = auxPosition;
             options = auxOptions;
@@ -397,6 +442,13 @@ public class TalkScript : MonoBehaviour {
         public GameObject corner2;
         public GameObject corner3;
         public GameObject corner4;
+        public GameObject squareMiddleBack;
+        public GameObject squareTopBack;
+        public GameObject squareBottomBack;
+        public GameObject corner1Back;
+        public GameObject corner2Back;
+        public GameObject corner3Back;
+        public GameObject corner4Back;
         public int currentLetter = 0;
         public float timer = 0f;
 
@@ -414,6 +466,13 @@ public class TalkScript : MonoBehaviour {
             corner2 = root.transform.FindChild("Corner2").gameObject;
             corner3 = root.transform.FindChild("Corner3").gameObject;
             corner4 = root.transform.FindChild("Corner4").gameObject;
+            squareMiddleBack = root.transform.FindChild("SquareMiddleBack").gameObject;
+            squareTopBack = root.transform.FindChild("SquareTopBack").gameObject;
+            squareBottomBack = root.transform.FindChild("SquareBottomBack").gameObject;
+            corner1Back = root.transform.FindChild("Corner1Back").gameObject;
+            corner2Back = root.transform.FindChild("Corner2Back").gameObject;
+            corner3Back = root.transform.FindChild("Corner3Back").gameObject;
+            corner4Back = root.transform.FindChild("Corner4Back").gameObject;
             root.SetActive(false);
             
         }
