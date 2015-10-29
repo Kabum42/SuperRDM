@@ -8,6 +8,10 @@ public class TalkScript : MonoBehaviour {
 	private AudioSource[] textSounds = new AudioSource[3];
 	private bool nextSound = true;
 
+    private AudioSource backgroundMusic;
+    private AudioSource menuOk;
+    private AudioSource closeSpeech;
+
 	private GameObject background;
 
 	private string target;
@@ -23,6 +27,10 @@ public class TalkScript : MonoBehaviour {
     private int globalPhase = 0;
 
     private static int eventRon = 0;
+    private static int eventDouchebards = 1;
+
+    private GameObject eventRonG;
+    private GameObject eventDouchebardsG;
 
     private float lineWidth = 0.035f;
 
@@ -31,20 +39,34 @@ public class TalkScript : MonoBehaviour {
 
 		background = GameObject.Find("Background");
 
+        eventRonG = GameObject.Find("EventRon");
+        eventRonG.SetActive(false);
+        eventDouchebardsG = GameObject.Find("EventDouchebards");
+        eventDouchebardsG.SetActive(false);
+
 		for (int i = 0; i < textSounds.Length; i++) {
 			textSounds[i] = gameObject.AddComponent<AudioSource>();
 	        textSounds[i].clip = Resources.Load("Music/Text/Text_"+i.ToString("00")) as AudioClip;
-	        textSounds[i].volume = 1f;
+	        textSounds[i].volume = 1.5f;
 	        textSounds[i].pitch = 1.1f;
 	        textSounds[i].Play();
 		}
+
+        menuOk = gameObject.AddComponent<AudioSource>();
+        menuOk.clip = Resources.Load("Music/Menu/MenuOk") as AudioClip;
+        menuOk.volume = 0.45f;
+
+        closeSpeech = gameObject.AddComponent<AudioSource>();
+        closeSpeech.clip = Resources.Load("Sounds/whip_01") as AudioClip;
+        closeSpeech.volume = 1f;
+        closeSpeech.playOnAwake = false;
 
         SpeechBubble s = new SpeechBubble();
         speechBubblePool.Add(s);
 
         options = new OptionsSquare();
 
-        InitializeSpeakers(eventRon);
+        InitializeSpeakers(eventDouchebards);
 
         target = bubbles[0].text;
 
@@ -52,8 +74,17 @@ public class TalkScript : MonoBehaviour {
 
     void InitializeSpeakers(int eventID)
     {
+        
         if (eventID == eventRon)
         {
+            eventRonG.SetActive(true);
+
+            backgroundMusic = gameObject.AddComponent<AudioSource>();
+            backgroundMusic.clip = Resources.Load("Music/Ron_Weasel") as AudioClip;
+            backgroundMusic.volume = 0f;
+            backgroundMusic.loop = true;
+            backgroundMusic.Play();
+
 			speakers = new GameObject[2];
             speakers[0] = GameObject.Find ("Player");
             speakers[1] = GameObject.Find ("Ron");
@@ -96,14 +127,93 @@ public class TalkScript : MonoBehaviour {
             bubbles.Add(new Bubble(0, localPhase, localPhase, "", new Vector2(-5.5f, 2.5f), new string[]{"I don't know", "A duck", "Fuck you Ron"}));
         
         }
+        if (eventID == eventDouchebards)
+        {
+            eventDouchebardsG.SetActive(true);
+
+            backgroundMusic = gameObject.AddComponent<AudioSource>();
+            backgroundMusic.clip = Resources.Load("Music/Douchebards") as AudioClip;
+            backgroundMusic.volume = 1f;
+            backgroundMusic.loop = true;
+            backgroundMusic.Play();
+
+            speakers = new GameObject[2];
+            speakers[0] = GameObject.Find("Player");
+            speakers[1] = GameObject.Find("Leader");
+
+            int localPhase = 0;
+            float randomHello = Random.Range(0f, 1f);
+
+            if (randomHello < 1f / 3f)
+            {
+                bubbles.Add(new Bubble(1, localPhase, localPhase, "I'm Ron Weasel, but\n you can call me Ron Weasel", new Vector2(3f, 3f), null));
+                localPhase++;
+                bubbles.Add(new Bubble(1, localPhase, localPhase, "( ͡° ͜ʖ ͡°)", new Vector2(3f, 3f), null));
+                localPhase++;
+            }
+            else if (randomHello < 2f / 3f)
+            {
+                bubbles.Add(new Bubble(1, localPhase, localPhase, "Hey bro, don't trust Harry Otter", new Vector2(3f, 3f), null));
+                localPhase++;
+            }
+            else
+            {
+                bubbles.Add(new Bubble(1, localPhase, localPhase, "This shoe tastes like... sweaty foot.\nFar from strawberry candy", new Vector2(3f, 3f), null));
+                localPhase++;
+            }
+
+            bubbles.Add(new Bubble(0, localPhase, localPhase, "...", new Vector2(-3f, 3f), null));
+            localPhase++;
+
+            bubbles.Add(new Bubble(1, localPhase, localPhase, "If you answer my question correctly\n I will give you something VERY special", new Vector2(3f, 3f), null));
+            localPhase++;
+
+            float randomQuestion = Random.Range(0f, 1f);
+
+            if (randomQuestion < 1f)
+            {
+                bubbles.Add(new Bubble(1, localPhase, localPhase + 1, "What's the difference between a duck?", new Vector2(5f, 3f), null));
+                localPhase++;
+            }
+
+            bubbles.Add(new Bubble(0, localPhase, localPhase, "", new Vector2(-5.5f, 2.5f), new string[] { "I don't know", "A duck", "Fuck you Ron" }));
+
+        }
+
+        
+    }
+
+    void addTag(GameObject g, string s)
+    {
+        addTag(g, s, null);
+    }
+
+    void addTag(GameObject g, string s, string s2)
+    {
+
     }
 	
 	// Update is called once per frame
 	void Update () {
 
+        if (backgroundMusic.volume < 0.5f)
+        {
+            backgroundMusic.volume += Time.deltaTime/2f;
+            if (backgroundMusic.volume > 0.5f)
+            {
+                backgroundMusic.volume = 0.5f;
+            }
+        }
+
         if (nextPhase == 1)
         {
             globalPhase++;
+
+            if (toRecycle.Count > 0)
+            {
+                closeSpeech.Play();
+            }
+
             for (int i = 0; i < toRecycle.Count; i++)
             {
                 speechBubblePool[toRecycle[i]].text.GetComponent<TextMesh>().text = "";
@@ -371,11 +481,13 @@ public class TalkScript : MonoBehaviour {
                 nextPhase = 1;
             }
 
+            //menuOk.Play();
+
             bubbles.Add(new Bubble(0, globalPhase+1, globalPhase+2, b.options[o.selected], new Vector2(-3f, 3f), null));
 
             if (b.options[o.selected] == "I don't know")
             {
-                bubbles.Add(new Bubble(1, globalPhase + 2, globalPhase + 2, "That's what she said\nWait, what?", new Vector2(3f, 3f), null));
+                bubbles.Add(new Bubble(1, globalPhase + 2, globalPhase + 2, "Then go away!", new Vector2(3f, 3f), null));
             }
             if (b.options[o.selected] == "A duck")
             {
