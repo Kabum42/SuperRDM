@@ -57,7 +57,7 @@ public class TalkScript : MonoBehaviour {
             speakers[0] = GameObject.Find ("Player");
             speakers[1] = GameObject.Find ("Ron");
 
-            bubbles.Add(new Bubble(1, 0, 0, "Hi bro, my name is Ron Weasel.\nDid you see my friend, Harry the Otter?", new Vector2(3f, 3f), null));
+            bubbles.Add(new Bubble(1, 0, 0, "Hi there, I'm Kuku the Henmancer\nI love chickens!", new Vector2(3f, 3f), null));
             bubbles.Add(new Bubble(0, 1, 1, "...", new Vector2(-3f, 3f), null));
             bubbles.Add(new Bubble(1, 2, 3, "Ron Ron Ron Ron\nRon Ron Ron Ron???", new Vector2(5f, 3f), null));
             bubbles.Add(new Bubble(0, 3, 3, "", new Vector2(-5.5f, 2.5f), new string[]{"This is a long text to test something\nso looong", "EJEM", "OMG"}));
