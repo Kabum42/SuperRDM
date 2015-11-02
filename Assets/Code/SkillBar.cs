@@ -10,21 +10,22 @@ public class SkillBar : MonoBehaviour {
     private GameObject critical;
     private GameObject circle;
 
-    private Vector2 vectorMiss;
-    private Vector2 vectorBad;
-    private Vector2 vectorGood;
-    private Vector2 vectorCritical;
+	private Vector2 vectorMiss = new Vector2(-1f, 1f);
+    private Vector2 vectorBad = new Vector2(0f, 0f);
+	private Vector2 vectorGood = new Vector2(0f, 0f);
+	private Vector2 vectorCritical = new Vector2(0f, 0f);
 
     private float width = 4.5f*2f;
     private bool right = true;
-    private float speed = 10f;
+    private float speed = 2f;
+
+	private float circleX = -1f;
 
 	// Use this for initialization
 	void Start() {
         root = this.gameObject;
         circle = root.transform.FindChild("Circle").gameObject;
         circle.transform.localPosition = new Vector3(-width/2 +circle.GetComponent<Renderer>().bounds.size.x, circle.transform.localPosition.y, circle.transform.localPosition.z);
-        vectorMiss = new Vector2(-1f, 1f);
 
         miss = root.transform.FindChild("Miss").gameObject;
         bad = root.transform.FindChild("Bad").gameObject;
@@ -34,6 +35,11 @@ public class SkillBar : MonoBehaviour {
 
     void Update()
     {
+		if (root.transform.localScale.x < 0.99f) {
+			float scaleRoot = Mathf.Lerp (root.transform.localScale.x, 1f, Time.deltaTime * 10f);
+			root.transform.localScale = new Vector3 (scaleRoot, scaleRoot, scaleRoot);
+		}
+
         bad.transform.localScale = new Vector3(Mathf.Lerp(bad.transform.localScale.x, (vectorBad.y-vectorBad.x)*miss.transform.localScale.x/2f, Time.deltaTime*15f), bad.transform.localScale.y, bad.transform.localScale.z);
         bad.transform.localPosition = new Vector3(Mathf.Lerp(bad.transform.localPosition.x, vectorBad.x * miss.GetComponent<Renderer>().bounds.size.x / 2f + bad.GetComponent<Renderer>().bounds.size.x / 2f, Time.deltaTime*15f), bad.transform.localPosition.y, bad.transform.localPosition.z);
 
@@ -44,40 +50,92 @@ public class SkillBar : MonoBehaviour {
         critical.transform.localPosition = new Vector3(Mathf.Lerp(critical.transform.localPosition.x, vectorCritical.x * miss.GetComponent<Renderer>().bounds.size.x / 2f + critical.GetComponent<Renderer>().bounds.size.x / 2f, Time.deltaTime*15f), critical.transform.localPosition.y, critical.transform.localPosition.z);
 
 
-        if (right)
-        {
-            circle.transform.localPosition = new Vector3(circle.transform.localPosition.x + Time.deltaTime*speed, circle.transform.localPosition.y, circle.transform.localPosition.z);
+		if (circle.transform.localScale.x < 1.176569f + 0.05f) {
 
-            if (circle.transform.localPosition.x > width / 2 - circle.GetComponent<Renderer>().bounds.size.x)
-            {
-                Bounce();
-            }
-        }
-        else
-        {
-            circle.transform.localPosition = new Vector3(circle.transform.localPosition.x - Time.deltaTime*speed, circle.transform.localPosition.y, circle.transform.localPosition.z);
+			if (Input.GetKeyDown(KeyCode.Return)) {
+				pressedButton();
+			}
 
-            if (circle.transform.localPosition.x < -width / 2 + circle.GetComponent<Renderer>().bounds.size.x)
-            {
-                Bounce();
-            }
-        }
+
+			if (right) {
+				circleX += Time.deltaTime * speed;
+
+				if (circleX > 1) {
+					circleX = 1;
+					Bounce ();
+				}
+			} else {
+				circleX -= Time.deltaTime * speed;
+
+				if (circleX < -1) {
+					circleX = -1;
+					Bounce ();
+				}
+			}
+
+			if (Input.GetKeyDown(KeyCode.R)) {
+				Reset();
+			}
+
+		} else {
+
+			float scale = Mathf.Lerp(circle.transform.localScale.x, 1.176569f, Time.deltaTime*speed);
+			float color = Mathf.Lerp(circle.GetComponent<SpriteRenderer>().color.r, 0.7f, Time.deltaTime*speed);
+
+			circle.transform.localScale = new Vector3(scale, scale, scale);
+
+			if (circle.transform.localScale.x < 1.176569f + 0.05f) { color = 1f; }
+
+			circle.GetComponent<SpriteRenderer>().color = new Color(color, color, color);
+
+		}
+
+		circle.transform.localPosition = new Vector3 (circleX * (miss.GetComponent<Renderer> ().bounds.size.x / 2f - circle.GetComponent<Renderer> ().bounds.size.x / 2f), circle.transform.localPosition.y, circle.transform.localPosition.z);
+
+
+        
 
         
     }
 
+	void pressedButton() {
+
+		if (circleX > vectorCritical.x && circleX < vectorCritical.y) {
+			Debug.Log ("CRITICAL HIT");
+		} else if (circleX > vectorGood.x && circleX < vectorGood.y) {
+			Debug.Log ("GOOD HIT");
+		} else if (circleX > vectorBad.x && circleX < vectorBad.y) {
+			Debug.Log ("BAD HIT");
+		} else {
+			Debug.Log ("MISS HIT");
+		}
+
+	}
+
     void Bounce()
     {
         right = !right;
-        speed -= 2f;
-        if (speed < 2f)
+        speed -= 0.4f;
+        if (speed < 0.6f)
         {
-            speed = 2f;
+            speed = 0.6f;
         }
         //setBad(Reduce(vectorBad, 0.9f).x, Reduce(vectorBad, 0.9f).y);
         setGood(Reduce(vectorGood, 0.8f).x, Reduce(vectorGood, 0.8f).y);
         setCritical(Reduce(vectorCritical, 0f).x, Reduce(vectorCritical, 0f).y);
     }
+
+	public void Reset() {
+		root.transform.localScale = new Vector3 (0.01f, 0.01f, 0.01f);
+		circle.GetComponent<SpriteRenderer> ().color = new Color (0f, 0f, 0f);
+		circle.transform.localScale = new Vector3 (2f, 2f, 2f);
+		circleX = -1f;
+		speed = 2f;
+		right = true;
+		//setBad(-0.95f, 0.65f);
+		//setGood(-0.85f, 0.15f);
+		//setCritical(-0.75f, -0.5f);
+	}
 
     public void setBad(float x1, float x2)
     {
