@@ -68,6 +68,7 @@
      <Compile Include="Assets\Code\SkillBar.cs" />
      <Compile Include="Assets\Code\TalkScript.cs" />
      <Compile Include="Assets\Code\TestScript.cs" />
+     <Compile Include="Assets\Code\VisualCharacter.cs" />
      <Compile Include="Assets\Code\WorldScript.cs" />
      <None Include="Assets\Resources\Fonts\Comfortaa\OFL.txt" />
      <None Include="Assets\Resources\Languages.txt" />
