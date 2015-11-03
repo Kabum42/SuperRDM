@@ -33,6 +33,8 @@ public static class GlobalData {
     public static bool connected = false;
     public static float boardSeed = 42f;
 
+    public static float bossFatigue = 0f;
+
     // Use this for initialization
     public static void Start () {
 
