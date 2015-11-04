@@ -101,7 +101,7 @@ public class VisualCharacter : MonoBehaviour {
 
         if (bloodBarbarian.activeInHierarchy)
         {
-            if (bloodBarbarian.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).normalizedTime >= 1)
+            if (!bloodBarbarian.GetComponent<ParticleSystem>().isPlaying)
             {
                 bloodBarbarian.SetActive(false);
             }
@@ -130,7 +130,6 @@ public class VisualCharacter : MonoBehaviour {
             // ES EL FINISHER DEL BARBARO
             axeHit.Play();
             bloodBarbarian.SetActive(true);
-            Hacks.SpriteRendererAlpha(bloodBarbarian, 1f);
         }
     }
 
