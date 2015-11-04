@@ -8,7 +8,10 @@ public class VisualCharacter : MonoBehaviour {
     private VisualCharacter targetPerformance = null;
     private bool side = true;
     private GameObject character;
-    private GameObject bloodBarbarian;
+    private GameObject blood1;
+    private GameObject blood2;
+    private GameObject bloodBF;
+    private GameObject bloodBFAnimation;
     private AudioSource axeHit;
 
     private string statusPerformance = "none";
@@ -17,8 +20,18 @@ public class VisualCharacter : MonoBehaviour {
 	void Awake () {
         root = this.gameObject;
         character = root.transform.FindChild("Character").gameObject;
-        bloodBarbarian = root.transform.FindChild("Character/BloodBarbarian").gameObject;
-        bloodBarbarian.SetActive(false);
+
+        blood1 = root.transform.FindChild("Character/Blood1").gameObject;
+        blood1.SetActive(false);
+
+        blood2 = root.transform.FindChild("Character/Blood2").gameObject;
+        blood2.SetActive(false);
+
+        bloodBF = root.transform.FindChild("Character/BloodBF").gameObject;
+        bloodBF.SetActive(false);
+
+        bloodBFAnimation = root.transform.FindChild("Character/BloodBFAnimation").gameObject;
+        bloodBFAnimation.SetActive(false);
 
         axeHit = gameObject.AddComponent<AudioSource>();
         axeHit.clip = Resources.Load("Music/Hits/AxeHit") as AudioClip;
@@ -35,7 +48,17 @@ public class VisualCharacter : MonoBehaviour {
                 if ((root.transform.position.x + character.GetComponent<SpriteRenderer>().bounds.size.x / 2f) < targetPerformance.root.transform.position.x)
                 {
                     root.transform.position = new Vector3(Mathf.Lerp(root.transform.position.x, targetPerformance.root.transform.position.x, Time.deltaTime * 10f), root.transform.position.y, root.transform.position.z);
-
+                }
+                else
+                {
+                    statusPerformance = "executing";
+                }
+            }
+            else
+            {
+                if ((root.transform.position.x - character.GetComponent<SpriteRenderer>().bounds.size.x / 2f) > targetPerformance.root.transform.position.x)
+                {
+                    root.transform.position = new Vector3(Mathf.Lerp(root.transform.position.x, targetPerformance.root.transform.position.x, Time.deltaTime * 10f), root.transform.position.y, root.transform.position.z);
                 }
                 else
                 {
@@ -52,6 +75,28 @@ public class VisualCharacter : MonoBehaviour {
                 if (root.transform.position.x > -4.95f)
                 {
                     root.transform.position = new Vector3(Mathf.Lerp(root.transform.position.x, -5f, Time.deltaTime * 10f), root.transform.position.y, root.transform.position.z);
+                }
+                else
+                {
+                    statusPerformance = "none";
+
+                    float scaleX = root.transform.localScale.x;
+                    if (side)
+                    {
+                        scaleX = Mathf.Abs(scaleX);
+                    }
+                    else
+                    {
+                        scaleX = -Mathf.Abs(scaleX);
+                    }
+                    root.transform.localScale = new Vector3(scaleX, root.transform.localScale.y, root.transform.localScale.z);
+                }
+            }
+            else
+            {
+                if (root.transform.position.x < 4.95f)
+                {
+                    root.transform.position = new Vector3(Mathf.Lerp(root.transform.position.x, 5f, Time.deltaTime * 10f), root.transform.position.y, root.transform.position.z);
                 }
                 else
                 {
@@ -99,12 +144,17 @@ public class VisualCharacter : MonoBehaviour {
 
 
 
-        if (bloodBarbarian.activeInHierarchy)
+        if (bloodBF.activeInHierarchy)
         {
-            if (!bloodBarbarian.GetComponent<ParticleSystem>().isPlaying)
+
+            if (!bloodBF.GetComponent<ParticleSystem>().isPlaying)
             {
-                bloodBarbarian.SetActive(false);
+                blood1.SetActive(false);
+                blood2.SetActive(false);
+                bloodBF.SetActive(false);
+                bloodBFAnimation.SetActive(false);
             }
+            
         }
 	
 	}
@@ -129,7 +179,9 @@ public class VisualCharacter : MonoBehaviour {
         {
             // ES EL FINISHER DEL BARBARO
             axeHit.Play();
-            bloodBarbarian.SetActive(true);
+            blood1.SetActive(true);
+            blood2.SetActive(true);
+            bloodBF.SetActive(true);
         }
     }
 

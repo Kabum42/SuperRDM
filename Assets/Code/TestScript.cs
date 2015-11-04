@@ -31,8 +31,14 @@ public class TestScript : MonoBehaviour {
 
         if (Input.GetKeyDown(KeyCode.Return))
         {
-            player1.Perform(GlobalData.Skills[2], player2);
+            //player1.Perform(GlobalData.Skills[2], player2);
+            player2.Perform(GlobalData.Skills[2], player1);
             //henmancer.Represent(GlobalData.Skills[2]);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            player1.Perform(GlobalData.Skills[2], player2);
         }
 	
 	}
