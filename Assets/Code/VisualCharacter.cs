@@ -130,7 +130,8 @@ public class VisualCharacter : MonoBehaviour {
             {
                 if (root.transform.position.x > -4.95f)
                 {
-                    root.transform.position = new Vector3(root.transform.position.x - Time.deltaTime * 20f, root.transform.position.y, root.transform.position.z);
+                    //root.transform.position = new Vector3(root.transform.position.x - Time.deltaTime * 20f, root.transform.position.y, root.transform.position.z);
+                    root.transform.position = new Vector3(Mathf.Lerp(root.transform.position.x, -5f, Time.deltaTime * 10f), root.transform.position.y, root.transform.position.z);
                 }
                 else
                 {
@@ -153,7 +154,8 @@ public class VisualCharacter : MonoBehaviour {
             {
                 if (root.transform.position.x < 4.95f)
                 {
-                    root.transform.position = new Vector3(root.transform.position.x + Time.deltaTime * 20f, root.transform.position.y, root.transform.position.z);
+                    //root.transform.position = new Vector3(root.transform.position.x + Time.deltaTime * 20f, root.transform.position.y, root.transform.position.z);
+                    root.transform.position = new Vector3(Mathf.Lerp(root.transform.position.x, 5f, Time.deltaTime * 10f), root.transform.position.y, root.transform.position.z);
                 }
                 else
                 {
@@ -186,18 +188,7 @@ public class VisualCharacter : MonoBehaviour {
                     performing = -1;
                     targetPerformance = null;
                     statusPerformance = "returning";
-                    animated.GetComponent<Animator>().CrossFade("Move", GlobalData.crossfadeAnimation, 0, 0f);
-
-                    float scaleX = root.transform.localScale.x;
-                    if (side)
-                    {
-                        scaleX = -Mathf.Abs(scaleX);
-                    }
-                    else
-                    {
-                        scaleX = Mathf.Abs(scaleX);
-                    }
-                    root.transform.localScale = new Vector3(scaleX, root.transform.localScale.y, root.transform.localScale.z);
+                    animated.GetComponent<Animator>().CrossFade("Return", GlobalData.crossfadeAnimation, 0, 0f);
                 }
 
                 
