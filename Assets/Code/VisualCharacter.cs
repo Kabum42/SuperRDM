@@ -13,6 +13,8 @@ public class VisualCharacter : MonoBehaviour {
     private GameObject bloodBF;
     private GameObject bloodBFAnimation;
     private GameObject bloodBFSplat;
+    private Vector3 bloodBFSplatOriginalPosition;
+    private Vector3 bloodBFSplatOriginalScale;
     private AudioSource axeHit;
 
     private string statusPerformance = "none";
@@ -169,9 +171,13 @@ public class VisualCharacter : MonoBehaviour {
                 {
                     Hacks.SpriteRendererAlpha(bloodBFSplat, bloodBFSplat.GetComponent<SpriteRenderer>().color.a - Time.deltaTime * 0.75f);
                 }
-                float auxScale = Mathf.Lerp(bloodBFSplat.transform.localScale.x, 2.5f, Time.deltaTime * 20f);
-                bloodBFSplat.transform.localScale = new Vector3(auxScale, auxScale, auxScale);
-                bloodBFSplat.transform.localPosition = new Vector3(+bloodBFSplat.GetComponent<SpriteRenderer>().bounds.size.x*1.3f, -character.GetComponent<SpriteRenderer>().bounds.size.y*1.3f, bloodBFSplat.transform.localPosition.z);
+
+                float auxScale = Mathf.Lerp(Mathf.Abs(bloodBFSplat.transform.localScale.x), 2.5f, Time.deltaTime * 20f);
+                if ((bloodBFSplatOriginalScale.x < 0 && root.transform.localScale.x > 0) || (bloodBFSplatOriginalScale.x > 0 && root.transform.localScale.x < 0)) { auxScale = -auxScale; }
+                bloodBFSplat.transform.localScale = new Vector3(auxScale, Mathf.Abs(auxScale), Mathf.Abs(auxScale));
+                bloodBFSplat.transform.position = new Vector3(bloodBFSplatOriginalPosition.x + bloodBFSplat.GetComponent<SpriteRenderer>().bounds.size.x * 1 / 2f * -(bloodBFSplatOriginalScale.x / Mathf.Abs(bloodBFSplatOriginalScale.x)), bloodBFSplatOriginalPosition.y - character.GetComponent<SpriteRenderer>().bounds.size.y * 1 / 2f, bloodBFSplat.transform.position.z);
+                //bloodBFSplat.transform.position = new Vector3(0f, bloodBFSplat.transform.position.y, bloodBFSplat.transform.position.z);
+                //Debug.Log(bloodBFSplatOriginalTransform.position.x);
             }
             
         }
@@ -201,6 +207,8 @@ public class VisualCharacter : MonoBehaviour {
             blood1.SetActive(true);
             blood2.SetActive(true);
             bloodBF.SetActive(true);
+            bloodBFSplatOriginalPosition = root.transform.position;
+            bloodBFSplatOriginalScale = new Vector3(root.transform.localScale.x, root.transform.localScale.y, root.transform.localScale.z);
             bloodBFSplat.SetActive(true);
         }
     }
