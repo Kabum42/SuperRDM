@@ -34,6 +34,7 @@ public static class GlobalData {
     public static float boardSeed = 42f;
 
     public static float bossFatigue = 0f;
+    public static float crossfadeAnimation = 0.15f;
 
     // Use this for initialization
     public static void Start () {

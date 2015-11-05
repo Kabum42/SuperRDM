@@ -99,26 +99,26 @@ public class VisualCharacter : MonoBehaviour {
             // ACERCARSE
             if (side)
             {
-                if ((root.transform.position.x + characterBounds.size.x / 2f) < targetPerformance.root.transform.position.x)
+                if ((root.transform.position.x + characterBounds.size.x) < targetPerformance.root.transform.position.x)
                 {
-                    root.transform.position = new Vector3(Mathf.Lerp(root.transform.position.x, targetPerformance.root.transform.position.x, Time.deltaTime * 10f), root.transform.position.y, root.transform.position.z);
+                    root.transform.position = new Vector3(root.transform.position.x + Time.deltaTime * 20f, root.transform.position.y, root.transform.position.z);
                 }
                 else
                 {
                     statusPerformance = "executing";
-                    animated.GetComponent<Animator>().CrossFade("Idle", Time.deltaTime*2f);
+                    animated.GetComponent<Animator>().CrossFade("Idle", GlobalData.crossfadeAnimation, 0, 0f);
                 }
             }
             else
             {
-                if ((root.transform.position.x - characterBounds.size.x / 2f) > targetPerformance.root.transform.position.x)
+                if ((root.transform.position.x - characterBounds.size.x) > targetPerformance.root.transform.position.x)
                 {
-                    root.transform.position = new Vector3(Mathf.Lerp(root.transform.position.x, targetPerformance.root.transform.position.x, Time.deltaTime * 10f), root.transform.position.y, root.transform.position.z);
+                    root.transform.position = new Vector3(root.transform.position.x - Time.deltaTime * 20f, root.transform.position.y, root.transform.position.z);
                 }
                 else
                 {
                     statusPerformance = "executing";
-                    animated.GetComponent<Animator>().CrossFade("Idle", Time.deltaTime*2f);
+                    animated.GetComponent<Animator>().CrossFade("Idle", GlobalData.crossfadeAnimation, 0, 0f);
                 }
             }
 
@@ -130,12 +130,12 @@ public class VisualCharacter : MonoBehaviour {
             {
                 if (root.transform.position.x > -4.95f)
                 {
-                    root.transform.position = new Vector3(Mathf.Lerp(root.transform.position.x, -5f, Time.deltaTime * 10f), root.transform.position.y, root.transform.position.z);
+                    root.transform.position = new Vector3(root.transform.position.x - Time.deltaTime * 20f, root.transform.position.y, root.transform.position.z);
                 }
                 else
                 {
                     statusPerformance = "none";
-                    animated.GetComponent<Animator>().CrossFade("Idle", Time.deltaTime*2f);
+                    animated.GetComponent<Animator>().CrossFade("Idle", GlobalData.crossfadeAnimation, 0, 0f);
 
                     float scaleX = root.transform.localScale.x;
                     if (side)
@@ -153,12 +153,12 @@ public class VisualCharacter : MonoBehaviour {
             {
                 if (root.transform.position.x < 4.95f)
                 {
-                    root.transform.position = new Vector3(Mathf.Lerp(root.transform.position.x, 5f, Time.deltaTime * 10f), root.transform.position.y, root.transform.position.z);
+                    root.transform.position = new Vector3(root.transform.position.x + Time.deltaTime * 20f, root.transform.position.y, root.transform.position.z);
                 }
                 else
                 {
                     statusPerformance = "none";
-                    animated.GetComponent<Animator>().CrossFade("Idle", Time.deltaTime*2f);
+                    animated.GetComponent<Animator>().CrossFade("Idle", GlobalData.crossfadeAnimation, 0, 0f);
 
                     float scaleX = root.transform.localScale.x;
                     if (side)
@@ -179,22 +179,28 @@ public class VisualCharacter : MonoBehaviour {
             if (performing == 2)
             {
                 // ES EL FINISHER DEL BARBARO
-                targetPerformance.Represent(GlobalData.Skills[performing], importantFloats);
-                performing = -1;
-                targetPerformance = null;
-                statusPerformance = "returning";
-                animated.GetComponent<Animator>().CrossFade("Move", Time.deltaTime*2f);
 
-                float scaleX = root.transform.localScale.x;
-                if (side)
+                if (animated.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).normalizedTime >= 1f)
                 {
-                    scaleX = -Mathf.Abs(scaleX);
+                    targetPerformance.Represent(GlobalData.Skills[performing], importantFloats);
+                    performing = -1;
+                    targetPerformance = null;
+                    statusPerformance = "returning";
+                    animated.GetComponent<Animator>().CrossFade("Move", GlobalData.crossfadeAnimation, 0, 0f);
+
+                    float scaleX = root.transform.localScale.x;
+                    if (side)
+                    {
+                        scaleX = -Mathf.Abs(scaleX);
+                    }
+                    else
+                    {
+                        scaleX = Mathf.Abs(scaleX);
+                    }
+                    root.transform.localScale = new Vector3(scaleX, root.transform.localScale.y, root.transform.localScale.z);
                 }
-                else
-                {
-                    scaleX = Mathf.Abs(scaleX);
-                }
-                root.transform.localScale = new Vector3(scaleX, root.transform.localScale.y, root.transform.localScale.z);
+
+                
             }
             
         }
@@ -298,7 +304,7 @@ public class VisualCharacter : MonoBehaviour {
         if (performing == 2)
         {
             statusPerformance = "chasing";
-            animated.GetComponent<Animator>().CrossFade("Move", Time.deltaTime*2f);
+            animated.GetComponent<Animator>().CrossFade("Move", GlobalData.crossfadeAnimation, 0, 0f);
         }
 
     }
