@@ -12,6 +12,7 @@ public class VisualCharacter : MonoBehaviour {
     private GameObject blood2;
     private GameObject bloodBF;
     private GameObject bloodBFAnimation;
+    private GameObject bloodBFSplat;
     private AudioSource axeHit;
 
     private string statusPerformance = "none";
@@ -32,6 +33,11 @@ public class VisualCharacter : MonoBehaviour {
 
         bloodBFAnimation = root.transform.FindChild("Character/BloodBFAnimation").gameObject;
         bloodBFAnimation.SetActive(false);
+
+        bloodBFSplat = root.transform.FindChild("Character/BloodBFSplat").gameObject;
+        bloodBFSplat.transform.localScale = new Vector3(0f, 0f, 0f);
+        Hacks.SpriteRendererAlpha(bloodBFSplat, 1f);
+        bloodBFSplat.SetActive(false);
 
         axeHit = gameObject.AddComponent<AudioSource>();
         axeHit.clip = Resources.Load("Music/Hits/AxeHit") as AudioClip;
@@ -147,12 +153,25 @@ public class VisualCharacter : MonoBehaviour {
         if (bloodBF.activeInHierarchy)
         {
 
-            if (!bloodBF.GetComponent<ParticleSystem>().isPlaying)
+            if (bloodBFSplat.GetComponent<SpriteRenderer>().color.a < 0.01f)
             {
                 blood1.SetActive(false);
                 blood2.SetActive(false);
                 bloodBF.SetActive(false);
                 bloodBFAnimation.SetActive(false);
+                bloodBFSplat.transform.localScale = new Vector3(0f, 0f, 0f);
+                Hacks.SpriteRendererAlpha(bloodBFSplat, 1f);
+                bloodBFSplat.SetActive(false);
+            }
+            else
+            {
+                if (bloodBFAnimation.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).normalizedTime >= 1f)
+                {
+                    Hacks.SpriteRendererAlpha(bloodBFSplat, bloodBFSplat.GetComponent<SpriteRenderer>().color.a - Time.deltaTime * 0.75f);
+                }
+                float auxScale = Mathf.Lerp(bloodBFSplat.transform.localScale.x, 2.5f, Time.deltaTime * 20f);
+                bloodBFSplat.transform.localScale = new Vector3(auxScale, auxScale, auxScale);
+                bloodBFSplat.transform.localPosition = new Vector3(+bloodBFSplat.GetComponent<SpriteRenderer>().bounds.size.x*1.3f, -character.GetComponent<SpriteRenderer>().bounds.size.y*1.3f, bloodBFSplat.transform.localPosition.z);
             }
             
         }
@@ -182,6 +201,7 @@ public class VisualCharacter : MonoBehaviour {
             blood1.SetActive(true);
             blood2.SetActive(true);
             bloodBF.SetActive(true);
+            bloodBFSplat.SetActive(true);
         }
     }
 

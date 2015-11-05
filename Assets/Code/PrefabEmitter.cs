@@ -41,20 +41,25 @@ public class PrefabEmitter : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+
         ParticleSystem.Particle[] particles = new ParticleSystem.Particle[this.GetComponent<ParticleSystem>().particleCount];
 	    this.GetComponent<ParticleSystem>().GetParticles(particles);
 
-        
-        if (root.transform.localScale.x < 0)
-        {
-            source.transform.position = new Vector3(particles[0].position.x, particles[0].position.y, source.transform.position.z) + new Vector3(source.GetComponent<Renderer>().bounds.size.x / 2f, source.GetComponent<Renderer>().bounds.size.y / 2f, 0f);
-        }
-        else
-        {
-            source.transform.position = new Vector3(particles[0].position.x, particles[0].position.y, source.transform.position.z) + new Vector3(-source.GetComponent<Renderer>().bounds.size.x / 2f, source.GetComponent<Renderer>().bounds.size.y / 2f, 0f);
-        }
 
-        source.SetActive(true);
+        if (particles != null && particles.Length > 0)
+        {
+            if (root.transform.localScale.x < 0)
+            {
+                source.transform.position = new Vector3(particles[0].position.x, particles[0].position.y, source.transform.position.z) + new Vector3(source.GetComponent<Renderer>().bounds.size.x / 2f, source.GetComponent<Renderer>().bounds.size.y / 2f, 0f);
+            }
+            else
+            {
+                source.transform.position = new Vector3(particles[0].position.x, particles[0].position.y, source.transform.position.z) + new Vector3(-source.GetComponent<Renderer>().bounds.size.x / 2f, source.GetComponent<Renderer>().bounds.size.y / 2f, 0f);
+            }
+
+            source.SetActive(true);
+        }
+        
 
 	}
 }
