@@ -27,14 +27,10 @@ public class PrefabEmitter : MonoBehaviour {
         if (root.transform.localScale.x < 0)
         {
             this.gameObject.transform.eulerAngles = new Vector3(this.gameObject.transform.eulerAngles.x, 90f, this.gameObject.transform.eulerAngles.z);
-            //source.transform.localScale = new Vector3(-Mathf.Abs(source.transform.localScale.x), source.transform.localScale.y, source.transform.localScale.z);
-            Debug.Log("CASO 1");
         }
         else
         {
             this.gameObject.transform.eulerAngles = new Vector3(this.gameObject.transform.eulerAngles.x, 270f, this.gameObject.transform.eulerAngles.z);
-            //source.transform.localScale = new Vector3(Mathf.Abs(source.transform.localScale.x), source.transform.localScale.y, source.transform.localScale.z);
-            Debug.Log("CASO 2");
         }
 
     }

@@ -9,6 +9,8 @@ public class VisualCharacter : MonoBehaviour {
     private bool side = true;
     private float[] importantFloats;
     private GameObject character;
+    private GameObject animated;
+    private Bounds characterBounds;
     private GameObject text1;
     private GameObject text2;
     private GameObject blood1;
@@ -25,7 +27,8 @@ public class VisualCharacter : MonoBehaviour {
 	// Use this for initialization
 	void Awake () {
         root = this.gameObject;
-        character = root.transform.FindChild("Character").gameObject;
+
+        setClass(GlobalData.Classes[0]);
 
         text1 = root.transform.FindChild("Text1").gameObject;
         text1.SetActive(false);
@@ -61,7 +64,30 @@ public class VisualCharacter : MonoBehaviour {
         if (c.getID() == 0)
         {
             // ES EL BOAR RIDER
-            prefab = "Barbarian";
+            //prefab = "Barbarian";
+            character = Instantiate(Resources.Load("Prefabs/Barbarian")) as GameObject;
+            character.transform.parent = root.transform;
+            animated = character.transform.FindChild("Animated").gameObject;
+            characterBounds = GetChildRendererBounds(character);
+        }
+    }
+
+    Bounds GetChildRendererBounds(GameObject go)
+    {
+        Renderer[] renderers = go.GetComponentsInChildren<Renderer>();
+
+        if (renderers.Length > 0)
+        {
+            Bounds bounds = renderers[0].bounds;
+            for (int i = 1, ni = renderers.Length; i < ni; i++)
+            {
+                bounds.Encapsulate(renderers[i].bounds);
+            }
+            return bounds;
+        }
+        else
+        {
+            return new Bounds();
         }
     }
 	
@@ -73,24 +99,26 @@ public class VisualCharacter : MonoBehaviour {
             // ACERCARSE
             if (side)
             {
-                if ((root.transform.position.x + character.GetComponent<SpriteRenderer>().bounds.size.x / 2f) < targetPerformance.root.transform.position.x)
+                if ((root.transform.position.x + characterBounds.size.x / 2f) < targetPerformance.root.transform.position.x)
                 {
                     root.transform.position = new Vector3(Mathf.Lerp(root.transform.position.x, targetPerformance.root.transform.position.x, Time.deltaTime * 10f), root.transform.position.y, root.transform.position.z);
                 }
                 else
                 {
                     statusPerformance = "executing";
+                    animated.GetComponent<Animator>().CrossFade("Idle", Time.deltaTime*2f);
                 }
             }
             else
             {
-                if ((root.transform.position.x - character.GetComponent<SpriteRenderer>().bounds.size.x / 2f) > targetPerformance.root.transform.position.x)
+                if ((root.transform.position.x - characterBounds.size.x / 2f) > targetPerformance.root.transform.position.x)
                 {
                     root.transform.position = new Vector3(Mathf.Lerp(root.transform.position.x, targetPerformance.root.transform.position.x, Time.deltaTime * 10f), root.transform.position.y, root.transform.position.z);
                 }
                 else
                 {
                     statusPerformance = "executing";
+                    animated.GetComponent<Animator>().CrossFade("Idle", Time.deltaTime*2f);
                 }
             }
 
@@ -107,6 +135,7 @@ public class VisualCharacter : MonoBehaviour {
                 else
                 {
                     statusPerformance = "none";
+                    animated.GetComponent<Animator>().CrossFade("Idle", Time.deltaTime*2f);
 
                     float scaleX = root.transform.localScale.x;
                     if (side)
@@ -129,6 +158,7 @@ public class VisualCharacter : MonoBehaviour {
                 else
                 {
                     statusPerformance = "none";
+                    animated.GetComponent<Animator>().CrossFade("Idle", Time.deltaTime*2f);
 
                     float scaleX = root.transform.localScale.x;
                     if (side)
@@ -153,6 +183,7 @@ public class VisualCharacter : MonoBehaviour {
                 performing = -1;
                 targetPerformance = null;
                 statusPerformance = "returning";
+                animated.GetComponent<Animator>().CrossFade("Move", Time.deltaTime*2f);
 
                 float scaleX = root.transform.localScale.x;
                 if (side)
@@ -195,10 +226,10 @@ public class VisualCharacter : MonoBehaviour {
                 }
 
                 
-                float auxScale = Mathf.Lerp(-Mathf.Abs(bloodBFSplat.transform.localScale.x), -1f, Time.deltaTime * 20f);
+                float auxScale = Mathf.Lerp(-Mathf.Abs(bloodBFSplat.transform.localScale.x), -0.5f, Time.deltaTime * 40f);
                 if ((bloodBFSplatOriginalScale.x < 0 && root.transform.localScale.x > 0) || (bloodBFSplatOriginalScale.x > 0 && root.transform.localScale.x < 0)) { auxScale = -auxScale; }
                 bloodBFSplat.transform.localScale = new Vector3(auxScale, Mathf.Abs(auxScale), Mathf.Abs(auxScale));
-                bloodBFSplat.transform.position = new Vector3(bloodBFSplatOriginalPosition.x + bloodBFSplat.GetComponent<SpriteRenderer>().bounds.size.x * 1 / 2f * -(bloodBFSplatOriginalScale.x / Mathf.Abs(bloodBFSplatOriginalScale.x)), bloodBFSplatOriginalPosition.y - character.GetComponent<SpriteRenderer>().bounds.size.y * 1 / 2f, bloodBFSplat.transform.position.z);
+                bloodBFSplat.transform.position = new Vector3(bloodBFSplatOriginalPosition.x + bloodBFSplat.GetComponent<SpriteRenderer>().bounds.size.x * 1 / 2f * -(bloodBFSplatOriginalScale.x / Mathf.Abs(bloodBFSplatOriginalScale.x)), bloodBFSplatOriginalPosition.y - characterBounds.size.y * 1 / 2f, bloodBFSplat.transform.position.z);
 
                 auxScale = 1;
                 if (bloodBFSplatOriginalScale.x < 0) { auxScale = -auxScale; }
@@ -243,7 +274,7 @@ public class VisualCharacter : MonoBehaviour {
             if (!bloodBFSplat.activeInHierarchy)
             {
                 text1.GetComponent<TextMesh>().text = aux[0].ToString();
-                text1.transform.localPosition = new Vector3(text1.transform.localPosition.x, character.GetComponent<SpriteRenderer>().bounds.size.y / 2f, text1.transform.localPosition.z);
+                text1.transform.localPosition = new Vector3(text1.transform.localPosition.x, characterBounds.size.y / 2f, text1.transform.localPosition.z);
                 Hacks.TextAlpha(text1, 1f);
                 text1.SetActive(true);
                 text2.GetComponent<TextMesh>().text = text1.GetComponent<TextMesh>().text;
@@ -267,6 +298,7 @@ public class VisualCharacter : MonoBehaviour {
         if (performing == 2)
         {
             statusPerformance = "chasing";
+            animated.GetComponent<Animator>().CrossFade("Move", Time.deltaTime*2f);
         }
 
     }
