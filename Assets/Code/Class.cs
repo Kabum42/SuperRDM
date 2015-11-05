@@ -47,6 +47,11 @@ public class Class {
 	public string getName(){
 		return this.Name;
 	}
+
+    public int getID()
+    {
+        return this.ID;
+    }
 }
 
 

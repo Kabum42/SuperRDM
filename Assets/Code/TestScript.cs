@@ -32,13 +32,15 @@ public class TestScript : MonoBehaviour {
         if (Input.GetKeyDown(KeyCode.Return))
         {
             //player1.Perform(GlobalData.Skills[2], player2);
-            player2.Perform(GlobalData.Skills[2], player1);
+            float[] aux = {Mathf.Floor(Random.Range(0f, 100f))};
+            player2.Perform(GlobalData.Skills[2], player1, aux);
             //henmancer.Represent(GlobalData.Skills[2]);
         }
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            player1.Perform(GlobalData.Skills[2], player2);
+            float[] aux = {Mathf.Floor(Random.Range(0f, 100f))};
+            player1.Perform(GlobalData.Skills[2], player2, aux);
         }
 	
 	}

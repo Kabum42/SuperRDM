@@ -7,7 +7,10 @@ public class VisualCharacter : MonoBehaviour {
     public int performing = -1;
     private VisualCharacter targetPerformance = null;
     private bool side = true;
+    private float[] importantFloats;
     private GameObject character;
+    private GameObject text1;
+    private GameObject text2;
     private GameObject blood1;
     private GameObject blood2;
     private GameObject bloodBF;
@@ -24,19 +27,25 @@ public class VisualCharacter : MonoBehaviour {
         root = this.gameObject;
         character = root.transform.FindChild("Character").gameObject;
 
-        blood1 = root.transform.FindChild("Character/Blood1").gameObject;
+        text1 = root.transform.FindChild("Text1").gameObject;
+        text1.SetActive(false);
+
+        text2 = root.transform.FindChild("Text2").gameObject;
+        text2.SetActive(false);
+
+        blood1 = root.transform.FindChild("Blood1").gameObject;
         blood1.SetActive(false);
 
-        blood2 = root.transform.FindChild("Character/Blood2").gameObject;
+        blood2 = root.transform.FindChild("Blood2").gameObject;
         blood2.SetActive(false);
 
-        bloodBF = root.transform.FindChild("Character/BloodBF").gameObject;
+        bloodBF = root.transform.FindChild("BloodBF").gameObject;
         bloodBF.SetActive(false);
 
-        bloodBFAnimation = root.transform.FindChild("Character/BloodBFAnimation").gameObject;
+        bloodBFAnimation = root.transform.FindChild("BloodBFAnimation").gameObject;
         bloodBFAnimation.SetActive(false);
 
-        bloodBFSplat = root.transform.FindChild("Character/BloodBFSplat").gameObject;
+        bloodBFSplat = root.transform.FindChild("BloodBFSplat").gameObject;
         bloodBFSplat.transform.localScale = new Vector3(0f, 0f, 0f);
         Hacks.SpriteRendererAlpha(bloodBFSplat, 1f);
         bloodBFSplat.SetActive(false);
@@ -44,6 +53,17 @@ public class VisualCharacter : MonoBehaviour {
         axeHit = gameObject.AddComponent<AudioSource>();
         axeHit.clip = Resources.Load("Music/Hits/AxeHit") as AudioClip;
 	}
+
+    public void setClass(Class c)
+    {
+        string prefab = null;
+
+        if (c.getID() == 0)
+        {
+            // ES EL BOAR RIDER
+            prefab = "Barbarian";
+        }
+    }
 	
 	// Update is called once per frame
 	void Update () {
@@ -129,7 +149,7 @@ public class VisualCharacter : MonoBehaviour {
             if (performing == 2)
             {
                 // ES EL FINISHER DEL BARBARO
-                targetPerformance.Represent(GlobalData.Skills[performing]);
+                targetPerformance.Represent(GlobalData.Skills[performing], importantFloats);
                 performing = -1;
                 targetPerformance = null;
                 statusPerformance = "returning";
@@ -157,6 +177,8 @@ public class VisualCharacter : MonoBehaviour {
 
             if (bloodBFSplat.GetComponent<SpriteRenderer>().color.a < 0.01f)
             {
+                text1.SetActive(false);
+                text2.SetActive(false);
                 blood1.SetActive(false);
                 blood2.SetActive(false);
                 bloodBF.SetActive(false);
@@ -172,12 +194,23 @@ public class VisualCharacter : MonoBehaviour {
                     Hacks.SpriteRendererAlpha(bloodBFSplat, bloodBFSplat.GetComponent<SpriteRenderer>().color.a - Time.deltaTime * 0.75f);
                 }
 
-                float auxScale = Mathf.Lerp(Mathf.Abs(bloodBFSplat.transform.localScale.x), 2.5f, Time.deltaTime * 20f);
+                
+                float auxScale = Mathf.Lerp(-Mathf.Abs(bloodBFSplat.transform.localScale.x), -1f, Time.deltaTime * 20f);
                 if ((bloodBFSplatOriginalScale.x < 0 && root.transform.localScale.x > 0) || (bloodBFSplatOriginalScale.x > 0 && root.transform.localScale.x < 0)) { auxScale = -auxScale; }
                 bloodBFSplat.transform.localScale = new Vector3(auxScale, Mathf.Abs(auxScale), Mathf.Abs(auxScale));
                 bloodBFSplat.transform.position = new Vector3(bloodBFSplatOriginalPosition.x + bloodBFSplat.GetComponent<SpriteRenderer>().bounds.size.x * 1 / 2f * -(bloodBFSplatOriginalScale.x / Mathf.Abs(bloodBFSplatOriginalScale.x)), bloodBFSplatOriginalPosition.y - character.GetComponent<SpriteRenderer>().bounds.size.y * 1 / 2f, bloodBFSplat.transform.position.z);
-                //bloodBFSplat.transform.position = new Vector3(0f, bloodBFSplat.transform.position.y, bloodBFSplat.transform.position.z);
-                //Debug.Log(bloodBFSplatOriginalTransform.position.x);
+
+                auxScale = 1;
+                if (bloodBFSplatOriginalScale.x < 0) { auxScale = -auxScale; }
+                if ((bloodBFSplatOriginalScale.x < 0 && root.transform.localScale.x > 0) || (bloodBFSplatOriginalScale.x > 0 && root.transform.localScale.x < 0)) { auxScale = -auxScale; }
+                text1.transform.localScale = new Vector3(Mathf.Abs(text1.transform.localScale.x)*auxScale, text1.transform.localScale.y, text1.transform.localScale.z);
+                text2.transform.localScale = text1.transform.localScale;
+
+                text1.transform.localPosition = new Vector3(text1.transform.localPosition.x, text1.transform.localPosition.y +Time.deltaTime*1f, text1.transform.localPosition.z);
+                Hacks.TextAlpha(text1, text1.GetComponent<TextMesh>().color.a - Time.deltaTime);
+                Hacks.TextAlpha(text2, text1.GetComponent<TextMesh>().color.a);
+                text2.transform.localPosition = new Vector3(text1.transform.localPosition.x + 0.05f*auxScale, text1.transform.localPosition.y - 0.05f, text2.transform.localPosition.z);
+            
             }
             
         }
@@ -198,7 +231,7 @@ public class VisualCharacter : MonoBehaviour {
         side = auxSide;
     }
 
-    public void Represent(Skill s)
+    public void Represent(Skill s, float[] aux)
     {
         if (s.getID() == 2)
         {
@@ -207,33 +240,34 @@ public class VisualCharacter : MonoBehaviour {
             blood1.SetActive(true);
             blood2.SetActive(true);
             bloodBF.SetActive(true);
-            bloodBFSplatOriginalPosition = root.transform.position;
-            bloodBFSplatOriginalScale = new Vector3(root.transform.localScale.x, root.transform.localScale.y, root.transform.localScale.z);
+            if (!bloodBFSplat.activeInHierarchy)
+            {
+                text1.GetComponent<TextMesh>().text = aux[0].ToString();
+                text1.transform.localPosition = new Vector3(text1.transform.localPosition.x, character.GetComponent<SpriteRenderer>().bounds.size.y / 2f, text1.transform.localPosition.z);
+                Hacks.TextAlpha(text1, 1f);
+                text1.SetActive(true);
+                text2.GetComponent<TextMesh>().text = text1.GetComponent<TextMesh>().text;
+                text2.transform.localPosition = new Vector3(text1.transform.localPosition.x + 0.05f, text1.transform.localPosition.y - 0.05f, text2.transform.localPosition.z);
+                Hacks.TextAlpha(text2, 1f);
+                text2.SetActive(true);
+                bloodBFSplatOriginalPosition = root.transform.position;
+                bloodBFSplatOriginalScale = new Vector3(root.transform.localScale.x, root.transform.localScale.y, root.transform.localScale.z);
+            }
             bloodBFSplat.SetActive(true);
         }
     }
 
-    public void Represent(Skill s, float stack)
-    {
-
-    }
-
-
-    public void Perform(Skill s, VisualCharacter v)
+    public void Perform(Skill s, VisualCharacter v, float[] aux)
     {
 
         performing = s.getID();
         targetPerformance = v;
+        importantFloats = aux;
 
         if (performing == 2)
         {
             statusPerformance = "chasing";
         }
-        
-    }
-
-    public void Perform(Skill s, VisualCharacter v, float stack)
-    {
 
     }
 }
