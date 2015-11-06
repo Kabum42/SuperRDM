@@ -20,13 +20,18 @@ public class VisualCharacter : MonoBehaviour {
     private GameObject bloodBFSplat;
     private Vector3 bloodBFSplatOriginalPosition;
     private Vector3 bloodBFSplatOriginalScale;
-    private AudioSource axeHit;
+
+    private AudioSource audio1;
+    private AudioSource audio2;
+    private AudioSource audio3;
 
     private string statusPerformance = "none";
 
 	// Use this for initialization
 	void Awake () {
         root = this.gameObject;
+
+        //Time.timeScale = 0.25f;
 
         setClass(GlobalData.Classes[0]);
 
@@ -53,8 +58,10 @@ public class VisualCharacter : MonoBehaviour {
         Hacks.SpriteRendererAlpha(bloodBFSplat, 1f);
         bloodBFSplat.SetActive(false);
 
-        axeHit = gameObject.AddComponent<AudioSource>();
-        axeHit.clip = Resources.Load("Music/Hits/AxeHit") as AudioClip;
+        audio1 = gameObject.AddComponent<AudioSource>();
+        audio2 = gameObject.AddComponent<AudioSource>();
+        audio3 = gameObject.AddComponent<AudioSource>();
+        
 	}
 
     public void setClass(Class c)
@@ -97,6 +104,9 @@ public class VisualCharacter : MonoBehaviour {
         if (statusPerformance == "chasing")
         {
             // ACERCARSE
+
+            bool executing = false;
+
             if (side)
             {
                 if ((root.transform.position.x + characterBounds.size.x) < targetPerformance.root.transform.position.x)
@@ -105,8 +115,7 @@ public class VisualCharacter : MonoBehaviour {
                 }
                 else
                 {
-                    statusPerformance = "executing";
-                    animated.GetComponent<Animator>().CrossFade("Idle", GlobalData.crossfadeAnimation, 0, 0f);
+                    executing = true;
                 }
             }
             else
@@ -117,9 +126,17 @@ public class VisualCharacter : MonoBehaviour {
                 }
                 else
                 {
-                    statusPerformance = "executing";
-                    animated.GetComponent<Animator>().CrossFade("Idle", GlobalData.crossfadeAnimation, 0, 0f);
+                    executing = true;
                 }
+            }
+
+            if (executing)
+            {
+                statusPerformance = "executing";
+                animated.GetComponent<Animator>().CrossFade("S1", GlobalData.crossfadeAnimation, 0, 0f);
+                int aux = Random.Range(1, 5);
+                audio1.clip = Resources.Load("Music/Battle/Barbarian_"+aux.ToString("00")) as AudioClip;
+                audio1.Play();
             }
 
         }
@@ -182,13 +199,18 @@ public class VisualCharacter : MonoBehaviour {
             {
                 // ES EL FINISHER DEL BARBARO
 
-                if (animated.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).normalizedTime >= 1f)
+                if (animated.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.75f && targetPerformance != null)
                 {
                     targetPerformance.Represent(GlobalData.Skills[performing], importantFloats);
-                    performing = -1;
                     targetPerformance = null;
+                }
+
+                if (animated.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).normalizedTime >= 1f)
+                {
+                    performing = -1;
                     statusPerformance = "returning";
-                    animated.GetComponent<Animator>().CrossFade("Return", GlobalData.crossfadeAnimation, 0, 0f);
+                    //animated.GetComponent<Animator>().CrossFade("Return", GlobalData.crossfadeAnimation, 0, 0f);
+                    animated.GetComponent<Animator>().Play("Return");
                 }
 
                 
@@ -264,7 +286,8 @@ public class VisualCharacter : MonoBehaviour {
         if (s.getID() == 2)
         {
             // ES EL FINISHER DEL BARBARO
-            axeHit.Play();
+            audio1.clip = Resources.Load("Music/Hits/AxeHit") as AudioClip;
+            audio1.Play();
             blood1.SetActive(true);
             blood2.SetActive(true);
             bloodBF.SetActive(true);
