@@ -199,7 +199,7 @@ public class VisualCharacter : MonoBehaviour {
             {
                 // ES EL FINISHER DEL BARBARO
 
-                if (animated.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.75f && targetPerformance != null)
+                if (animated.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.7f && targetPerformance != null)
                 {
                     targetPerformance.Represent(GlobalData.Skills[performing], importantFloats);
                     targetPerformance = null;
