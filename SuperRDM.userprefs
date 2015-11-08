@@ -1,8 +1,9 @@
 ﻿<Properties>
-  <MonoDevelop.Ide.Workspace />
-  <MonoDevelop.Ide.Workbench ActiveDocument="..\Forgotten Depths\Assets\Scripts\EditorMainScript.cs">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="MonoDevelop.Default" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Code\VisualCharacter.cs">
     <Files>
-      <File FileName="..\Forgotten Depths\Assets\Scripts\EditorMainScript.cs" Line="340" Column="6" />
+      <File FileName="Assets\Code\VisualCharacter.cs" Line="312" Column="16" />
+      <File FileName="..\Forgotten Depths\Assets\Scripts\EditorMainScript.cs" Line="343" Column="6" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

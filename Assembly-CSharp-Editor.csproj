@@ -52,9 +52,6 @@
      <Compile Include="Assets\Spriter2UnityDX\Editor\ScmlSupport.cs" />
      <None Include="Assets\Resources\Fonts\Comfortaa\OFL.txt" />
      <None Include="Assets\Resources\Languages.txt" />
- <Reference Include="UnityEngine.Advertisements">
- <HintPath>E:/Programas/Unity2/Editor/Data/UnityExtensions/Unity/Advertisements/UnityEngine.Advertisements.dll</HintPath>
- </Reference>
  <Reference Include="UnityEditor.Advertisements">
  <HintPath>E:/Programas/Unity2/Editor/Data/UnityExtensions/Unity/Advertisements/Editor/UnityEditor.Advertisements.dll</HintPath>
  </Reference>
@@ -69,9 +66,6 @@
  </Reference>
  <Reference Include="UnityEditor.Networking">
  <HintPath>E:/Programas/Unity2/Editor/Data/UnityExtensions/Unity/Networking/Editor/UnityEditor.Networking.dll</HintPath>
- </Reference>
- <Reference Include="UnityEngine.Analytics">
- <HintPath>E:/Programas/Unity2/Editor/Data/UnityExtensions/Unity/UnityAnalytics/UnityEngine.Analytics.dll</HintPath>
  </Reference>
  <Reference Include="UnityEditor.Graphs">
  <HintPath>E:/Programas/Unity2/Editor/Data/Managed/UnityEditor.Graphs.dll</HintPath>

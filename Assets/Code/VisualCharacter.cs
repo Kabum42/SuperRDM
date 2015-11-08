@@ -10,6 +10,7 @@ public class VisualCharacter : MonoBehaviour {
     private float[] importantFloats;
     private GameObject character;
     private GameObject animated;
+	private string lastAnimationOrder;
     private Bounds characterBounds;
     private GameObject text1;
     private GameObject text2;
@@ -24,6 +25,8 @@ public class VisualCharacter : MonoBehaviour {
     private AudioSource audio1;
     private AudioSource audio2;
     private AudioSource audio3;
+
+	private float forceY = 0f;
 
     private string statusPerformance = "none";
 
@@ -225,6 +228,24 @@ public class VisualCharacter : MonoBehaviour {
         if (bloodBF.activeInHierarchy)
         {
 
+
+			if (forceY < 0 && root.transform.position.y <= 1f) {
+
+				if (lastAnimationOrder == "Hurt") {
+					animated.GetComponent<Animator>().CrossFade("Idle", GlobalData.crossfadeAnimation*3f, 0, 0f);
+					lastAnimationOrder = "Idle";
+				}
+
+				root.transform.position = new Vector3(root.transform.position.x, Mathf.Lerp(root.transform.position.y, 0f, Time.deltaTime*20f), root.transform.position.z);
+
+			}
+			else if (lastAnimationOrder == "Hurt") {
+
+				forceY -= Time.deltaTime;
+				root.transform.position = new Vector3(root.transform.position.x, root.transform.position.y +forceY, root.transform.position.z);
+
+			}
+
             if (bloodBFSplat.GetComponent<SpriteRenderer>().color.a < 0.01f)
             {
                 text1.SetActive(false);
@@ -286,6 +307,9 @@ public class VisualCharacter : MonoBehaviour {
         if (s.getID() == 2)
         {
             // ES EL FINISHER DEL BARBARO
+			animated.GetComponent<Animator>().CrossFade("Hurt", GlobalData.crossfadeAnimation, 0, 0f);
+			lastAnimationOrder = "Hurt";
+			forceY = 0.6f;
             audio1.clip = Resources.Load("Music/Hits/AxeHit") as AudioClip;
             audio1.Play();
             blood1.SetActive(true);
