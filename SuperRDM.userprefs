@@ -1,12 +1,8 @@
 ﻿<Properties>
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Code\VisualCharacter.cs">
+  <MonoDevelop.Ide.Workspace />
+  <MonoDevelop.Ide.Workbench ActiveDocument="..\Forgotten Depths\Assets\Scripts\EditorMainScript.cs">
     <Files>
-      <File FileName="Assets\Code\TestScript.cs" Line="1" Column="1" />
-      <File FileName="Assets\Code\SkillBar.cs" Line="1" Column="1" />
-      <File FileName="Assets\Code\TalkScript.cs" Line="1" Column="1" />
-      <File FileName="Assets\Code\Hacks.cs" Line="21" Column="1" />
-      <File FileName="Assets\Code\VisualCharacter.cs" Line="132" Column="44" />
+      <File FileName="..\Forgotten Depths\Assets\Scripts\EditorMainScript.cs" Line="340" Column="6" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
