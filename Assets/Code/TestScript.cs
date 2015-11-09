@@ -29,6 +29,22 @@ public class TestScript : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
+        if (Input.GetKeyDown(KeyCode.Q)) {
+            float[] aux = {Mathf.Floor(Random.Range(0f, 100f))};
+            player1.Perform(GlobalData.Skills[0], player2, aux);
+        }
+
+        if (Input.GetKeyDown(KeyCode.W)) {
+            float[] aux = {Mathf.Floor(Random.Range(0f, 100f))};
+            player1.Perform(GlobalData.Skills[1], player2, aux);
+        }
+
+        if (Input.GetKeyDown(KeyCode.E)) {
+            float[] aux = {Mathf.Floor(Random.Range(0f, 100f))};
+            player1.Perform(GlobalData.Skills[2], player2, aux);
+        }
+
+        /*
         if (Input.GetKeyDown(KeyCode.Return))
         {
             //player1.Perform(GlobalData.Skills[2], player2);
@@ -42,6 +58,7 @@ public class TestScript : MonoBehaviour {
             float[] aux = {Mathf.Floor(Random.Range(0f, 100f))};
             player1.Perform(GlobalData.Skills[2], player2, aux);
         }
+        */
 	
 	}
 }
