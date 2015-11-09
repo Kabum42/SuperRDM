@@ -23,6 +23,7 @@ public class VisualCharacter : MonoBehaviour {
     private GameObject bloodBFSplat;
     private Vector3 bloodBFSplatOriginalPosition;
     private Vector3 bloodBFSplatOriginalScale;
+	private Vector3 originalRootPosition;
 
     private AudioSource audio1;
     private AudioSource audio2;
@@ -38,7 +39,7 @@ public class VisualCharacter : MonoBehaviour {
 
         //Time.timeScale = 0.25f;
 
-        setClass(GlobalData.Classes[0]);
+        //setClass(GlobalData.Classes[0]);
 
         text1 = root.transform.FindChild("Text1").gameObject;
         text1.SetActive(false);
@@ -72,11 +73,12 @@ public class VisualCharacter : MonoBehaviour {
     public void setClass(Class c)
     {
 
-        if (c.getID() == 0)
-        {
-            // ES EL BOAR RIDER
-            character = Instantiate(Resources.Load("Prefabs/Barbarian")) as GameObject;
-        }
+        if (c.getID () == 0) {
+			// ES EL BOAR RIDER
+			character = Instantiate (Resources.Load ("Prefabs/Barbarian")) as GameObject;
+		} else {
+			character = Instantiate (Resources.Load ("Prefabs/Barbarian")) as GameObject;
+		}
 
         character.transform.parent = root.transform;
         animated = character.transform.FindChild("Animated").gameObject;
@@ -121,7 +123,7 @@ public class VisualCharacter : MonoBehaviour {
             {
                 if ((root.transform.position.x + characterBounds.size.x) < targetPerformance.root.transform.position.x)
                 {
-                    root.transform.position = new Vector3(root.transform.position.x + Time.deltaTime * 20f, root.transform.position.y, root.transform.position.z);
+					root.transform.position = new Vector3(root.transform.position.x + Time.deltaTime * 20f, Mathf.Lerp(root.transform.position.y, targetPerformance.root.transform.position.y, Time.deltaTime * 10f), root.transform.position.z);
                 }
                 else
                 {
@@ -132,7 +134,7 @@ public class VisualCharacter : MonoBehaviour {
             {
                 if ((root.transform.position.x - characterBounds.size.x) > targetPerformance.root.transform.position.x)
                 {
-                    root.transform.position = new Vector3(root.transform.position.x - Time.deltaTime * 20f, root.transform.position.y, root.transform.position.z);
+					root.transform.position = new Vector3(root.transform.position.x - Time.deltaTime * 20f, Mathf.Lerp(root.transform.position.y, targetPerformance.root.transform.position.y, Time.deltaTime * 10f), root.transform.position.z);
                 }
                 else
                 {
@@ -171,7 +173,7 @@ public class VisualCharacter : MonoBehaviour {
                 if (root.transform.position.x > -4.95f)
                 {
                     //root.transform.position = new Vector3(root.transform.position.x - Time.deltaTime * 20f, root.transform.position.y, root.transform.position.z);
-                    root.transform.position = new Vector3(Mathf.Lerp(root.transform.position.x, -5f, Time.deltaTime * 10f), root.transform.position.y, root.transform.position.z);
+					root.transform.position = new Vector3(Mathf.Lerp(root.transform.position.x, -5f, Time.deltaTime * 10f), Mathf.Lerp(root.transform.position.y, originalRootPosition.y, Time.deltaTime * 10f), root.transform.position.z);
                 }
                 else
                 {
@@ -195,7 +197,7 @@ public class VisualCharacter : MonoBehaviour {
                 if (root.transform.position.x < 4.95f)
                 {
                     //root.transform.position = new Vector3(root.transform.position.x + Time.deltaTime * 20f, root.transform.position.y, root.transform.position.z);
-                    root.transform.position = new Vector3(Mathf.Lerp(root.transform.position.x, 5f, Time.deltaTime * 10f), root.transform.position.y, root.transform.position.z);
+					root.transform.position = new Vector3(Mathf.Lerp(root.transform.position.x, 5f, Time.deltaTime * 10f), Mathf.Lerp(root.transform.position.y, originalRootPosition.y, Time.deltaTime * 10f), root.transform.position.z);
                 }
                 else
                 {
@@ -308,7 +310,7 @@ public class VisualCharacter : MonoBehaviour {
             {
                 // ES EL S1 DEL BARBARO
 
-                if (forceY < 0 && root.transform.position.y <= 1f)
+                if (forceY < 0 && root.transform.position.y <= originalRootPosition.y +1f)
                 {
 
                     if (lastAnimationOrder == "Hurt")
@@ -317,7 +319,7 @@ public class VisualCharacter : MonoBehaviour {
                         lastAnimationOrder = "Idle";
                     }
 
-                    root.transform.position = new Vector3(root.transform.position.x, Mathf.Lerp(root.transform.position.y, 0f, Time.deltaTime * 20f), root.transform.position.z);
+                    root.transform.position = new Vector3(root.transform.position.x, Mathf.Lerp(root.transform.position.y, originalRootPosition.y, Time.deltaTime * 20f), root.transform.position.z);
 
                 }
                 else if (lastAnimationOrder == "Hurt")
@@ -357,7 +359,7 @@ public class VisualCharacter : MonoBehaviour {
                 // ES EL S3 DEL BARBARO
 
 
-                if (forceY < 0 && root.transform.position.y <= 1f)
+				if (forceY < 0 && root.transform.position.y <= originalRootPosition.y +1f)
                 {
 
                     if (lastAnimationOrder == "Hurt")
@@ -366,7 +368,7 @@ public class VisualCharacter : MonoBehaviour {
                         lastAnimationOrder = "Idle";
                     }
 
-                    root.transform.position = new Vector3(root.transform.position.x, Mathf.Lerp(root.transform.position.y, 0f, Time.deltaTime * 20f), root.transform.position.z);
+					root.transform.position = new Vector3(root.transform.position.x, Mathf.Lerp(root.transform.position.y, originalRootPosition.y, Time.deltaTime * 20f), root.transform.position.z);
 
                 }
                 else if (lastAnimationOrder == "Hurt")
@@ -428,16 +430,23 @@ public class VisualCharacter : MonoBehaviour {
 
     public void SetBattlePosition(bool auxSide, int number)
     {
+
+		int changeX = number / 3;
+		int changeY = number % 3;
+
         if (auxSide)
         {
-            root.transform.position = new Vector3(-5f, root.transform.position.y, root.transform.position.z);
+			root.transform.position = new Vector3(-5f -changeX*2f -changeY*0.5f, -2.5f +characterBounds.size.y/2f +changeY*0.5f, root.transform.position.z +changeY*0.1f);
         }
         else
         {
             root.transform.localScale = new Vector3(-root.transform.localScale.x, root.transform.localScale.y, root.transform.localScale.z);
-            root.transform.position = new Vector3(5f, root.transform.position.y, root.transform.position.z);
+			root.transform.position = new Vector3(5f +changeX*2f +changeY*0.5f, -2.5f +characterBounds.size.y/2f +changeY*0.5f, root.transform.position.z +changeY*0.1f);
         }
         side = auxSide;
+
+		originalRootPosition = root.transform.position;
+
     }
 
     public void Represent(Skill s, float[] aux)

@@ -4,7 +4,6 @@ using System.Collections;
 public class TestScript : MonoBehaviour {
 
     
-
     private VisualCharacter player1;
     private VisualCharacter player2;
 
@@ -19,15 +18,20 @@ public class TestScript : MonoBehaviour {
 
         GlobalData.Start();
 
+
         player1 = (Instantiate(Resources.Load("Prefabs/VisualCharacterObject")) as GameObject).GetComponent<VisualCharacter>();
         player2 = (Instantiate(Resources.Load("Prefabs/VisualCharacterObject")) as GameObject).GetComponent<VisualCharacter>();
-        player1.SetBattlePosition(true, 0);
-        player2.SetBattlePosition(false, 0);
+		player1.setClass (GlobalData.Classes [0]);
+		player2.setClass (GlobalData.Classes [0]);
+		player1.SetBattlePosition(true, 0);
+		player2.SetBattlePosition(false, 0);
+
 
 	}
 	
 	// Update is called once per frame
 	void Update () {
+
 
         if (Input.GetKeyDown(KeyCode.Q)) {
             float[] aux = {Mathf.Floor(Random.Range(0f, 100f))};
@@ -44,21 +48,6 @@ public class TestScript : MonoBehaviour {
             player1.Perform(GlobalData.Skills[2], player2, aux);
         }
 
-        /*
-        if (Input.GetKeyDown(KeyCode.Return))
-        {
-            //player1.Perform(GlobalData.Skills[2], player2);
-            float[] aux = {Mathf.Floor(Random.Range(0f, 100f))};
-            player2.Perform(GlobalData.Skills[2], player1, aux);
-            //henmancer.Represent(GlobalData.Skills[2]);
-        }
-
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            float[] aux = {Mathf.Floor(Random.Range(0f, 100f))};
-            player1.Perform(GlobalData.Skills[2], player2, aux);
-        }
-        */
 	
 	}
 }

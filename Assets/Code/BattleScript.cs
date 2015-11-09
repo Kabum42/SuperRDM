@@ -32,6 +32,8 @@ public class BattleScript : MonoBehaviour {
 	private int Top;
 	private int Bottom;
 
+	private VisualBattle vb;
+
 	// Use this for initialization
 	void Start () {
 		if (!GlobalData.started)
@@ -46,6 +48,11 @@ public class BattleScript : MonoBehaviour {
 		UpdateInformation ();
 		LogCharacters ();
 		Player = (MainCharacter) CurrentCharacters [PlayerCharacter];
+
+		vb = (Instantiate(Resources.Load("Prefabs/VisualBattleObject")) as GameObject).GetComponent<VisualBattle>();
+		vb.gameObject.transform.parent = GameObject.Find ("Battle").transform;
+		vb.setBattleScript (this);
+		vb.visualCharacters [0].Perform (GlobalData.Skills [1], vb.visualCharacters [3], new float[]{34f});
 
 	}
 	
@@ -83,6 +90,12 @@ public class BattleScript : MonoBehaviour {
 		UpdateInformation ();
 	}
 
+	public Character[] getCurrentCharacters() {
+
+		return CurrentCharacters;
+
+	}
+
 	void InitializeGameObjects(){
 		Skills [0] = GameObject.Find ("Skill1");
 		Skills [1] = GameObject.Find ("Skill2");
@@ -105,6 +118,9 @@ public class BattleScript : MonoBehaviour {
 
 		CurrentCharacters [2] = GlobalData.RandomEnemies [1];
 		CurrentCharacters [2].setBottom (false);
+
+		CurrentCharacters [3] = GlobalData.RandomEnemies [1];
+		CurrentCharacters [3].setBottom (false);
 	}
 
 	void InitializeBars(){
