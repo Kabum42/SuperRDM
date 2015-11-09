@@ -24,7 +24,7 @@ public static class GlobalData {
     public static string[] biomeNames;
     private static int[] biomeCosts;
 
-	public static EventCharacter[] RandomEnemies = new EventCharacter[3];
+	public static EventCharacter[] RandomEnemies = new EventCharacter[25];
 	public static Skill[] Skills = new Skill[24];
 	public static Class[] Classes = new Class[7];
 
@@ -66,8 +66,8 @@ public static class GlobalData {
 		GenerateSkills ();
 		GenerateClasses ();
 		GenerateEnemies ();
-		agents[0] = new MainCharacter(0, "Player1", 350, 100, GlobalData.Classes[0]);
-		agents[1] = new MainCharacter(0, "Player2", 175, 100, GlobalData.Classes[0]);
+		agents[0] = new MainCharacter(1, "Player1", 800, 100, GlobalData.Classes[2]);
+		agents[1] = new MainCharacter(2, "Player2", 80, 100, GlobalData.Classes[2]);
 
         biomeCosts = new int[11];
         biomeCosts[(int)Biome.Sanctuary] = 1;
@@ -97,20 +97,26 @@ public static class GlobalData {
     }
 
 	private static void GenerateSkills(){
-		Skills [0] = new Skill (0, "Hack", 30, 0, 20, false);
+		Skills [0] = new Skill (0, "Hack", 40, 0, 20, false);
 		Skills [1] = new Skill (1, "Axe Throw", 60, 0, 30, true);
-		Skills [2] = new Skill (2, "Wild Roar", 45, 0, 5, false);
+		Skills [2] = new Skill (2, "Axe Dunk", 45, 0, 10, true);
+		Skills [3] = new Skill (3, "Pilosity", 20, 0, 10, true);
+		Skills [4] = new Skill (4, "Laser Depilation", 40, 0, 10, true);
+		Skills [5] = new Skill (5, "Fashion Victim", 50, 0, 0, true);
+		Skills [6] = new Skill (6, "Pierce", 30, 0, 10, true);
+		Skills [7] = new Skill (7, "Daymare", 30, 0, 0, true);
+		Skills [8] = new Skill (8, "Deep Dream", 70, 0, 0, true);
+		 
 		
 	}
 
 	private static void GenerateClasses(){
 		Classes [0] = new Class (0, "Boar Ryder", Skills [0], Skills [1], Skills [2]);
-        Classes [1] = new Class (1, "Pilumantic", Skills [0], Skills [1], Skills [2]);
-        Classes [2] = new Class (2, "Dreamwalker", Skills [0], Skills [1], Skills [2]);
+        Classes [1] = new Class (1, "Pilumantic", Skills [3], Skills [4], Skills [5]);
+        Classes [2] = new Class (2, "Dreamwalker", Skills [6], Skills [7], Skills [8]);
         Classes [3] = new Class (3, "Henmancer", Skills [0], Skills [1], Skills [2]);
         Classes [4] = new Class (4, "Disembodied", Skills [0], Skills [1], Skills [2]);
         Classes [5] = new Class (5, "Black Shield", Skills [0], Skills [1], Skills [2]);
-
 		Classes [6] = new Class (6, "Wolf", null, null, null);
 	}
 
@@ -120,8 +126,9 @@ public static class GlobalData {
 	private static void GenerateEnemies (){
 		Biome newBiome;
 		newBiome = Biome.Forest;
-		RandomEnemies [0] = new EventCharacter (1, "Wolf", 50, 100, Classes [6], Biome.Forest);
-		RandomEnemies[1] = new EventCharacter (2, "Wolf", 50, 100, Classes [6], Biome.Forest);
+		RandomEnemies [0] = new EventCharacter (3, "Wolf", 50, 100, Classes [6], Biome.Forest);
+		RandomEnemies[1] = new EventCharacter (4, "Wolf", 50, 100, Classes [6], Biome.Forest);
+		RandomEnemies[2] = new EventCharacter (5, "Wolf", 50, 100, Classes [6], Biome.Forest);
 
 	}
 

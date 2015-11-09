@@ -7,6 +7,7 @@ public class BattleScript : MonoBehaviour {
 	private int ActualCharacters = 0;
 	private Character[] CurrentCharacters = new Character[MaxCharacters];
 	private MainCharacter Player;
+	private Effect[] auxEffects;
 	private int MaxTop;
 	private int MaxBottom;
 	private int[] PositionTops = new int[3];
@@ -15,6 +16,7 @@ public class BattleScript : MonoBehaviour {
 	private int EnemyAttacked = -1;
 	private int PlayerCharacter = 0;
 	private bool TurnoActivo = true;
+	private Skill lastSkill;
 	private GameObject[] Skills = new GameObject[3];
 	private GameObject[] StatsTop = new GameObject[3];
 	private GameObject[] StatsBottom = new GameObject[1];
@@ -72,6 +74,7 @@ public class BattleScript : MonoBehaviour {
 					if (TimerTurn > 1) {
 						TimerTurn = 0;
 						Turn ();
+						LogEffects();
 						SelectedSkill = false;
 					}
 				} 
@@ -105,6 +108,27 @@ public class BattleScript : MonoBehaviour {
 
 		CurrentCharacters [2] = GlobalData.RandomEnemies [1];
 		CurrentCharacters [2].setBottom (false);
+
+		// Setting Effects
+		MainCharacter auxCharacter;
+		Class auxClass;
+		for (int i = 0; i<MaxCharacters; i++){
+			if (CurrentCharacters[i] != null){
+				auxClass = CurrentCharacters[i].getOwnClass();
+				switch (auxClass.getName ()){
+					case "Pilumantic": 
+						auxCharacter = (MainCharacter) CurrentCharacters[i];
+						auxCharacter.addEffect("Pilosity Stacks", ref CurrentCharacters, -1, CurrentCharacters[i].getID ());
+						break;
+
+					case "Dreamwalker":
+						auxCharacter = (MainCharacter) CurrentCharacters[i];
+						auxCharacter.addEffect("Pierce Stacks", ref CurrentCharacters, -1, CurrentCharacters[i].getID ());
+						auxCharacter.addEffect("DeepDream Effect", ref CurrentCharacters, -1, CurrentCharacters[i].getID ());
+						break;
+				}
+			}
+		}
 	}
 
 	void InitializeBars(){
@@ -167,7 +191,7 @@ public class BattleScript : MonoBehaviour {
 		}
 
 		for (int i = 0; i<Skills.Length; i++) {
-			Skills[i].GetComponent<TextMesh>().text = CurrentCharacters[PlayerCharacter].getSkillName(i);
+			Skills[i].GetComponent<TextMesh>().text = CurrentCharacters[PlayerCharacter].getSkill(i).getName();
 			Skills[i].GetComponent<TextMesh> ().color = Color.black;
 		}
 	
@@ -186,7 +210,7 @@ public class BattleScript : MonoBehaviour {
 
 	void CalculateProgressIP(){
 		for (int i = 0; i<ActualCharacters; i++) {
-			if (CurrentCharacters[i] != null){
+			if (CurrentCharacters[i] != null && CurrentCharacters[i].IsNotStun()){
 				if (CurrentCharacters[i].getProgressIPBar() == CurrentCharacters[i].getMaxIPBar()){
 					if (CharacterTurn == -1){
 						CharacterTurn = i;
@@ -216,6 +240,23 @@ public class BattleScript : MonoBehaviour {
 						  "Aerial: " + CurrentCharacters[i].getAerial().ToString()); 
 			}
 		}
+	}
+
+	void LogEffects(){
+		string Effectstring = "";
+		for (int i = 0; i<MaxCharacters; i++) {
+			if (CurrentCharacters[i] != null){
+				auxEffects = CurrentCharacters[i].getCurrentEffects();
+				Effectstring += CurrentCharacters[i].getName() + "\n";
+				for (int j = 0; j<auxEffects.Length; j++){
+					if (auxEffects[j] != null){
+						Effectstring += auxEffects[j].getName() + ": " ;
+						Effectstring += auxEffects[j].getStackedNumber() + ", " + auxEffects[j].getDuration() + "\n\n";
+					}
+				}
+			}
+		}
+		Debug.Log (Effectstring);
 	}
 
 	void SelectSkill(){
@@ -268,9 +309,24 @@ public class BattleScript : MonoBehaviour {
 
 	void Turn(){
 		Attack ();
-		SkillUsed.GetComponent<TextMesh>().text = CurrentCharacters[CharacterTurn].getName() + " used: " 
-				+ CurrentCharacters[CharacterTurn].getLastSkillUsed();
-		UpdateHealth = true;
+		lastSkill = CurrentCharacters [CharacterTurn].getLastSkillUsed ();
+		UpdateEffects ();
+		if (lastSkill != null) {
+			SkillUsed.GetComponent<TextMesh> ().text = CurrentCharacters [CharacterTurn].getName () + " used: " + lastSkill.getName ();
+			if (CheckInstantHealth()) {
+				UpdateHealth = true;
+			} 
+			else {
+				CharacterTurn = -1;
+				UpdateHealth = false;
+			}
+		} 
+		else {
+			SkillUsed.GetComponent<TextMesh> ().text = CurrentCharacters [CharacterTurn].getName () + " used: " 
+				+ "Simple Attack";
+			UpdateHealth = true;
+		}
+
 	}
 
 	void Attack(){
@@ -290,9 +346,23 @@ public class BattleScript : MonoBehaviour {
 				MainCharacter CurrentNPC = (MainCharacter) CurrentCharacters[CharacterTurn];
 				CurrentNPC.ApplyEnemyIA(CharacterTurn, ref CurrentCharacters);
 			}
-			Debug.Log (CurrentCharacters[CharacterTurn].getName() + " passive: " + CurrentCharacters[CharacterTurn].getStackedNumberEffect("Anger Management"));
 		}
 
+	}
+			                   
+
+	bool CheckInstantHealth(){
+		for (int i = 0; i<ActualCharacters; i++) {
+			if (CurrentCharacters[i] != null){
+				if (CurrentCharacters[i].getCurrentHealth() < CurrentCharacters[i].getPreviousHealth()){
+					return true;
+				}
+				else if (CurrentCharacters[i].getCurrentHealth() > CurrentCharacters[i].getPreviousHealth()){
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	void CheckHealth(){
@@ -328,6 +398,14 @@ public class BattleScript : MonoBehaviour {
 					CurrentCharacters[i] = null;
 					CheckPositions();
 				}
+			}
+		}
+	}
+
+	void UpdateEffects(){
+		for (int i = 0; i<ActualCharacters; i++) {
+			if (CurrentCharacters[i] != null){
+				CurrentCharacters[i].UpdateEffects(CharacterTurn, ref CurrentCharacters, i);
 			}
 		}
 	}
