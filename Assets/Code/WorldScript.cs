@@ -594,6 +594,24 @@ public class WorldScript : MonoBehaviour {
 
     }
 
+    private int CalculateDijkstraTarget(int origin, int end)
+    {
+
+        distances = new int[boardCells.Length];
+        unvisited = new List<BoardCell>();
+        for (int i = 0; i < distances.Length; i++)
+        {
+            distances[i] = int.MaxValue;
+            unvisited.Add(boardCells[i]);
+        }
+
+        distances[origin] = 0;
+
+        visitCell(boardCells[origin]);
+
+        return distances[end];
+    }
+
     private List<int> copyList(List<int> source)
     {
         List<int> newList = new List<int>();
@@ -617,6 +635,12 @@ public class WorldScript : MonoBehaviour {
 
         reachables = Dijkstra();
         int shortTermObjective = bestObjective(reachables, GlobalData.currentAgentTurn);
+
+        while (CalculateDijkstraTarget(shortTermObjective, longTermObjective) >= CalculateDijkstraTarget(GlobalData.agents[GlobalData.currentAgentTurn].currentCell, longTermObjective))
+        {
+            reachables.Remove(shortTermObjective);
+            shortTermObjective = bestObjective(reachables, GlobalData.currentAgentTurn);
+        }
 
         if (GlobalData.online) {
             GetComponent<NetworkView>().RPC("moveAgentRPC", RPCMode.All, GlobalData.currentAgentTurn, shortTermObjective);

@@ -309,7 +309,7 @@ public class VisualCharacter : MonoBehaviour {
             // ES EL FINISHER DEL BARBARO
 			animated.GetComponent<Animator>().CrossFade("Hurt", GlobalData.crossfadeAnimation, 0, 0f);
 			lastAnimationOrder = "Hurt";
-			forceY = 0.6f;
+			forceY = 0.3f;
             audio1.clip = Resources.Load("Music/Hits/AxeHit") as AudioClip;
             audio1.Play();
             blood1.SetActive(true);
