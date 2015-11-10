@@ -291,7 +291,7 @@ public class VisualCharacter : MonoBehaviour {
             {
                 // ES EL S3 DEL BARBARO
 
-                if (animated.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.7f && targetPerformance != null)
+                if (animated.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.55f && targetPerformance != null)
                 {
                     targetPerformance.Represent(GlobalData.Skills[performing], importantFloats);
                     targetPerformance = null;
@@ -301,8 +301,8 @@ public class VisualCharacter : MonoBehaviour {
                 {
                     performing = -1;
                     statusPerformance = "returning";
-                    animated.GetComponent<Animator>().CrossFade("Return", GlobalData.crossfadeAnimation, 0, 0f);
-                    //animated.GetComponent<Animator>().Play("Return");
+                    //animated.GetComponent<Animator>().CrossFade("Return", GlobalData.crossfadeAnimation, 0, 0f);
+                    animated.GetComponent<Animator>().Play("Return");
                 }
 
                 
@@ -444,12 +444,12 @@ public class VisualCharacter : MonoBehaviour {
 
         if (auxSide)
         {
-			root.transform.position = new Vector3(-5f -changeX*2f -changeY*0.5f, -2.5f +characterBounds.size.y/2f +changeY*0.5f, root.transform.position.z +changeY*0.1f);
+			root.transform.position = new Vector3(-5f -changeX*2f -changeY*0.5f, -2f +characterBounds.size.y/2f +changeY*0.5f, root.transform.position.z +changeY*0.1f);
         }
         else
         {
             root.transform.localScale = new Vector3(-root.transform.localScale.x, root.transform.localScale.y, root.transform.localScale.z);
-			root.transform.position = new Vector3(5f +changeX*2f +changeY*0.5f, -2.5f +characterBounds.size.y/2f +changeY*0.5f, root.transform.position.z +changeY*0.1f);
+			root.transform.position = new Vector3(5f +changeX*2f +changeY*0.5f, -2f +characterBounds.size.y/2f +changeY*0.5f, root.transform.position.z +changeY*0.1f);
         }
         side = auxSide;
 

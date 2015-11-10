@@ -7,12 +7,16 @@ public class VisualBattle : MonoBehaviour {
 
 	private GameObject background;
 	public VisualCharacter[] visualCharacters = new VisualCharacter[12];
+    private VisualInterface vInterface;
 
 	// Use this for initialization
 	void Start () {
 
 		background = Instantiate (Resources.Load ("Prefabs/VisualBackground")) as GameObject;
 		background.transform.parent = this.gameObject.transform;
+
+        vInterface = (Instantiate(Resources.Load("Prefabs/VisualInterface")) as GameObject).GetComponent<VisualInterface>();
+        vInterface.root.transform.parent = this.gameObject.transform;
 	
 	}
 	

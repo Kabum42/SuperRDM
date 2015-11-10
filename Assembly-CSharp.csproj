@@ -71,6 +71,7 @@
      <Compile Include="Assets\Code\TestScript.cs" />
      <Compile Include="Assets\Code\VisualBattle.cs" />
      <Compile Include="Assets\Code\VisualCharacter.cs" />
+     <Compile Include="Assets\Code\VisualInterface.cs" />
      <Compile Include="Assets\Code\WorldScript.cs" />
      <Compile Include="Assets\Spriter2UnityDX\Runtime\EntityRenderer.cs" />
      <Compile Include="Assets\Spriter2UnityDX\Runtime\SortingOrderUpdater.cs" />
