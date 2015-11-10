@@ -31,6 +31,8 @@ public class VisualCharacter : MonoBehaviour {
 
 	private float forceY = 0f;
 
+    private bool auxBool1 = false;
+
     private string statusPerformance = "none";
 
 	// Use this for initialization
@@ -85,7 +87,7 @@ public class VisualCharacter : MonoBehaviour {
         animated2 = Instantiate(animated) as GameObject;
         animated2.SetActive(false);
         animated2.transform.parent = character.transform;
-        animated2.transform.localPosition = new Vector3(0f, 0f, 0f);
+        animated2.transform.localPosition = new Vector3(-4f, 7f, 0f);
         animated2.transform.localScale = new Vector3(1f, 1f, 1f);
         characterBounds = GetChildRendererBounds(character);
     }
@@ -157,7 +159,7 @@ public class VisualCharacter : MonoBehaviour {
                 if (performing == 2)
                 {
                     statusPerformance = "executing";
-                    animated.GetComponent<Animator>().CrossFade("S1", GlobalData.crossfadeAnimation, 0, 0f);
+                    animated.GetComponent<Animator>().CrossFade("S3", GlobalData.crossfadeAnimation, 0, 0f);
                     int aux = Random.Range(1, 5);
                     audio1.clip = Resources.Load("Music/Battle/Barbarian_" + aux.ToString("00")) as AudioClip;
                     audio1.Play();
@@ -247,15 +249,21 @@ public class VisualCharacter : MonoBehaviour {
 
                 if (animated2.activeInHierarchy)
                 {
-                    animated2.transform.localPosition = new Vector3(animated2.transform.localPosition.x + Time.deltaTime * 40f * -(root.transform.localScale.x / Mathf.Abs(root.transform.localScale.x)), animated2.transform.localPosition.y, animated2.transform.localPosition.z);
+                    animated2.transform.localPosition = new Vector3(animated2.transform.localPosition.x - Time.deltaTime * 40f , animated2.transform.localPosition.y, animated2.transform.localPosition.z);
+                    animated2.transform.position = new Vector3(animated2.transform.position.x, Mathf.Lerp(animated2.transform.position.y, targetPerformance.transform.position.y, Time.deltaTime*3.5f), -1f);
+
+                    if (!auxBool1 && animated2.transform.position.x * (root.transform.localScale.x / Mathf.Abs(root.transform.localScale.x)) > targetPerformance.root.transform.position.x * (-targetPerformance.root.transform.localScale.x / Mathf.Abs(targetPerformance.root.transform.localScale.x)))
+                    {
+                        auxBool1 = true;
+                        targetPerformance.Represent(GlobalData.Skills[0], importantFloats);
+                    }
 
                     if (Mathf.Abs(animated2.transform.position.x) > Camera.main.ScreenToWorldPoint(new Vector3(Screen.width, 0f, Camera.main.nearClipPlane)).x && ((animated.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName(lastAnimationOrder) && lastAnimationOrder == "Idle") || (animated.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).normalizedTime >= 1f && animated.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName(lastAnimationOrder) && lastAnimationOrder == "S2")))
                     {
                         //targetPerformance.Represent(GlobalData.Skills[performing], importantFloats);
-                        targetPerformance.Represent(GlobalData.Skills[0], importantFloats);
                         performing = -1;
                         statusPerformance = "none";
-                        animated2.transform.localPosition = new Vector3(0f, 7f, 0f);
+                        animated2.transform.localPosition = new Vector3(-4f, 7f, 0f);
                         animated2.SetActive(false);
                         animated.GetComponent<Animator>().CrossFade("Idle", GlobalData.crossfadeAnimation, 0, 0f);
                         lastAnimationOrder = "Idle";
@@ -266,7 +274,7 @@ public class VisualCharacter : MonoBehaviour {
                     if (animated.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.6f && animated.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName(lastAnimationOrder) && lastAnimationOrder == "S2")
                     {
                         animated2.SetActive(true);
-                        animated2.GetComponent<Animator>().Play("Axe_000");
+                        animated2.GetComponent<Animator>().Play("Axe");
                     }
                 }
 
@@ -505,12 +513,12 @@ public class VisualCharacter : MonoBehaviour {
 
     }
 
-    public void Perform(Skill s, VisualCharacter v, float[] aux)
+    public void Perform(Skill s, VisualCharacter v, float[] auxFloats)
     {
 
         performing = s.getID();
         targetPerformance = v;
-        importantFloats = aux;
+        importantFloats = auxFloats;
 
         if (performing == 0)
         {
@@ -523,6 +531,7 @@ public class VisualCharacter : MonoBehaviour {
             statusPerformance = "executing";
             animated.GetComponent<Animator>().CrossFade("S2", GlobalData.crossfadeAnimation, 0, 0f);
             lastAnimationOrder = "S2";
+            auxBool1 = false;
         }
 
         if (performing == 2)
