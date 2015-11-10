@@ -13,7 +13,7 @@ public class VisualCharacter : MonoBehaviour {
     private GameObject animated;
     private GameObject animated2;
 	private string lastAnimationOrder;
-    private Bounds characterBounds;
+    public Bounds characterBounds;
     private GameObject text1;
     private GameObject text2;
     private GameObject blood1;
@@ -89,7 +89,9 @@ public class VisualCharacter : MonoBehaviour {
         animated2.transform.parent = character.transform;
         animated2.transform.localPosition = new Vector3(-4f, 7f, 0f);
         animated2.transform.localScale = new Vector3(1f, 1f, 1f);
+
         characterBounds = GetChildRendererBounds(character);
+
     }
 
     Bounds GetChildRendererBounds(GameObject go)

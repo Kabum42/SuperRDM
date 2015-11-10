@@ -44,6 +44,18 @@ public class Class {
 		}
 	}
 
+    public int getSkillID(int position)
+    {
+        if (Skills[position] != null)
+        {
+            return Skills[position].getID();
+        }
+        else
+        {
+            return -1;
+        }
+    }
+
 	public string getName(){
 		return this.Name;
 	}

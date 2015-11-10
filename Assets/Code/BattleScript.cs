@@ -52,12 +52,19 @@ public class BattleScript : MonoBehaviour {
 		vb = (Instantiate(Resources.Load("Prefabs/VisualBattleObject")) as GameObject).GetComponent<VisualBattle>();
 		vb.gameObject.transform.parent = GameObject.Find ("Battle").transform;
 		vb.setBattleScript (this);
-		vb.visualCharacters [0].Perform (GlobalData.Skills [1], vb.visualCharacters [3], new float[]{34f});
+		//vb.visualCharacters [0].Perform (GlobalData.Skills [1], vb.visualCharacters [3], new float[]{34f});
 
 	}
 	
 	// Update is called once per frame
 	void Update () {
+
+        if (vb.hasOrders)
+        {
+            vb.visualCharacters[vb.myCharacter].Perform(GlobalData.Skills[vb.skillOrder], vb.visualCharacters[vb.targetOrder], new float[] { 34f });
+            vb.hasOrders = false;
+        }
+
 		if (CharacterTurn == -1) {
 			TimerIPBar += Time.deltaTime;
 			if (TimerIPBar > 0.01) {

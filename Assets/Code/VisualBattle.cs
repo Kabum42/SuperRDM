@@ -3,11 +3,16 @@ using System.Collections;
 
 public class VisualBattle : MonoBehaviour {
 
-	private BattleScript bs;
+	public BattleScript bs;
 
 	private GameObject background;
 	public VisualCharacter[] visualCharacters = new VisualCharacter[12];
+    public int myCharacter = 0;
     private VisualInterface vInterface;
+
+    public bool hasOrders = false;
+    public int skillOrder = -1;
+    public int targetOrder = -1;
 
 	// Use this for initialization
 	void Start () {
@@ -17,13 +22,31 @@ public class VisualBattle : MonoBehaviour {
 
         vInterface = (Instantiate(Resources.Load("Prefabs/VisualInterface")) as GameObject).GetComponent<VisualInterface>();
         vInterface.root.transform.parent = this.gameObject.transform;
+        vInterface.vBatlle = this;
 	
 	}
 	
 	// Update is called once per frame
 	void Update () {
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            AllowInteraction();
+        }
 	
 	}
+
+    public void AllowInteraction()
+    {
+        vInterface.AllowInteraction();
+    }
+
+    public void setOrders(int skill, int target)
+    {
+        skillOrder = skill;
+        targetOrder = target;
+        hasOrders = true;
+    }
 
 	public void setBattleScript(BattleScript auxBs) {
 
