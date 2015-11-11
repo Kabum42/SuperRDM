@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class VisualCharacter : MonoBehaviour {
 
@@ -34,6 +35,10 @@ public class VisualCharacter : MonoBehaviour {
     private bool auxBool1 = false;
 
     private string statusPerformance = "none";
+
+	public Material palette1;
+	public Material palette2;
+	public Material palette3;
 
 	// Use this for initialization
 	void Awake () {
@@ -75,9 +80,66 @@ public class VisualCharacter : MonoBehaviour {
     public void setClass(Class c)
     {
 
+		palette1 = Instantiate((Material)Resources.Load("HueMaterial", typeof(Material)));
+		palette2 = Instantiate((Material)Resources.Load("HueMaterial", typeof(Material)));
+		palette3 = Instantiate((Material)Resources.Load("HueMaterial", typeof(Material)));
+
+
+
         if (c.getID () == 0) {
-			// ES EL BOAR RIDER
+			// ES EL BARBARO
 			character = Instantiate (Resources.Load ("Prefabs/Barbarian")) as GameObject;
+
+
+			List <string> list1 = new List<string>();
+
+			list1.Add("Head");
+			list1.Add("Chest_000");
+			list1.Add("Thumb");
+			list1.Add("Hand");
+			list1.Add("R_Low_Arm");
+			list1.Add("R_Up_Arm");
+			list1.Add("L_Low_Arm");
+			list1.Add("L_Up_Arm");
+			list1.Add("Thumb_000");
+			list1.Add("R_Low_Leg");
+			list1.Add("R_Up_Leg");
+			list1.Add("L_Low_Leg");
+			list1.Add("L_Up_Leg");
+
+			AssignToPalette(list1, ref palette1);
+
+			palette1.SetFloat("_HueShift", Random.Range (0f, 360f));
+			palette1.SetFloat("_Sat", Random.Range (0.5f, 1f));
+
+
+
+			List <string> list2 = new List<string>();
+			
+			list2.Add("Axe");
+			list2.Add("Axe_000");
+			list2.Add("Axe_001");
+			list2.Add("Axe_002");
+
+			AssignToPalette(list2, ref palette2);
+
+			palette2.SetFloat("_HueShift", Random.Range (0f, 360f));
+			palette2.SetFloat("_Sat", Random.Range (0f, 2f));
+
+
+
+			List <string> list3 = new List<string>();
+			
+			list3.Add("Pelvis");
+			list3.Add("Belt");
+			list3.Add("Collar");
+			
+			AssignToPalette(list3, ref palette3);
+			
+			palette3.SetFloat("_HueShift", Random.Range (0f, 360f));
+			palette3.SetFloat("_Sat", Random.Range (0f, 2f));
+
+
 		} else {
 			character = Instantiate (Resources.Load ("Prefabs/Barbarian")) as GameObject;
 		}
@@ -112,6 +174,31 @@ public class VisualCharacter : MonoBehaviour {
             return new Bounds();
         }
     }
+
+	private void AssignToPalette(List<string> list, ref Material palette) {
+
+		for (int i = 0; i < list.Count; i++) {
+
+			FindRecursive(character.transform, list[i]).GetComponent<SpriteRenderer>().sharedMaterial = palette;
+
+		}
+
+	}
+	
+
+	private GameObject FindRecursive(Transform source, string name)// (finds one only)
+	{
+		//Transform[] transforms = source.GetComponentsInChildren<Transform>();
+		Transform[] transforms = source.GetComponentsInChildren<Transform>(true);
+		for (int i = 0; i < transforms.Length; i++)
+		{
+			if (transforms[i].name == name) return transforms[i].gameObject;
+		}
+		return null;
+	}
+
+	
+	
 	
 	// Update is called once per frame
 	void Update () {
