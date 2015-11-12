@@ -73,9 +73,9 @@
      <Compile Include="Assets\Code\VisualCharacter.cs" />
      <Compile Include="Assets\Code\VisualInterface.cs" />
      <Compile Include="Assets\Code\WorldScript.cs" />
-     <Compile Include="Assets\Spriter2UnityDX\Runtime\EntityRenderer.cs" />
-     <Compile Include="Assets\Spriter2UnityDX\Runtime\SortingOrderUpdater.cs" />
-     <Compile Include="Assets\Spriter2UnityDX\Runtime\TextureController.cs" />
+     <Compile Include="Assets\ThirdParty\Spriter2Unity\Example\Scripts\AnimationTestScript.cs" />
+     <Compile Include="Assets\ThirdParty\Spriter2Unity\Runtime\SortingOrderUpdate.cs" />
+     <None Include="Assets\ThirdParty\Spriter2Unity\Example\Spriter Project\GreyGuy\Copyright_Information_Please_Read.txt" />
      <None Include="Assets\Shaders\HSVDefault.shader" />
      <None Include="Assets\Resources\Fonts\Comfortaa\OFL.txt" />
      <None Include="Assets\Resources\Languages.txt" />
