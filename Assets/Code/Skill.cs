@@ -10,6 +10,7 @@ public class Skill {
 	private int TargetID;
 	private int[] AgentID = new int[100];
 	private float Damage;
+    private float LastDamage;
 	private bool NeedEnemy;
 
 	public Skill(int ID, string Name, float CostIP, float CostHealth, float Damage, bool NeedEnemy)
@@ -25,6 +26,7 @@ public class Skill {
 	public void Activate(int Attacker, ref Character[] CharactersInBattle, int EnemyFocused)
 	{
 		int StackedNumber;
+        int EnemyAttacked = EnemyFocused;
 		switch (this.Name) {
 
 			// Boar Ryder abilities
@@ -33,8 +35,10 @@ public class Skill {
 				for (int i = 0; i<CharactersInBattle.Length; i++){
 					if (CharactersInBattle[i] != null){
 						if (!CharactersInBattle[i].getAerial() && (CharactersInBattle[Attacker].getBottom() != CharactersInBattle[i].getBottom ())){
-							CharactersInBattle[i].setCurrentHealth(CharactersInBattle[i].getCurrentHealth() - (Damage + 2*StackedNumber));
+                            LastDamage = (Damage + 2 * StackedNumber);
+							CharactersInBattle[i].setCurrentHealth(CharactersInBattle[i].getCurrentHealth() - LastDamage);
 							CharactersInBattle[Attacker].setProgressIPBar(CharactersInBattle[Attacker].getProgressIPBar() - CostIP);
+                            EnemyAttacked = i;
 							break;
 						}
 					}
@@ -46,7 +50,8 @@ public class Skill {
 
 			case "Axe Throw":
 				StackedNumber = CharactersInBattle[Attacker].getStackedNumberEffect("Anger Management");
-				CharactersInBattle[EnemyFocused].setCurrentHealth(CharactersInBattle[EnemyFocused].getCurrentHealth()- (Damage + 2*StackedNumber));
+                LastDamage = (Damage + 2 * StackedNumber);
+				CharactersInBattle[EnemyFocused].setCurrentHealth(CharactersInBattle[EnemyFocused].getCurrentHealth()- LastDamage);
 				CharactersInBattle[Attacker].setProgressIPBar(CharactersInBattle[Attacker].getProgressIPBar() - CostIP);
 				if (StackedNumber < 5){
 					CharactersInBattle[Attacker].setStackedNumberEffect("Anger Management", StackedNumber+1);
@@ -55,7 +60,8 @@ public class Skill {
 
 			case "Axe Dunk":
 				StackedNumber = CharactersInBattle[Attacker].getStackedNumberEffect("Anger Management");
-				CharactersInBattle[EnemyFocused].setCurrentHealth(CharactersInBattle[EnemyFocused].getCurrentHealth()- ((Damage*StackedNumber) + 2*StackedNumber));
+                LastDamage = ((Damage * StackedNumber) + 2 * StackedNumber);
+				CharactersInBattle[EnemyFocused].setCurrentHealth(CharactersInBattle[EnemyFocused].getCurrentHealth()- LastDamage);
 				CharactersInBattle[EnemyFocused].setProgressIPBar(CharactersInBattle[EnemyFocused].getProgressIPBar() - (StackedNumber*20));
 				CharactersInBattle[Attacker].setProgressIPBar(CharactersInBattle[Attacker].getProgressIPBar() - CostIP);
 				CharactersInBattle[Attacker].setStackedNumberEffect("Anger Management", StackedNumber/2);
@@ -64,17 +70,19 @@ public class Skill {
 			// Pilumantic abilities
 			case "Pilosity":
 				StackedNumber = CharactersInBattle[EnemyFocused].getStackedNumberEffect("Pilosity Stacks");
+                LastDamage = this.Damage;
 				if (StackedNumber < 5){
 					CharactersInBattle[EnemyFocused].setStackedNumberEffect("Pilosity Stacks", StackedNumber+1);
 				}
-				CharactersInBattle[EnemyFocused].setCurrentHealth(CharactersInBattle[EnemyFocused].getCurrentHealth()- this.Damage);
+                CharactersInBattle[EnemyFocused].setCurrentHealth(CharactersInBattle[EnemyFocused].getCurrentHealth() - LastDamage);
 				CharactersInBattle[EnemyFocused].setProgressIPBar(CharactersInBattle[EnemyFocused].getProgressIPBar() - CharactersInBattle[EnemyFocused].getProgressIPBar()/10);
 				CharactersInBattle[Attacker].setProgressIPBar(CharactersInBattle[Attacker].getProgressIPBar() - CostIP);
 				break;
 
 			case "Laser Depilation":
 				StackedNumber = CharactersInBattle[EnemyFocused].getStackedNumberEffect("Pilosity Stacks");
-				CharactersInBattle[EnemyFocused].setCurrentHealth(CharactersInBattle[EnemyFocused].getCurrentHealth()- (StackedNumber * Damage));
+                LastDamage = StackedNumber * Damage;
+				CharactersInBattle[EnemyFocused].setCurrentHealth(CharactersInBattle[EnemyFocused].getCurrentHealth()- LastDamage);
 				if (StackedNumber == 5){
 					CharactersInBattle[EnemyFocused].setProgressIPBar(CharactersInBattle[EnemyFocused].getProgressIPBar() - CharactersInBattle[EnemyFocused].getProgressIPBar()/2);
 				}	
@@ -114,10 +122,12 @@ public class Skill {
 				}
 				if (StackedNumber > 3){
 					StackedNumber = 3;
-				}	
+				}
+
+                LastDamage = StackedNumber * Damage;
 				
 				for (int i = 0; i<StackedNumber; i++){
-					CharactersInBattle[EnemyFocused].setCurrentHealth(CharactersInBattle[EnemyFocused].getCurrentHealth()- (StackedNumber * Damage));
+					CharactersInBattle[EnemyFocused].setCurrentHealth(CharactersInBattle[EnemyFocused].getCurrentHealth() - LastDamage);
 				}
 
 				CharactersInBattle[Attacker].setProgressIPBar(CharactersInBattle[Attacker].getProgressIPBar() - CostIP);
@@ -140,6 +150,7 @@ public class Skill {
 				CharactersInBattle[Attacker].setProgressIPBar(CharactersInBattle[Attacker].getProgressIPBar() - CostIP);
 				break;
 		}
+        CharactersInBattle[Attacker].setLastEnemyAttacked(EnemyAttacked);
 	}
 
 	public bool getNeedEnemy(){
@@ -158,5 +169,10 @@ public class Skill {
 	public float getDamage(){
 		return this.Damage;
 	}
+
+    public float getLastDamage()
+    {
+        return LastDamage;
+    }
 }
 

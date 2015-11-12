@@ -22,7 +22,7 @@ public class VisualBattle : MonoBehaviour {
 
         vInterface = (Instantiate(Resources.Load("Prefabs/VisualInterface")) as GameObject).GetComponent<VisualInterface>();
         vInterface.root.transform.parent = this.gameObject.transform;
-        vInterface.vBatlle = this;
+        vInterface.vBattle = this;
 	
 	}
 	

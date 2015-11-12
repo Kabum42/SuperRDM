@@ -70,7 +70,7 @@ public static class GlobalData {
 		GenerateClasses ();
 		GenerateEnemies ();
 		agents[0] = new MainCharacter(1, "Player1", 800, 100, GlobalData.Classes[0]);
-		agents[1] = new MainCharacter(2, "Player2", 80, 100, GlobalData.Classes[2]);
+		agents[1] = new MainCharacter(2, "Player2", 800, 100, GlobalData.Classes[0]);
 
         biomeCosts = new int[11];
         biomeCosts[(int)Biome.Sanctuary] = 1;

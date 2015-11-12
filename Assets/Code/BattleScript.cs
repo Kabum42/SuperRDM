@@ -64,7 +64,9 @@ public class BattleScript : MonoBehaviour {
 
         if (vb.hasOrders)
         {
-            vb.visualCharacters[vb.myCharacter].Perform(GlobalData.Skills[vb.skillOrder], vb.visualCharacters[vb.targetOrder], new float[] { 34f });
+            SelectedSkill = true;
+            SkillSelected = vb.skillOrder;
+            CurrentEnemy = vb.targetOrder;
             vb.hasOrders = false;
         }
 
@@ -89,12 +91,12 @@ public class BattleScript : MonoBehaviour {
 					if (TimerTurn > 1) {
 						TimerTurn = 0;
 						Turn ();
-						LogEffects();
+						// LogEffects();
 						SelectedSkill = false;
 					}
 				} 
 				else {
-					SelectSkill ();
+                    vb.AllowInteraction();
 				}
 			}
 		}
@@ -126,12 +128,6 @@ public class BattleScript : MonoBehaviour {
 
 		CurrentCharacters [1] = GlobalData.agents [1];
 		CurrentCharacters [1].setBottom (false);
-
-		CurrentCharacters [2] = GlobalData.RandomEnemies [1];
-		CurrentCharacters [2].setBottom (false);
-
-		CurrentCharacters [3] = GlobalData.RandomEnemies [1];
-		CurrentCharacters [3].setBottom (false);
 
 		// Setting Effects
 		MainCharacter auxCharacter;
@@ -283,58 +279,14 @@ public class BattleScript : MonoBehaviour {
 		Debug.Log (Effectstring);
 	}
 
-	void SelectSkill(){
-		if (!NeedEnemy) {
-			if (Input.GetKeyDown (KeyCode.LeftArrow)) {
-				if (SkillSelected == 0) {
-					SkillSelected = 2;
-				} else {
-					SkillSelected -= 1;
-				}
-			}
-			if (Input.GetKeyDown (KeyCode.RightArrow)) {
-				if (SkillSelected == 2) {
-					SkillSelected = 0;
-				} else {
-					SkillSelected += 1;
-				}
-			}
-			if (Input.GetKeyDown (KeyCode.Return)) {
-				if(CurrentCharacters [CharacterTurn].CheckEnemies(SkillSelected)){
-					NeedEnemy = true;
-				}
-				else {
-					SelectedSkill = true;
-					CurrentEnemy = -1;
-				}
-
-			}
-		} 
-		else {
-			if (Input.GetKeyDown (KeyCode.LeftArrow)) {
-				if (CurrentEnemy == 0) {
-					CurrentEnemy = MaxTop;
-				} else {
-					CurrentEnemy -= 1;
-				}
-			}
-			if (Input.GetKeyDown (KeyCode.RightArrow)) {
-				if (CurrentEnemy == MaxTop) {
-					CurrentEnemy = 0;
-				} else {
-					CurrentEnemy += 1;
-				}
-			}
-			if (Input.GetKeyDown (KeyCode.Return)) {
-				SelectedSkill = true;
-			}
-		}
-	}
-
 	void Turn(){
 		Attack ();
 		lastSkill = CurrentCharacters [CharacterTurn].getLastSkillUsed ();
-		UpdateEffects ();
+        if (lastSkill != null)
+        {
+            vb.visualCharacters[CharacterTurn].Perform(lastSkill, vb.visualCharacters[CurrentCharacters[CharacterTurn].getLastEnemyAttacked()], new float[] { lastSkill.getLastDamage() });
+        }
+        UpdateEffects ();
 		if (lastSkill != null) {
 			SkillUsed.GetComponent<TextMesh> ().text = CurrentCharacters [CharacterTurn].getName () + " used: " + lastSkill.getName ();
 			if (CheckInstantHealth()) {
@@ -360,10 +312,6 @@ public class BattleScript : MonoBehaviour {
 		} 
 		else {
 			if (CharacterTurn == PlayerCharacter){
-				if (NeedEnemy){
-					CurrentEnemy = PositionTops[CurrentEnemy];
-					NeedEnemy = false;
-				}
 				CurrentCharacters [CharacterTurn].UseSkill (SkillSelected, CharacterTurn, ref CurrentCharacters, CurrentEnemy);
 			}
 			else {
@@ -459,13 +407,23 @@ public class BattleScript : MonoBehaviour {
 		}
 	}
 
-	public List<int> getTargets(int caster, int skillID) {
+	public List<int> getTargets(int caster, int position) {
 
 		List<int> aux = new List<int> ();
 		//aux.Add (0);
-		aux.Add (1);
-		aux.Add (2);
-		aux.Add (3);
+        if (CurrentCharacters[caster].CheckEnemies(position))
+        {
+            for (int i = 0; i < ActualCharacters; i++)
+            {
+                if (CurrentCharacters[i] != null)
+                {
+                    if (CurrentCharacters[i].getBottom() != CurrentCharacters[caster].getBottom())
+                    {
+                        aux.Add(i);
+                    }
+                }
+            }
+        }
 		return aux;
 
 	}
