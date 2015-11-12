@@ -82,5 +82,10 @@ public class Skill {
 	public string getName(){
 		return this.Name;
 	}
+
+    public int getID()
+    {
+        return this.ID;
+    }
 }
 

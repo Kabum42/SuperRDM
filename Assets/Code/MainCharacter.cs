@@ -10,6 +10,7 @@ public class MainCharacter : Character {
 	private int MaxMP;
 	private int Experience;
 	private int CurrentLevel;
+    private float CurrentFatigue;
     public NetworkPlayer player;
     public bool IA = false;
     public int currentCell;
@@ -138,6 +139,16 @@ public class MainCharacter : Character {
 	{
 
 	}
+
+    public int getCurrentLevel()
+    {
+        return CurrentLevel;
+    }
+
+    public float getCurrentFatigue()
+    {
+        return CurrentFatigue;
+    }
 	
 	
 }
