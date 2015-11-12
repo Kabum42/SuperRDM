@@ -123,11 +123,37 @@ public class BattleScript : MonoBehaviour {
 	}
 
 	void AsignCharacters(){
-		CurrentCharacters [0] = GlobalData.agents [0];
-		CurrentCharacters [0].setBottom (true);
+        int auxposition = 0;
+        CurrentCharacters[auxposition] = GlobalData.agents[GlobalData.positionCharacterCombat[0]];
+        CurrentCharacters[auxposition].setBottom(true);
+        auxposition++;
 
-		CurrentCharacters [1] = GlobalData.agents [1];
-		CurrentCharacters [1].setBottom (false);
+        if (GlobalData.positionCharacterCombat[1] != -1)
+        {
+            CurrentCharacters[auxposition] = GlobalData.agents[GlobalData.positionCharacterCombat[1]];
+            CurrentCharacters[auxposition].setBottom(false);
+        }
+        else
+        {
+            switch (GlobalData.currentBiome)
+            {
+                case Biome.Prairie:
+                    CurrentCharacters[auxposition] = GlobalData.RandomEnemies[0];
+                    break;
+
+                case Biome.Forest:
+                    CurrentCharacters[auxposition] = GlobalData.RandomEnemies[1];
+                    break;
+
+                case Biome.Swamp:
+                    CurrentCharacters[auxposition] = GlobalData.RandomEnemies[2];
+                    break;
+
+                default:
+                    break;
+            }
+            CurrentCharacters[auxposition].setBottom(false);
+        }
 
 		// Setting Effects
 		MainCharacter auxCharacter;
@@ -396,12 +422,10 @@ public class BattleScript : MonoBehaviour {
 		}
 
 		if (Bottom == 0) {
-			Debug.Log ("Top Wins");
             GlobalData.World();
             Destroy(GameObject.Find("Battle"));
 		} 
 		else if (Top == 0){
-			Debug.Log ("Bottom Wins");
             GlobalData.World();
             Destroy(GameObject.Find("Battle"));
 		}

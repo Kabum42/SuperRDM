@@ -10,6 +10,9 @@ public static class GlobalData {
 	public static int MaxEnemies;
     public static string OS;
     public static MainCharacter[] agents = new MainCharacter[6];
+    public static int[] positionCharacterCombat = new int[2];
+
+    public static Biome currentBiome;
     public static int myAgent = 0;
     public static int[] order;
     public static int currentAgentTurn = 0;
@@ -69,8 +72,6 @@ public static class GlobalData {
 		GenerateSkills ();
 		GenerateClasses ();
 		GenerateEnemies ();
-		agents[0] = new MainCharacter(1, "Player1", 800, 100, GlobalData.Classes[0]);
-		agents[1] = new MainCharacter(2, "Player2", 800, 100, GlobalData.Classes[0]);
 
         biomeCosts = new int[11];
         biomeCosts[(int)Biome.Sanctuary] = 1;
@@ -120,7 +121,7 @@ public static class GlobalData {
         Classes [3] = new Class (3, "Henmancer", Skills [0], Skills [1], Skills [2]);
         Classes [4] = new Class (4, "Disembodied", Skills [0], Skills [1], Skills [2]);
         Classes [5] = new Class (5, "Black Shield", Skills [0], Skills [1], Skills [2]);
-		Classes [6] = new Class (6, "Wolf", null, null, null);
+		Classes [6] = new Class (6, "Animal", null, null, null);
 	}
 
 
@@ -129,9 +130,9 @@ public static class GlobalData {
 	private static void GenerateEnemies (){
 		Biome newBiome;
 		newBiome = Biome.Forest;
-		RandomEnemies [0] = new EventCharacter (3, "Wolf", 50, 100, Classes [6], Biome.Forest);
+		RandomEnemies [0] = new EventCharacter (3, "Rabbit", 50, 100, Classes [6], Biome.Prairie);
 		RandomEnemies[1] = new EventCharacter (4, "Wolf", 50, 100, Classes [6], Biome.Forest);
-		RandomEnemies[2] = new EventCharacter (5, "Wolf", 50, 100, Classes [6], Biome.Forest);
+		RandomEnemies[2] = new EventCharacter (5, "Frog", 50, 100, Classes [6], Biome.Swamp);
 
 	}
 
