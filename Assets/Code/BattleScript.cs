@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class BattleScript : MonoBehaviour {
 
@@ -34,6 +35,8 @@ public class BattleScript : MonoBehaviour {
 	private int Top;
 	private int Bottom;
 
+	private VisualBattle vb;
+
 	// Use this for initialization
 	void Start () {
 		if (!GlobalData.started)
@@ -49,10 +52,24 @@ public class BattleScript : MonoBehaviour {
 		LogCharacters ();
 		Player = (MainCharacter) CurrentCharacters [PlayerCharacter];
 
+		vb = (Instantiate(Resources.Load("Prefabs/VisualBattleObject")) as GameObject).GetComponent<VisualBattle>();
+		vb.gameObject.transform.parent = GameObject.Find ("Battle").transform;
+		vb.setBattleScript (this);
+		//vb.visualCharacters [0].Perform (GlobalData.Skills [1], vb.visualCharacters [3], new float[]{34f});
+
 	}
 	
 	// Update is called once per frame
 	void Update () {
+
+        if (vb.hasOrders)
+        {
+            SelectedSkill = true;
+            SkillSelected = vb.skillOrder;
+            CurrentEnemy = vb.targetOrder;
+            vb.hasOrders = false;
+        }
+
 		if (CharacterTurn == -1) {
 			TimerIPBar += Time.deltaTime;
 			if (TimerIPBar > 0.01) {
@@ -74,16 +91,22 @@ public class BattleScript : MonoBehaviour {
 					if (TimerTurn > 1) {
 						TimerTurn = 0;
 						Turn ();
-						LogEffects();
+						// LogEffects();
 						SelectedSkill = false;
 					}
 				} 
 				else {
-					SelectSkill ();
+                    vb.AllowInteraction();
 				}
 			}
 		}
 		UpdateInformation ();
+	}
+
+	public Character[] getCurrentCharacters() {
+
+		return CurrentCharacters;
+
 	}
 
 	void InitializeGameObjects(){
@@ -100,14 +123,37 @@ public class BattleScript : MonoBehaviour {
 	}
 
 	void AsignCharacters(){
-		CurrentCharacters [0] = GlobalData.agents [0];
-		CurrentCharacters [0].setBottom (true);
+        int auxposition = 0;
+        CurrentCharacters[auxposition] = GlobalData.agents[GlobalData.positionCharacterCombat[0]];
+        CurrentCharacters[auxposition].setBottom(true);
+        auxposition++;
 
-		CurrentCharacters [1] = GlobalData.agents [1];
-		CurrentCharacters [1].setBottom (false);
+        if (GlobalData.positionCharacterCombat[1] != -1)
+        {
+            CurrentCharacters[auxposition] = GlobalData.agents[GlobalData.positionCharacterCombat[1]];
+            CurrentCharacters[auxposition].setBottom(false);
+        }
+        else
+        {
+            switch (GlobalData.currentBiome)
+            {
+                case Biome.Prairie:
+                    CurrentCharacters[auxposition] = GlobalData.RandomEnemies[0];
+                    break;
 
-		CurrentCharacters [2] = GlobalData.RandomEnemies [1];
-		CurrentCharacters [2].setBottom (false);
+                case Biome.Forest:
+                    CurrentCharacters[auxposition] = GlobalData.RandomEnemies[1];
+                    break;
+
+                case Biome.Swamp:
+                    CurrentCharacters[auxposition] = GlobalData.RandomEnemies[2];
+                    break;
+
+                default:
+                    break;
+            }
+            CurrentCharacters[auxposition].setBottom(false);
+        }
 
 		// Setting Effects
 		MainCharacter auxCharacter;
@@ -259,58 +305,14 @@ public class BattleScript : MonoBehaviour {
 		Debug.Log (Effectstring);
 	}
 
-	void SelectSkill(){
-		if (!NeedEnemy) {
-			if (Input.GetKeyDown (KeyCode.LeftArrow)) {
-				if (SkillSelected == 0) {
-					SkillSelected = 2;
-				} else {
-					SkillSelected -= 1;
-				}
-			}
-			if (Input.GetKeyDown (KeyCode.RightArrow)) {
-				if (SkillSelected == 2) {
-					SkillSelected = 0;
-				} else {
-					SkillSelected += 1;
-				}
-			}
-			if (Input.GetKeyDown (KeyCode.Return)) {
-				if(CurrentCharacters [CharacterTurn].CheckEnemies(SkillSelected)){
-					NeedEnemy = true;
-				}
-				else {
-					SelectedSkill = true;
-					CurrentEnemy = -1;
-				}
-
-			}
-		} 
-		else {
-			if (Input.GetKeyDown (KeyCode.LeftArrow)) {
-				if (CurrentEnemy == 0) {
-					CurrentEnemy = MaxTop;
-				} else {
-					CurrentEnemy -= 1;
-				}
-			}
-			if (Input.GetKeyDown (KeyCode.RightArrow)) {
-				if (CurrentEnemy == MaxTop) {
-					CurrentEnemy = 0;
-				} else {
-					CurrentEnemy += 1;
-				}
-			}
-			if (Input.GetKeyDown (KeyCode.Return)) {
-				SelectedSkill = true;
-			}
-		}
-	}
-
 	void Turn(){
 		Attack ();
 		lastSkill = CurrentCharacters [CharacterTurn].getLastSkillUsed ();
-		UpdateEffects ();
+        if (lastSkill != null)
+        {
+            vb.visualCharacters[CharacterTurn].Perform(lastSkill, vb.visualCharacters[CurrentCharacters[CharacterTurn].getLastEnemyAttacked()], new float[] { lastSkill.getLastDamage() });
+        }
+        UpdateEffects ();
 		if (lastSkill != null) {
 			SkillUsed.GetComponent<TextMesh> ().text = CurrentCharacters [CharacterTurn].getName () + " used: " + lastSkill.getName ();
 			if (CheckInstantHealth()) {
@@ -336,10 +338,6 @@ public class BattleScript : MonoBehaviour {
 		} 
 		else {
 			if (CharacterTurn == PlayerCharacter){
-				if (NeedEnemy){
-					CurrentEnemy = PositionTops[CurrentEnemy];
-					NeedEnemy = false;
-				}
 				CurrentCharacters [CharacterTurn].UseSkill (SkillSelected, CharacterTurn, ref CurrentCharacters, CurrentEnemy);
 			}
 			else {
@@ -424,15 +422,34 @@ public class BattleScript : MonoBehaviour {
 		}
 
 		if (Bottom == 0) {
-			Debug.Log ("Top Wins");
             GlobalData.World();
             Destroy(GameObject.Find("Battle"));
 		} 
 		else if (Top == 0){
-			Debug.Log ("Bottom Wins");
             GlobalData.World();
             Destroy(GameObject.Find("Battle"));
 		}
+	}
+
+	public List<int> getTargets(int caster, int position) {
+
+		List<int> aux = new List<int> ();
+		//aux.Add (0);
+        if (CurrentCharacters[caster].CheckEnemies(position))
+        {
+            for (int i = 0; i < ActualCharacters; i++)
+            {
+                if (CurrentCharacters[i] != null)
+                {
+                    if (CurrentCharacters[i].getBottom() != CurrentCharacters[caster].getBottom())
+                    {
+                        aux.Add(i);
+                    }
+                }
+            }
+        }
+		return aux;
+
 	}
 
 }

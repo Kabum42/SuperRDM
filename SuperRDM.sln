@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 
 Project("{94791B49-C864-E6FA-675E-742693130F3F}") = "SuperRDM", "Assembly-CSharp.csproj", "{38E841E2-B5C4-76BB-C3D8-B3B748795A7A}"
 EndProject
+Project("{94791B49-C864-E6FA-675E-742693130F3F}") = "SuperRDM", "Assembly-CSharp-Editor.csproj", "{0558B0FC-3445-569D-4B45-4ABADD16F9E0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -13,11 +15,30 @@ Global
 		{38E841E2-B5C4-76BB-C3D8-B3B748795A7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{38E841E2-B5C4-76BB-C3D8-B3B748795A7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{38E841E2-B5C4-76BB-C3D8-B3B748795A7A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0558B0FC-3445-569D-4B45-4ABADD16F9E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0558B0FC-3445-569D-4B45-4ABADD16F9E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0558B0FC-3445-569D-4B45-4ABADD16F9E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0558B0FC-3445-569D-4B45-4ABADD16F9E0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
+																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																		GlobalSection(MonoDevelopProperties) = preSolution
+=======
+																																																																																																																																																																																																																																										GlobalSection(MonoDevelopProperties) = preSolution
+>>>>>>> origin/Kabum42
+=======
+																																																																																																																																																																																		GlobalSection(MonoDevelopProperties) = preSolution
+>>>>>>> refs/remotes/origin/FrVonLettow
+=======
+																																																									GlobalSection(MonoDevelopProperties) = preSolution
+=======
+																																																																																																																																									GlobalSection(MonoDevelopProperties) = preSolution
+>>>>>>> master
+>>>>>>> master
+=======
 																																																																																																																																																																																																																																																																																																																																																																GlobalSection(MonoDevelopProperties) = preSolution
+>>>>>>> refs/remotes/origin/FrVonLettow
 		StartupItem = Assembly-CSharp.csproj
 		Policies = $0
 		$0.TextStylePolicy = $1

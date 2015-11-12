@@ -15,6 +15,7 @@ public class Character {
 	protected bool Aerial;
 	protected Class OwnClass;
 	protected int LastSkillUsed;
+    protected int lastEnemyAttacked;
 	protected bool Bottom;
 
 	public Character()
@@ -117,11 +118,22 @@ public class Character {
 		return true;
 	}
 
-	public Skill getLastSkillUsed(){
-		return OwnClass.getSkill(LastSkillUsed);
-	}
-
 	// Getters and Setters
+
+    public Skill getLastSkillUsed()
+    {
+        return OwnClass.getSkill(LastSkillUsed);
+    }
+
+    public void setLastEnemyAttacked(int position)
+    {
+        lastEnemyAttacked = position;
+    }
+
+    public int getLastEnemyAttacked()
+    {
+        return lastEnemyAttacked;
+    }
 
 	public int getID(){
 		return this.ID;
@@ -184,5 +196,4 @@ public class Character {
 	public Effect[] getCurrentEffects(){
 		return CurrentEffects;
 	}
-
 }

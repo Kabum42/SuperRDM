@@ -594,6 +594,24 @@ public class WorldScript : MonoBehaviour {
 
     }
 
+    private int CalculateDijkstraTarget(int origin, int end)
+    {
+
+        distances = new int[boardCells.Length];
+        unvisited = new List<BoardCell>();
+        for (int i = 0; i < distances.Length; i++)
+        {
+            distances[i] = int.MaxValue;
+            unvisited.Add(boardCells[i]);
+        }
+
+        distances[origin] = 0;
+
+        visitCell(boardCells[origin]);
+
+        return distances[end];
+    }
+
     private List<int> copyList(List<int> source)
     {
         List<int> newList = new List<int>();
@@ -617,6 +635,13 @@ public class WorldScript : MonoBehaviour {
 
         reachables = Dijkstra();
         int shortTermObjective = bestObjective(reachables, GlobalData.currentAgentTurn);
+
+        while (CalculateDijkstraTarget(shortTermObjective, longTermObjective) >= CalculateDijkstraTarget(GlobalData.agents[GlobalData.currentAgentTurn].currentCell, longTermObjective))
+        {
+            //REVISAR
+            reachables.Remove(shortTermObjective);
+            shortTermObjective = bestObjective(reachables, GlobalData.currentAgentTurn);
+        }
 
         if (GlobalData.online) {
             GetComponent<NetworkView>().RPC("moveAgentRPC", RPCMode.All, GlobalData.currentAgentTurn, shortTermObjective);
@@ -644,18 +669,57 @@ public class WorldScript : MonoBehaviour {
 
     int cellValue(int cell, int agent) {
 
-        // SI TIENE LA VIDA MUY BAJA
-        if (false && cell == GlobalData.agents[agent].sanctuary) {
+        // SI TIENE LA FATIGA MUY ALTA
+        if (GlobalData.agents[agent].getCurrentFatigue() > 0.5f && cell == GlobalData.agents[agent].sanctuary) {
             return 100;
         }
         // SI TIENE NIVEL 10 o MAS
-        if (false && boardCells[cell].biome == Biome.TheEvil) {
-            return 99;
+        if (GlobalData.agents[agent].getCurrentLevel() >= 6 && boardCells[cell].biome == Biome.TheEvil) {
+            // DECIDIR SI VA A POR EL BOSS BASANDOSE EN SU NIVEL Y EN LA FATIGA DEL BOSS
+            float aux = Mathf.Pow(2, Mathf.Clamp(GlobalData.agents[agent].getCurrentLevel(), 0, 10) - 4);
+            aux += GlobalData.bossFatigue * 30f;
+            // AUX VA DESDE 4 a 64
+            if (Random.Range(0f, 100f) < aux)
+            {
+                // DECIDE IR A POR EL BOSS
+                return 99;
+            }
         }
+
+        // SI EN ESA CASILLA HAY UN JUGADOR ENEMIGO CON FATIGA ALTA Y NIVEL BAJO
+        for (int i = 0; i < GlobalData.activeAgents; i++)
+        {
+            if (GlobalData.agents[i].currentCell == cell && i != agent)
+            {
+                // HAY UN JUGADOR ENEMIGO
+                if (false)
+                {
+                    // PUEDO ACABAR CON EL
+                    if (false)
+                    {
+                        // TIENE UNA MISION POR ENTREGAR
+                        return 98;
+                    }
+                    if (false)
+                    {
+                        // ESTA POR ENCIMA DE LA MEDIA DE NIVELES (Y POR ENCIMA DE TI EN EL RANKING O JUSTO DEBAJO DE TI)
+                        // POR TANTO ES UN COMPETIDOR DIRECTO
+                        return 98;
+                    }
+                    if (false)
+                    {
+                        // ESTA EN TU LISTA NEGRA Y TE CAE MAL
+                        return 98;
+                    }
+                }
+            }
+        }
+        
+
 
         // SI ESA CASILLA TIENE MISION
         if (false) {
-            return 98;
+            return 97;
         }
 
         // SI ESA CASILLA NO ESTA EXHAUSTA
@@ -1323,6 +1387,8 @@ public class WorldScript : MonoBehaviour {
             else if (usedAction)
             {
                 usedTurn = true;
+                GlobalData.positionCharacterCombat = new int[] {GlobalData.myAgent, -1};
+                GlobalData.currentBiome = boardCells[GlobalData.agents[GlobalData.currentAgentTurn].currentCell].biome;
                 //Application.LoadLevel("Battle");
                 GlobalData.Battle();
             }
