@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class BattleScript : MonoBehaviour {
 
@@ -378,6 +379,17 @@ public class BattleScript : MonoBehaviour {
             GlobalData.World();
             Destroy(GameObject.Find("Battle"));
 		}
+	}
+
+	public List<int> getTargets(int caster, int skillID) {
+
+		List<int> aux = new List<int> ();
+		//aux.Add (0);
+		aux.Add (1);
+		aux.Add (2);
+		aux.Add (3);
+		return aux;
+
 	}
 
 }

@@ -4,6 +4,7 @@ using System.Collections;
 [ExecuteInEditMode]
 public class SortingOrderUpdate : MonoBehaviour 
 {
+	/*
     public float SortingOrder = 0;
 
     private Renderer cachedRenderer;
@@ -21,4 +22,5 @@ public class SortingOrderUpdate : MonoBehaviour
     {
         cachedRenderer.sortingOrder = (int)SortingOrder;
 	}
+	*/
 }
