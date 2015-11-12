@@ -13,7 +13,7 @@ public class VisualInterface : MonoBehaviour {
     private int currentSkillHolder = 0;
     private int currentCharacterTarget = 0;
 
-    public VisualBattle vBatlle;
+    public VisualBattle vBattle;
 
     private bool skillSelectable = false;
     private bool characterSelectable = false;
@@ -42,9 +42,9 @@ public class VisualInterface : MonoBehaviour {
     {
         skills.SetActive(true);
         skillSelectable = true;
-		availableTargets [0] = vBatlle.bs.getTargets (vBatlle.myCharacter, vBatlle.bs.getCurrentCharacters()[vBatlle.myCharacter].getOwnClass().getSkillID(0));
-		availableTargets [1] = vBatlle.bs.getTargets (vBatlle.myCharacter, vBatlle.bs.getCurrentCharacters()[vBatlle.myCharacter].getOwnClass().getSkillID(1));
-		availableTargets [2] = vBatlle.bs.getTargets (vBatlle.myCharacter, vBatlle.bs.getCurrentCharacters()[vBatlle.myCharacter].getOwnClass().getSkillID(2));
+		availableTargets [0] = vBattle.bs.getTargets (vBattle.myCharacter, 0);
+		availableTargets [1] = vBattle.bs.getTargets (vBattle.myCharacter, 1);
+		availableTargets [2] = vBattle.bs.getTargets (vBattle.myCharacter, 2);
     }
 
     // Update is called once per frame
@@ -63,7 +63,7 @@ public class VisualInterface : MonoBehaviour {
                 if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))
                 {
                     currentCharacterTarget++;
-					while (currentCharacterTarget >= availableTargets[currentSkillHolder].Count || vBatlle.visualCharacters[availableTargets[currentSkillHolder][currentCharacterTarget]] == null)
+					while (currentCharacterTarget >= availableTargets[currentSkillHolder].Count || vBattle.visualCharacters[availableTargets[currentSkillHolder][currentCharacterTarget]] == null)
                     {
 						if (currentCharacterTarget >= availableTargets[currentSkillHolder].Count)
                         {
@@ -79,7 +79,7 @@ public class VisualInterface : MonoBehaviour {
                 if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
                 {
                     currentCharacterTarget--;
-					while (currentCharacterTarget < 0 || vBatlle.visualCharacters[availableTargets[currentSkillHolder][currentCharacterTarget]] == null)
+					while (currentCharacterTarget < 0 || vBattle.visualCharacters[availableTargets[currentSkillHolder][currentCharacterTarget]] == null)
                     {
                         if (currentCharacterTarget < 0)
                         {
@@ -97,19 +97,21 @@ public class VisualInterface : MonoBehaviour {
                     characterSelectable = false;
                 }
 
+                pointer.transform.position = new Vector3(Mathf.Lerp(pointer.transform.position.x, vBattle.visualCharacters[availableTargets[currentSkillHolder][currentCharacterTarget]].transform.position.x, Time.deltaTime * 15f), Mathf.Lerp(pointer.transform.position.y, vBattle.visualCharacters[availableTargets[currentSkillHolder][currentCharacterTarget]].transform.position.y, Time.deltaTime * 15f), pointer.transform.position.z);
+                pointer.transform.localEulerAngles = new Vector3(0f, 0f, 0f);
+                pointer.transform.localScale = new Vector3(1f * (vBattle.visualCharacters[availableTargets[currentSkillHolder][currentCharacterTarget]].root.transform.localScale.x / Mathf.Abs(vBattle.visualCharacters[availableTargets[currentSkillHolder][currentCharacterTarget]].root.transform.localScale.x)), 1f, 1f);
+
+
                 if (Input.GetKeyDown(KeyCode.Return))
                 {
                     skillSelectable = false;
                     characterSelectable = false;
-                    vBatlle.setOrders(vBatlle.bs.getCurrentCharacters()[vBatlle.myCharacter].getOwnClass().getSkillID(currentSkillHolder), availableTargets[currentSkillHolder][currentCharacterTarget]);
+                    vBattle.setOrders(currentSkillHolder, availableTargets[currentSkillHolder][currentCharacterTarget]);
                     currentSkillHolder = 0;
                     currentCharacterTarget = 0;
                 }
 
-				pointer.transform.position = new Vector3(Mathf.Lerp(pointer.transform.position.x, vBatlle.visualCharacters[availableTargets[currentSkillHolder][currentCharacterTarget]].transform.position.x, Time.deltaTime * 15f), Mathf.Lerp(pointer.transform.position.y, vBatlle.visualCharacters[availableTargets[currentSkillHolder][currentCharacterTarget]].transform.position.y, Time.deltaTime * 15f), pointer.transform.position.z);
-                pointer.transform.localEulerAngles = new Vector3(0f, 0f, 0f);
-				pointer.transform.localScale = new Vector3(1f * (vBatlle.visualCharacters[availableTargets[currentSkillHolder][currentCharacterTarget]].root.transform.localScale.x / Mathf.Abs(vBatlle.visualCharacters[availableTargets[currentSkillHolder][currentCharacterTarget]].root.transform.localScale.x)), 1f, 1f);
-
+				
             }
             else
             {
@@ -126,7 +128,7 @@ public class VisualInterface : MonoBehaviour {
                     if (currentSkillHolder < 0) { currentSkillHolder = skillHolders.Length - 1; }
                 }
 
-                skills.transform.position = new Vector3(vBatlle.visualCharacters[vBatlle.myCharacter].root.transform.position.x, vBatlle.visualCharacters[vBatlle.myCharacter].root.transform.position.y + vBatlle.visualCharacters[vBatlle.myCharacter].characterBounds.size.y / 2f + 3f, skills.transform.position.z);
+                skills.transform.position = new Vector3(vBattle.visualCharacters[vBattle.myCharacter].root.transform.position.x, vBattle.visualCharacters[vBattle.myCharacter].root.transform.position.y + vBattle.visualCharacters[vBattle.myCharacter].characterBounds.size.y / 2f + 3f, skills.transform.position.z);
 
                 pointer.transform.localPosition = new Vector3(Mathf.Lerp(pointer.transform.localPosition.x, skillHolders[currentSkillHolder].transform.localPosition.x, Time.deltaTime * 15f), Mathf.Lerp(pointer.transform.localPosition.y, -3.74f, Time.deltaTime * 15f), pointer.transform.localPosition.z);
                 pointer.transform.localEulerAngles = new Vector3(0f, 0f, 90f);
@@ -135,8 +137,19 @@ public class VisualInterface : MonoBehaviour {
 
                 if (Input.GetKeyDown(KeyCode.Return))
                 {
-                    characterSelectable = true;
-					currentCharacterTarget = 0;
+                    if (availableTargets[currentSkillHolder].Count == 0)
+                    {
+                        skillSelectable = false;
+                        characterSelectable = false;
+                        vBattle.setOrders(currentSkillHolder, -1);
+                        currentSkillHolder = 0;
+                        currentCharacterTarget = 0;
+                    }
+                    else
+                    {
+                        characterSelectable = true;
+                        currentCharacterTarget = 0;
+                    }
                 }
 
             }

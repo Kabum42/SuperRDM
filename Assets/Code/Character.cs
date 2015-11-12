@@ -8,26 +8,19 @@ public class Character {
 	protected float PreviousHealth;
 	protected float CurrentHealth;
 	protected float MaxHealth;
+	protected float StunIPBar;
 	protected float ProgressIPBar;
 	protected float MaxIPBar;
 	protected Effect[] CurrentEffects = new Effect[6];
 	protected bool Aerial;
 	protected Class OwnClass;
 	protected int LastSkillUsed;
+    protected int lastEnemyAttacked;
 	protected bool Bottom;
 
 	public Character()
 	{
 		Debug.Log("Character created");
-	}
-
-	public void EndBattleTurn(){
-	}
-
-	public void StartBattleTurn(){
-	}
-
-	public void EndBattle(){
 	}
 
 	public void UseSkill(int SkillSelected, int Attacker, ref Character[] CharactersInBattle, int EnemyFocused)
@@ -36,40 +29,111 @@ public class Character {
 		LastSkillUsed = SkillSelected;
 	}
 
-	public string getSkillName(int position){
-		return OwnClass.getSkillName (position);
+	public Skill getSkill(int position){
+		return OwnClass.getSkill (position);
 	}
 
 	public bool CheckEnemies(int position){
 		return OwnClass.CheckEnemiesSkill (position);
 	}
 
+	// Effects
+
+	public void UpdateEffects(int CharacterTurn, ref Character[] CharactersInBattle, int CharacterSelected){
+		for (int i = 0; i<CurrentEffects.Length; i++){
+			if (CurrentEffects[i] != null){
+				if (CurrentEffects[i].getDuration() != 0){
+					CurrentEffects[i].Update(CharacterTurn, ref CharactersInBattle, CharacterSelected);
+				}
+			}
+		}
+	}
+
 	public int getStackedNumberEffect(string Name){
 		int position;
 		for (position = 0; position< CurrentEffects.Length; position++){
-			if (CurrentEffects[position].getName() == Name){
-				return CurrentEffects[position].getStackedNumber(); 
+			if (CurrentEffects[position] != null){
+				if (CurrentEffects[position].getName() == Name){
+					return CurrentEffects[position].getStackedNumber(); 
+				}
 			}
 		}
 
-		return 0;
+		return -1;
 	}
 
 	public void setStackedNumberEffect(string Name, int StackedNumber){
 		int position;
 		for (position = 0; position< CurrentEffects.Length; position++){
-			if (CurrentEffects[position].getName() == Name){
-				CurrentEffects[position].setStackedNumber(StackedNumber); 
+			if (CurrentEffects[position] != null){
+				if (CurrentEffects[position].getName() == Name){
+					CurrentEffects[position].setStackedNumber(StackedNumber); 
+				}
+			}
+		}
+	}
+
+	public void newEffect(string Name, int StackedNumber, int Duration, int DamageValue, int IDCreator){
+		int position;
+		for (position = 0; position< CurrentEffects.Length; position++){
+			if (CurrentEffects[position] == null){
+				CurrentEffects[position] = new Effect(position, Name, StackedNumber, Duration, DamageValue, IDCreator);
 				break;
 			}
 		}
 	}
 
-	public string getLastSkillUsed(){
-		return OwnClass.getSkillName (LastSkillUsed);
+	public int getDurationEffect(string Name){
+		int position;
+		for (position = 0; position< CurrentEffects.Length; position++){
+			if (CurrentEffects[position] != null){
+				if (CurrentEffects[position].getName() == Name){
+					return CurrentEffects[position].getDuration();
+				}
+			}
+		}
+		return -1;
+	}
+
+	public void setDurationEffect(string Name, int Duration){
+		int position;
+		for (position = 0; position< CurrentEffects.Length; position++){
+			if (CurrentEffects[position] != null){
+				if (CurrentEffects[position].getName() == Name){
+					CurrentEffects[position].setDuration(Duration); 
+				}
+			}
+		}
+	}
+
+	public bool IsNotStun(){
+		int position;
+		for (position = 0; position< CurrentEffects.Length; position++){
+			if (CurrentEffects[position] != null){
+				if(CurrentEffects[position].Stun()){
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 
 	// Getters and Setters
+
+    public Skill getLastSkillUsed()
+    {
+        return OwnClass.getSkill(LastSkillUsed);
+    }
+
+    public void setLastEnemyAttacked(int position)
+    {
+        lastEnemyAttacked = position;
+    }
+
+    public int getLastEnemyAttacked()
+    {
+        return lastEnemyAttacked;
+    }
 
 	public int getID(){
 		return this.ID;
@@ -78,9 +142,11 @@ public class Character {
 	public string getName(){
 		return this.Name;
 	}
-
+	
 	public void setProgressIPBar(float number){
-		this.ProgressIPBar = number;
+		if (IsNotStun ()) {
+			this.ProgressIPBar = number;
+		}
 	}
 
 	public float getProgressIPBar(){
@@ -127,5 +193,7 @@ public class Character {
 		return OwnClass;
 	}
 
-	
+	public Effect[] getCurrentEffects(){
+		return CurrentEffects;
+	}
 }

@@ -638,6 +638,7 @@ public class WorldScript : MonoBehaviour {
 
         while (CalculateDijkstraTarget(shortTermObjective, longTermObjective) >= CalculateDijkstraTarget(GlobalData.agents[GlobalData.currentAgentTurn].currentCell, longTermObjective))
         {
+            //REVISAR
             reachables.Remove(shortTermObjective);
             shortTermObjective = bestObjective(reachables, GlobalData.currentAgentTurn);
         }
@@ -1386,6 +1387,8 @@ public class WorldScript : MonoBehaviour {
             else if (usedAction)
             {
                 usedTurn = true;
+                GlobalData.positionCharacterCombat = new int[] {GlobalData.myAgent, -1};
+                GlobalData.currentBiome = boardCells[GlobalData.agents[GlobalData.currentAgentTurn].currentCell].biome;
                 //Application.LoadLevel("Battle");
                 GlobalData.Battle();
             }

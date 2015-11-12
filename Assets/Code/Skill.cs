@@ -10,6 +10,7 @@ public class Skill {
 	private int TargetID;
 	private int[] AgentID = new int[100];
 	private float Damage;
+    private float LastDamage;
 	private bool NeedEnemy;
 
 	public Skill(int ID, string Name, float CostIP, float CostHealth, float Damage, bool NeedEnemy)
@@ -20,12 +21,12 @@ public class Skill {
 		this.CostHealth = CostHealth;
 		this.Damage = Damage;
 		this.NeedEnemy = NeedEnemy;
-		Debug.Log("Skill " + this.Name + " created");
 	}
 
 	public void Activate(int Attacker, ref Character[] CharactersInBattle, int EnemyFocused)
 	{
 		int StackedNumber;
+        int EnemyAttacked = EnemyFocused;
 		switch (this.Name) {
 
 			// Boar Ryder abilities
@@ -34,13 +35,14 @@ public class Skill {
 				for (int i = 0; i<CharactersInBattle.Length; i++){
 					if (CharactersInBattle[i] != null){
 						if (!CharactersInBattle[i].getAerial() && (CharactersInBattle[Attacker].getBottom() != CharactersInBattle[i].getBottom ())){
-							Debug.Log ("Defender: " + CharactersInBattle [i].getName ());
-							CharactersInBattle[i].setCurrentHealth(CharactersInBattle[i].getCurrentHealth()- (Damage + 4*StackedNumber));
+                            LastDamage = (Damage + 2 * StackedNumber);
+							CharactersInBattle[i].setCurrentHealth(CharactersInBattle[i].getCurrentHealth() - LastDamage);
 							CharactersInBattle[Attacker].setProgressIPBar(CharactersInBattle[Attacker].getProgressIPBar() - CostIP);
+                            EnemyAttacked = i;
 							break;
 						}
 					}
-				}
+				}	
 				if (StackedNumber < 5){
 					CharactersInBattle[Attacker].setStackedNumberEffect("Anger Management", StackedNumber+1);
 				}
@@ -48,31 +50,107 @@ public class Skill {
 
 			case "Axe Throw":
 				StackedNumber = CharactersInBattle[Attacker].getStackedNumberEffect("Anger Management");
-				CharactersInBattle[EnemyFocused].setCurrentHealth(CharactersInBattle[EnemyFocused].getCurrentHealth()- (Damage + 4*StackedNumber));
+                LastDamage = (Damage + 2 * StackedNumber);
+				CharactersInBattle[EnemyFocused].setCurrentHealth(CharactersInBattle[EnemyFocused].getCurrentHealth()- LastDamage);
 				CharactersInBattle[Attacker].setProgressIPBar(CharactersInBattle[Attacker].getProgressIPBar() - CostIP);
 				if (StackedNumber < 5){
 					CharactersInBattle[Attacker].setStackedNumberEffect("Anger Management", StackedNumber+1);
 				}
 				break;
 
-			case "Wild Roar":
+			case "Axe Dunk":
 				StackedNumber = CharactersInBattle[Attacker].getStackedNumberEffect("Anger Management");
-				for (int i = 0; i<CharactersInBattle.Length; i++){
-					if (CharactersInBattle[i] != null){
-						if (CharactersInBattle[Attacker].getBottom() != CharactersInBattle[i].getBottom ()){
-							CharactersInBattle[i].setCurrentHealth(CharactersInBattle[i].getCurrentHealth()- ((Damage*StackedNumber) + 4*StackedNumber));
-							CharactersInBattle[i].setProgressIPBar(CharactersInBattle[i].getProgressIPBar() - (StackedNumber*20));
-						}
-					}
-				}
+                LastDamage = ((Damage * StackedNumber) + 2 * StackedNumber);
+				CharactersInBattle[EnemyFocused].setCurrentHealth(CharactersInBattle[EnemyFocused].getCurrentHealth()- LastDamage);
+				CharactersInBattle[EnemyFocused].setProgressIPBar(CharactersInBattle[EnemyFocused].getProgressIPBar() - (StackedNumber*20));
 				CharactersInBattle[Attacker].setProgressIPBar(CharactersInBattle[Attacker].getProgressIPBar() - CostIP);
 				CharactersInBattle[Attacker].setStackedNumberEffect("Anger Management", StackedNumber/2);
 				break;
 
-			//
+			// Pilumantic abilities
+			case "Pilosity":
+				StackedNumber = CharactersInBattle[EnemyFocused].getStackedNumberEffect("Pilosity Stacks");
+                LastDamage = this.Damage;
+				if (StackedNumber < 5){
+					CharactersInBattle[EnemyFocused].setStackedNumberEffect("Pilosity Stacks", StackedNumber+1);
+				}
+                CharactersInBattle[EnemyFocused].setCurrentHealth(CharactersInBattle[EnemyFocused].getCurrentHealth() - LastDamage);
+				CharactersInBattle[EnemyFocused].setProgressIPBar(CharactersInBattle[EnemyFocused].getProgressIPBar() - CharactersInBattle[EnemyFocused].getProgressIPBar()/10);
+				CharactersInBattle[Attacker].setProgressIPBar(CharactersInBattle[Attacker].getProgressIPBar() - CostIP);
+				break;
 
+			case "Laser Depilation":
+				StackedNumber = CharactersInBattle[EnemyFocused].getStackedNumberEffect("Pilosity Stacks");
+                LastDamage = StackedNumber * Damage;
+				CharactersInBattle[EnemyFocused].setCurrentHealth(CharactersInBattle[EnemyFocused].getCurrentHealth()- LastDamage);
+				if (StackedNumber == 5){
+					CharactersInBattle[EnemyFocused].setProgressIPBar(CharactersInBattle[EnemyFocused].getProgressIPBar() - CharactersInBattle[EnemyFocused].getProgressIPBar()/2);
+				}	
+				CharactersInBattle[EnemyFocused].setStackedNumberEffect("Pilosity Stacks", 0);
+				CharactersInBattle[Attacker].setProgressIPBar(CharactersInBattle[Attacker].getProgressIPBar() - CostIP);
+				break;
 
+			case "Fashion Victim":
+				StackedNumber = CharactersInBattle[EnemyFocused].getStackedNumberEffect("Pilosity Stacks");
+				if (StackedNumber == 0){
+					for (int i = 0; i<CharactersInBattle.Length; i++){
+						if (CharactersInBattle[i] != null){
+							StackedNumber += CharactersInBattle[i].getStackedNumberEffect("Pilosity Stacks");
+							CharactersInBattle[i].setStackedNumberEffect("Pilosity Stacks", 0);
+						}
+					}
+				}
+				if (StackedNumber > 5){
+					StackedNumber = 5;
+				}
+				CharactersInBattle[EnemyFocused].setStackedNumberEffect("Pilosity Stacks", StackedNumber);
+				CharactersInBattle[Attacker].setProgressIPBar(CharactersInBattle[Attacker].getProgressIPBar() - CostIP);
+				break;
+
+			// Dreamwalker abilities
+
+			case "Pierce":
+				StackedNumber = CharactersInBattle[EnemyFocused].getStackedNumberEffect("Pierce Stacks");
+
+				if ((CharactersInBattle[EnemyFocused].getMaxHealth()*0.30) > CharactersInBattle[EnemyFocused].getCurrentHealth()){
+					StackedNumber += 1;
+				}
+				if (CharactersInBattle[EnemyFocused].getAerial()){
+					if (StackedNumber != 1){
+						StackedNumber /= 2;
+					}
+				}
+				if (StackedNumber > 3){
+					StackedNumber = 3;
+				}
+
+                LastDamage = StackedNumber * Damage;
+				
+				for (int i = 0; i<StackedNumber; i++){
+					CharactersInBattle[EnemyFocused].setCurrentHealth(CharactersInBattle[EnemyFocused].getCurrentHealth() - LastDamage);
+				}
+
+				CharactersInBattle[Attacker].setProgressIPBar(CharactersInBattle[Attacker].getProgressIPBar() - CostIP);
+				break;
+
+			case "Daymare":
+				for (int i = 0; i<CharactersInBattle.Length; i++){
+					if (CharactersInBattle[i] != null){
+						CharactersInBattle[i].setStackedNumberEffect("Pierce Stacks", 1);
+						CharactersInBattle[EnemyFocused].setDurationEffect("Pierce Stacks", 0);
+					}
+				}
+				CharactersInBattle[EnemyFocused].setStackedNumberEffect("Pierce Stacks", 3);
+				CharactersInBattle[EnemyFocused].setDurationEffect("Pierce Stacks", 4);
+				CharactersInBattle[Attacker].setProgressIPBar(CharactersInBattle[Attacker].getProgressIPBar() - CostIP);
+				break;
+
+			case "Deep Dream":
+				CharactersInBattle[EnemyFocused].setDurationEffect("DeepDream Effect", 4);
+				CharactersInBattle[Attacker].setProgressIPBar(CharactersInBattle[Attacker].getProgressIPBar() - CostIP);
+				break;
 		}
+        CharactersInBattle[Attacker].setLastEnemyAttacked(EnemyAttacked);
 	}
 
 	public bool getNeedEnemy(){
@@ -86,6 +164,15 @@ public class Skill {
     public int getID()
     {
         return this.ID;
+    }
+
+	public float getDamage(){
+		return this.Damage;
+	}
+
+    public float getLastDamage()
+    {
+        return LastDamage;
     }
 }
 
