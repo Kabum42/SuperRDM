@@ -636,7 +636,9 @@ public class WorldScript : MonoBehaviour {
         reachables = Dijkstra();
         int shortTermObjective = bestObjective(reachables, GlobalData.currentAgentTurn);
 
-        while (CalculateDijkstraTarget(shortTermObjective, longTermObjective) >= CalculateDijkstraTarget(GlobalData.agents[GlobalData.currentAgentTurn].currentCell, longTermObjective))
+
+
+        while (CalculateDijkstraTarget(shortTermObjective, longTermObjective) > CalculateDijkstraTarget(GlobalData.agents[GlobalData.currentAgentTurn].currentCell, longTermObjective))
         {
             //REVISAR
             reachables.Remove(shortTermObjective);
@@ -664,6 +666,14 @@ public class WorldScript : MonoBehaviour {
                 bestValue = cellValue(availableCells[i], agent);
             }
         }
+
+        if (bestAux < 0 || bestAux >= availableCells.Count)
+        {
+            Debug.Log("BEST AUX:" + bestAux);
+            Debug.Log("BEST VALUE:" + bestValue);
+            Debug.Log("LOLASO:" + availableCells.Count);
+        }
+
         return availableCells[bestAux];
     }
 
