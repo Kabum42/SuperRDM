@@ -20,6 +20,9 @@ public class VisualInterface : MonoBehaviour {
 
 	private List<int>[] availableTargets = new List<int>[3];
 
+    private AudioSource menuOk;
+    private AudioSource menuBack;
+
 	// Use this for initialization
 	void Awake () {
 
@@ -35,6 +38,14 @@ public class VisualInterface : MonoBehaviour {
 
         skills.transform.localScale = new Vector3(0f, 0f, 0f);
         skills.SetActive(false);
+
+        menuOk = gameObject.AddComponent<AudioSource>();
+        menuOk.clip = Resources.Load("Music/Menu/MenuOk") as AudioClip;
+        menuOk.volume = 0.85f;
+
+        menuBack = gameObject.AddComponent<AudioSource>();
+        menuBack.clip = Resources.Load("Music/Menu/MenuBack") as AudioClip;
+        menuBack.volume = 0.85f;
 	
 	}
 
@@ -94,6 +105,7 @@ public class VisualInterface : MonoBehaviour {
 
                 if (Input.GetKeyDown(KeyCode.Escape))
                 {
+                    menuBack.Play();
                     characterSelectable = false;
                 }
 
@@ -104,6 +116,7 @@ public class VisualInterface : MonoBehaviour {
 
                 if (Input.GetKeyDown(KeyCode.Return))
                 {
+                    menuOk.Play();
                     skillSelectable = false;
                     characterSelectable = false;
                     vBattle.setOrders(currentSkillHolder, availableTargets[currentSkillHolder][currentCharacterTarget]);
@@ -137,6 +150,7 @@ public class VisualInterface : MonoBehaviour {
 
                 if (Input.GetKeyDown(KeyCode.Return))
                 {
+                    menuOk.Play();
                     if (availableTargets[currentSkillHolder].Count == 0)
                     {
                         skillSelectable = false;
