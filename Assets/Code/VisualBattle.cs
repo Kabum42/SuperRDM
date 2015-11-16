@@ -33,8 +33,24 @@ public class VisualBattle : MonoBehaviour {
         {
             AllowInteraction();
         }
+
+        Character[] temp = GetCurrentCharacters();
+
+        for (int i = 0; i < visualCharacters.Length; i++)
+        {
+            if (visualCharacters[i] != null)
+            {
+                float percentHealth = (float)temp[i].getCurrentHealth() / (float)temp[i].getMaxHealth();
+                visualCharacters[i].health.GetComponent<Animator>().Play("Health", 0, percentHealth);
+            }
+        }
 	
 	}
+
+    public Character[] GetCurrentCharacters()
+    {
+        return bs.getCurrentCharacters();
+    }
 
     public void AllowInteraction()
     {

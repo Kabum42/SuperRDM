@@ -452,5 +452,10 @@ public class BattleScript : MonoBehaviour {
 
 	}
 
+    public Character[] GetCurrentCharacters()
+    {
+        return CurrentCharacters;
+    }
+
 }
 

@@ -15,6 +15,7 @@ public class VisualCharacter : MonoBehaviour {
     private GameObject animated2;
 	private string lastAnimationOrder;
     public Bounds characterBounds;
+    public GameObject health;
     private GameObject text1;
     private GameObject text2;
     private GameObject blood1;
@@ -65,6 +66,8 @@ public class VisualCharacter : MonoBehaviour {
 
         bloodBFAnimation = root.transform.FindChild("BloodBFAnimation").gameObject;
         bloodBFAnimation.SetActive(false);
+
+        health = root.transform.FindChild("Health").gameObject;
 
         bloodBFSplat = root.transform.FindChild("BloodBFSplat").gameObject;
         bloodBFSplat.transform.localScale = new Vector3(0f, 0f, 0f);
