@@ -72,6 +72,8 @@ public class WorldScript : MonoBehaviour {
     private GameObject action2Option1;
     private GameObject action2Option2;
 
+	private bool fadingBattle = false;
+
     private float thinkingIA = 1f;
 
 
@@ -745,6 +747,12 @@ public class WorldScript : MonoBehaviour {
     void Update()
     {
 
+		if (!fadingBattle && fading.GetComponent<SpriteRenderer> ().color.a > 0f) {
+
+			fading.GetComponent<SpriteRenderer>().color = new Color(fading.GetComponent<SpriteRenderer>().color.r, fading.GetComponent<SpriteRenderer>().color.g, fading.GetComponent<SpriteRenderer>().color.b, fading.GetComponent<SpriteRenderer> ().color.a -Time.deltaTime);
+
+		}
+
         if (phase == 2 && GlobalData.currentAgentTurn == GlobalData.myAgent && !usedDijkstra && movingList == null)
         {
             reachables = Dijkstra();
@@ -922,7 +930,6 @@ public class WorldScript : MonoBehaviour {
             if (transition >= 1f)
             {
                 transition = 1f;
-                fading.SetActive(false);
                 phase = 1;
             }
 
@@ -1376,31 +1383,39 @@ public class WorldScript : MonoBehaviour {
         {
             if (usedTurn)
             {
-                if (GlobalData.online)
-                {
-                    if (int.Parse(Network.player.ToString()) == 0)
-                    {
-                        // ES EL SERVER
-                        GetComponent<NetworkView>().RPC("nextTurnRPC", RPCMode.All);
-                    }
-                    else
-                    {
-                        // ES UN CLIENTE
-                        GetComponent<NetworkView>().RPC("nextTurnRequestRPC", RPCMode.Server, Network.player);
-                    }
-                }
-                else
-                {
-                    nextTurn();
-                }
+				if (fadingBattle) {
+					fading.GetComponent<SpriteRenderer>().color = new Color(fading.GetComponent<SpriteRenderer>().color.r, fading.GetComponent<SpriteRenderer>().color.g, fading.GetComponent<SpriteRenderer>().color.b, fading.GetComponent<SpriteRenderer>().color.a +Time.deltaTime);
+					if (fading.GetComponent<SpriteRenderer>().color.a >= 1f) {
+						fadingBattle = false;
+						GlobalData.Battle();
+					}
+				}
+				else {
+					if (GlobalData.online)
+					{
+						if (int.Parse(Network.player.ToString()) == 0)
+						{
+							// ES EL SERVER
+							GetComponent<NetworkView>().RPC("nextTurnRPC", RPCMode.All);
+						}
+						else
+						{
+							// ES UN CLIENTE
+							GetComponent<NetworkView>().RPC("nextTurnRequestRPC", RPCMode.Server, Network.player);
+						}
+					}
+					else
+					{
+						nextTurn();
+					}
+				}
             }
             else if (usedAction)
             {
                 usedTurn = true;
                 GlobalData.positionCharacterCombat = new int[] {GlobalData.myAgent, -1};
                 GlobalData.currentBiome = boardCells[GlobalData.agents[GlobalData.currentAgentTurn].currentCell].biome;
-                //Application.LoadLevel("Battle");
-                GlobalData.Battle();
+				fadingBattle = true;
             }
         }
         

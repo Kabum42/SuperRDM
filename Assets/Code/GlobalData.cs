@@ -140,7 +140,6 @@ public static class GlobalData {
 
     public static void Battle()
     {
-        worldObject.SetActive(false);
         Application.LoadLevelAdditive("Battle");
     }
 

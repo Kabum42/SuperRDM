@@ -14,6 +14,8 @@ public class VisualBattle : MonoBehaviour {
     public int skillOrder = -1;
     public int targetOrder = -1;
 
+	private AudioSource musicBattle;
+
 	// Use this for initialization
 	void Start () {
 
@@ -23,6 +25,14 @@ public class VisualBattle : MonoBehaviour {
         vInterface = (Instantiate(Resources.Load("Prefabs/VisualInterface")) as GameObject).GetComponent<VisualInterface>();
         vInterface.root.transform.parent = this.gameObject.transform;
         vInterface.vBattle = this;
+
+		musicBattle = gameObject.AddComponent<AudioSource>();
+		musicBattle.clip = Resources.Load("Music/Battle_Boss") as AudioClip;
+		musicBattle.volume = 1f;
+		musicBattle.loop = true;
+		musicBattle.Play();
+
+		GlobalData.worldObject.SetActive (false);
 	
 	}
 	
@@ -41,7 +51,7 @@ public class VisualBattle : MonoBehaviour {
             if (visualCharacters[i] != null)
             {
                 float percentHealth = (float)temp[i].getCurrentHealth() / (float)temp[i].getMaxHealth();
-                visualCharacters[i].health.GetComponent<Animator>().Play("Health", 0, percentHealth);
+                visualCharacters[i].health.GetComponent<Animator>().Play("Health", 0, Mathf.Clamp(percentHealth, 0f, 0.9999999f));
             }
         }
 	
