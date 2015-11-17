@@ -422,12 +422,10 @@ public class BattleScript : MonoBehaviour {
 		}
 
 		if (Bottom == 0) {
-            GlobalData.World();
-            Destroy(GameObject.Find("Battle"));
+			vb.EndBattle();
 		} 
 		else if (Top == 0){
-            GlobalData.World();
-            Destroy(GameObject.Find("Battle"));
+			vb.EndBattle();
 		}
 	}
 

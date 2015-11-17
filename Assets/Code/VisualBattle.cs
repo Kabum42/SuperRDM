@@ -14,6 +14,10 @@ public class VisualBattle : MonoBehaviour {
     public int skillOrder = -1;
     public int targetOrder = -1;
 
+	public GameObject fading;
+
+	private bool endingBattle = false;
+
 	private AudioSource musicBattle;
 
 	// Use this for initialization
@@ -25,6 +29,9 @@ public class VisualBattle : MonoBehaviour {
         vInterface = (Instantiate(Resources.Load("Prefabs/VisualInterface")) as GameObject).GetComponent<VisualInterface>();
         vInterface.root.transform.parent = this.gameObject.transform;
         vInterface.vBattle = this;
+
+		fading = this.gameObject.transform.FindChild ("Fading").gameObject;
+		Hacks.SpriteRendererAlpha (fading, 1f);
 
 		musicBattle = gameObject.AddComponent<AudioSource>();
 		musicBattle.clip = Resources.Load("Music/Battle_Boss") as AudioClip;
@@ -39,21 +46,48 @@ public class VisualBattle : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            AllowInteraction();
-        }
+		if (endingBattle) {
+			if (fading.GetComponent<SpriteRenderer> ().color.a < 1f) {
+				Hacks.SpriteRendererAlpha (fading, fading.GetComponent<SpriteRenderer> ().color.a + Time.deltaTime*2f);
+				if (fading.GetComponent<SpriteRenderer> ().color.a >= 1f) {
+					GlobalData.World();
+					Destroy(GameObject.Find("Battle"));
+				}
+			}
+		} else {
 
-        Character[] temp = GetCurrentCharacters();
+			if (fading.GetComponent<SpriteRenderer> ().color.a > 0f) {
+				Hacks.SpriteRendererAlpha (fading, fading.GetComponent<SpriteRenderer> ().color.a - Time.deltaTime);
+			}
+		}
 
-        for (int i = 0; i < visualCharacters.Length; i++)
-        {
-            if (visualCharacters[i] != null)
-            {
-                float percentHealth = (float)temp[i].getCurrentHealth() / (float)temp[i].getMaxHealth();
-                visualCharacters[i].health.GetComponent<Animator>().Play("Health", 0, Mathf.Clamp(percentHealth, 0f, 0.9999999f));
-            }
-        }
+		Character[] temp = GetCurrentCharacters();
+		
+		for (int i = 0; i < visualCharacters.Length; i++)
+		{
+			if (visualCharacters[i] != null)
+			{
+
+				if (!endingBattle) {
+					visualCharacters[i].currentTrueHealth = Mathf.Clamp((float)temp[i].getCurrentHealth(), 0.000001f, float.MaxValue);
+					visualCharacters[i].currentTrueMaxHealth = (float)temp[i].getMaxHealth();
+				}
+
+				float percentHealth = 1;
+				
+				if (visualCharacters[i].previousHealth < visualCharacters[i].currentVirtualHealth-0.001f  ||  visualCharacters[i].previousHealth > visualCharacters[i].currentVirtualHealth+0.001f) {
+					
+					visualCharacters[i].previousHealth = Mathf.Lerp(visualCharacters[i].previousHealth, visualCharacters[i].currentVirtualHealth, Time.deltaTime*10f);
+					
+				}
+				
+				percentHealth = Mathf.Clamp (visualCharacters[i].previousHealth / visualCharacters[i].currentTrueMaxHealth, 0.000001f, 0.9999999f);
+				visualCharacters[i].health.GetComponent<Animator>().Play("Health", 0, percentHealth);
+				
+			}
+		}
+
+
 	
 	}
 
@@ -81,6 +115,8 @@ public class VisualBattle : MonoBehaviour {
 		int currentLeft = 0;
 		int currentRight = 0;
 
+		Character[] temp = GetCurrentCharacters();
+
 		for (int i = 0; i < bs.getCurrentCharacters().Length; i++) {
 
 			if (bs.getCurrentCharacters()[i] != null) {
@@ -88,6 +124,10 @@ public class VisualBattle : MonoBehaviour {
 				visualCharacters[i] = (Instantiate(Resources.Load("Prefabs/VisualCharacterObject")) as GameObject).GetComponent<VisualCharacter>();
 				visualCharacters[i].gameObject.transform.parent = this.gameObject.transform;
 				visualCharacters[i].setClass(bs.getCurrentCharacters()[i].getOwnClass());
+				visualCharacters[i].previousHealth = (float)temp[i].getCurrentHealth();
+				visualCharacters[i].currentTrueHealth = visualCharacters[i].previousHealth;
+				visualCharacters[i].currentVirtualHealth = visualCharacters[i].previousHealth;
+				visualCharacters[i].positionInArray = i;
 
 				if (bs.getCurrentCharacters()[i].getBottom()) {
 					// ESTA A LA IZQUIERDA
@@ -108,4 +148,11 @@ public class VisualBattle : MonoBehaviour {
 		}
 
 	}
+
+	public void EndBattle() {
+
+		endingBattle = true;
+
+	}
+
 }

@@ -37,6 +37,13 @@ public class VisualCharacter : MonoBehaviour {
 
     private string statusPerformance = "none";
 
+	public float previousHealth;
+	public float currentVirtualHealth;
+	public float currentTrueHealth;
+	public float currentTrueMaxHealth;
+
+	public int positionInArray;
+
 	//public Material palette1;
 	//public Material palette2;
 	//public Material palette3;
@@ -548,6 +555,8 @@ public class VisualCharacter : MonoBehaviour {
         }
 
         representing = s.getID();
+
+		currentVirtualHealth = currentTrueHealth;
 
     }
 
