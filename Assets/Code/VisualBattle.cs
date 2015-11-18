@@ -15,6 +15,7 @@ public class VisualBattle : MonoBehaviour {
     public int targetOrder = -1;
 
 	public GameObject fading;
+	public GameObject fading2;
 
 	private bool endingBattle = false;
 
@@ -31,7 +32,9 @@ public class VisualBattle : MonoBehaviour {
         vInterface.vBattle = this;
 
 		fading = this.gameObject.transform.FindChild ("Fading").gameObject;
-		Hacks.SpriteRendererAlpha (fading, 1f);
+		Hacks.SpriteRendererAlpha (fading, 0f);
+
+		fading2 = this.gameObject.transform.FindChild ("Fading2").gameObject;
 
 		musicBattle = gameObject.AddComponent<AudioSource>();
 		musicBattle.clip = Resources.Load("Music/Battle_Boss") as AudioClip;
@@ -54,10 +57,10 @@ public class VisualBattle : MonoBehaviour {
 					Destroy(GameObject.Find("Battle"));
 				}
 			}
+			fading2.GetComponent<MeshRenderer>().material.SetFloat("_Cutoff", 1f);
 		} else {
-
-			if (fading.GetComponent<SpriteRenderer> ().color.a > 0f) {
-				Hacks.SpriteRendererAlpha (fading, fading.GetComponent<SpriteRenderer> ().color.a - Time.deltaTime);
+			if (fading2.GetComponent<MeshRenderer>().material.GetFloat("_Cutoff") < 1f) {
+				fading2.GetComponent<MeshRenderer>().material.SetFloat("_Cutoff", fading2.GetComponent<MeshRenderer>().material.GetFloat("_Cutoff") + Time.deltaTime);
 			}
 		}
 
@@ -146,6 +149,23 @@ public class VisualBattle : MonoBehaviour {
 			}
 
 		}
+
+	}
+
+	public bool isWaiting() {
+
+		bool aux = false;
+
+		for (int i = 0; i < visualCharacters.Length; i++) {
+			if (visualCharacters [i] != null) {
+				if (visualCharacters[i].performing != -1 || visualCharacters[i].representing != -1) {
+					aux = true;
+					break;
+				}
+			}
+		}
+
+		return aux;
 
 	}
 

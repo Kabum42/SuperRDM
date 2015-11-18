@@ -504,6 +504,7 @@ public class VisualCharacter : MonoBehaviour {
 
     public void Represent(Skill s, float[] aux)
     {
+
         if (s.getID() == 0)
         {
             // ES EL S1 DEL BARBARO
