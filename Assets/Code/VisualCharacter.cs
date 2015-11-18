@@ -158,6 +158,7 @@ public class VisualCharacter : MonoBehaviour {
 	void Update () {
 
 
+
         if (statusPerformance == "chasing")
         {
             // ACERCARSE

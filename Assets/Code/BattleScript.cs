@@ -55,7 +55,6 @@ public class BattleScript : MonoBehaviour {
 		vb = (Instantiate(Resources.Load("Prefabs/VisualBattleObject")) as GameObject).GetComponent<VisualBattle>();
 		vb.gameObject.transform.parent = GameObject.Find ("Battle").transform;
 		vb.setBattleScript (this);
-		//vb.visualCharacters [0].Perform (GlobalData.Skills [1], vb.visualCharacters [3], new float[]{34f});
 
 	}
 	

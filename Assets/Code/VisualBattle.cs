@@ -64,7 +64,11 @@ public class VisualBattle : MonoBehaviour {
 			}
 		}
 
+
+
 		Character[] temp = GetCurrentCharacters();
+
+
 		
 		for (int i = 0; i < visualCharacters.Length; i++)
 		{
@@ -76,17 +80,20 @@ public class VisualBattle : MonoBehaviour {
 					visualCharacters[i].currentTrueMaxHealth = (float)temp[i].getMaxHealth();
 				}
 
+
+
 				float percentHealth = 1;
 				
 				if (visualCharacters[i].previousHealth < visualCharacters[i].currentVirtualHealth-0.001f  ||  visualCharacters[i].previousHealth > visualCharacters[i].currentVirtualHealth+0.001f) {
 					
 					visualCharacters[i].previousHealth = Mathf.Lerp(visualCharacters[i].previousHealth, visualCharacters[i].currentVirtualHealth, Time.deltaTime*10f);
+
+					percentHealth = Mathf.Clamp (visualCharacters[i].previousHealth / visualCharacters[i].currentTrueMaxHealth, 0.000001f, 0.9999999f);
+					visualCharacters[i].health.GetComponent<Animator>().Play("Health", 0, percentHealth);
 					
 				}
-				
-				percentHealth = Mathf.Clamp (visualCharacters[i].previousHealth / visualCharacters[i].currentTrueMaxHealth, 0.000001f, 0.9999999f);
-				visualCharacters[i].health.GetComponent<Animator>().Play("Health", 0, percentHealth);
-				
+
+
 			}
 		}
 
@@ -124,6 +131,7 @@ public class VisualBattle : MonoBehaviour {
 
 			if (bs.getCurrentCharacters()[i] != null) {
 
+
 				visualCharacters[i] = (Instantiate(Resources.Load("Prefabs/VisualCharacterObject")) as GameObject).GetComponent<VisualCharacter>();
 				visualCharacters[i].gameObject.transform.parent = this.gameObject.transform;
 				visualCharacters[i].setClass(bs.getCurrentCharacters()[i].getOwnClass());
@@ -131,6 +139,9 @@ public class VisualBattle : MonoBehaviour {
 				visualCharacters[i].currentTrueHealth = visualCharacters[i].previousHealth;
 				visualCharacters[i].currentVirtualHealth = visualCharacters[i].previousHealth;
 				visualCharacters[i].positionInArray = i;
+
+				float percentHealth = Mathf.Clamp (visualCharacters[i].previousHealth / visualCharacters[i].currentTrueMaxHealth, 0.000001f, 0.9999999f);
+				visualCharacters[i].health.GetComponent<Animator>().Play("Health", 0, percentHealth);
 
 				if (bs.getCurrentCharacters()[i].getBottom()) {
 					// ESTA A LA IZQUIERDA
@@ -142,8 +153,6 @@ public class VisualBattle : MonoBehaviour {
 					visualCharacters[i].SetBattlePosition(false, currentRight);
 					currentRight++;
 				}
-
-
 
 
 			}
