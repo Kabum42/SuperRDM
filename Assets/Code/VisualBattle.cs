@@ -36,7 +36,12 @@ public class VisualBattle : MonoBehaviour {
 
 		fading2 = this.gameObject.transform.FindChild ("Fading2").gameObject;
 
+		fading2.transform.localScale = new Vector3 (3000f, 3000f, 1.1f);
 
+
+		/*
+		fading2.GetComponent<SpriteRenderer> ().color = new Color (1f, 1f, 1f);
+		fading2.GetComponent<SpriteRenderer> ().material.SetColor("_Color", new Color(1f, 1f, 1f));
 		fading2.transform.localScale = new Vector3 (1.1f, 1.1f, 1.1f);
 
 		int resolution = 512;
@@ -62,7 +67,7 @@ public class VisualBattle : MonoBehaviour {
 		fading2.GetComponent<SpriteRenderer> ().material.SetTexture ("_AlphaTex", texture);
 		fading2.GetComponent<SpriteRenderer> ().sprite = Sprite.Create(GlobalData.auxTexture, new Rect(0, 0, GlobalData.auxTexture.width, GlobalData.auxTexture.height), new Vector2(0.5f, 0.5f));
 		fading2.GetComponent<SpriteRenderer> ().material.SetTexture ("_MainTex", GlobalData.auxTexture);
-
+		*/
 
 		musicBattle = gameObject.AddComponent<AudioSource>();
 		musicBattle.clip = Resources.Load("Music/Battle_Boss") as AudioClip;

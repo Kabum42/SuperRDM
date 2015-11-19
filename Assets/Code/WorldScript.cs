@@ -1386,7 +1386,7 @@ public class WorldScript : MonoBehaviour {
             {
 				if (fadingBattle) {
 					fading.GetComponent<SpriteRenderer>().color = new Color(fading.GetComponent<SpriteRenderer>().color.r, fading.GetComponent<SpriteRenderer>().color.g, fading.GetComponent<SpriteRenderer>().color.b, fading.GetComponent<SpriteRenderer>().color.a +Time.deltaTime*2f);
-					if (fading.GetComponent<SpriteRenderer>().color.a >= 0f) {
+					if (fading.GetComponent<SpriteRenderer>().color.a >= 1f) {
 						fadingBattle = false;
 						GlobalData.Battle();
 					}
@@ -1989,6 +1989,7 @@ public class WorldScript : MonoBehaviour {
 
     }
 
+	/*
 	void OnPostRender() {
 		if (fadingBattle && !takedScreenshot) {
 			takedScreenshot = true;
@@ -1997,6 +1998,7 @@ public class WorldScript : MonoBehaviour {
 			GlobalData.auxTexture.Apply ();
 		}
 	}
+	*/
     
 
 }
