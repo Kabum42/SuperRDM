@@ -25,8 +25,29 @@ public class TestScript : MonoBehaviour {
 		player2.setClass (GlobalData.Classes [0]);
 		player1.SetBattlePosition(true, 0);
 		player2.SetBattlePosition(false, 0);
+		/*
+		int resolution = 512;
+		Texture2D texture = new Texture2D(resolution, resolution, TextureFormat.RGB24, true);
 
+		float offsetX = Random.Range (1000f, 2000f);
+		float offsetY = Random.Range (1000f, 2000f);
+		float offsetZ = 0f;
 
+		float division = (float)resolution;
+
+		for (int y = 0; y < resolution; y++) {
+			for (int x = 0; x < resolution; x++) {
+				Vector3 point = new Vector3(offsetX + (float)x/division, offsetY + (float)y/division, offsetZ);
+				float value = Noise.Sum(Noise.valueMethods[1], point, 2f, 10, 3f, 0.75f); 
+				//float value = Noise.Perlin2D(n, 1f);
+				texture.SetPixel(x, y, new Color(value, value, value));
+			}
+		}
+
+		texture.Apply();
+
+		GameObject.Find ("Chest").GetComponent<SpriteRenderer> ().material.SetTexture ("_AlphaTex", texture);
+		*/
 	}
 	
 	// Update is called once per frame

@@ -74,6 +74,7 @@
      <Compile Include="Assets\ThirdParty\Spriter2Unity\Example\Editor\AnimationTestScriptInspector.cs" />
      <None Include="Assets\ThirdParty\Spriter2Unity\Example\Spriter Project\GreyGuy\Copyright_Information_Please_Read.txt" />
      <None Include="Assets\Shaders\HSVDefault.shader" />
+     <None Include="Assets\Shaders\Transition.shader" />
      <None Include="Assets\Resources\Fonts\Comfortaa\OFL.txt" />
      <None Include="Assets\Resources\Languages.txt" />
  <Reference Include="UnityEditor.Advertisements">

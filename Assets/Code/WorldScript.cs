@@ -73,6 +73,7 @@ public class WorldScript : MonoBehaviour {
     private GameObject action2Option2;
 
 	private bool fadingBattle = false;
+	public bool takedScreenshot = false;
 
     private float thinkingIA = 1f;
 
@@ -1385,7 +1386,7 @@ public class WorldScript : MonoBehaviour {
             {
 				if (fadingBattle) {
 					fading.GetComponent<SpriteRenderer>().color = new Color(fading.GetComponent<SpriteRenderer>().color.r, fading.GetComponent<SpriteRenderer>().color.g, fading.GetComponent<SpriteRenderer>().color.b, fading.GetComponent<SpriteRenderer>().color.a +Time.deltaTime*2f);
-					if (fading.GetComponent<SpriteRenderer>().color.a >= 1f) {
+					if (fading.GetComponent<SpriteRenderer>().color.a >= 0f) {
 						fadingBattle = false;
 						GlobalData.Battle();
 					}
@@ -1987,6 +1988,15 @@ public class WorldScript : MonoBehaviour {
         return false;
 
     }
+
+	void OnPostRender() {
+		if (fadingBattle && !takedScreenshot) {
+			takedScreenshot = true;
+			GlobalData.auxTexture = new Texture2D (Screen.width, Screen.height);
+			GlobalData.auxTexture.ReadPixels(new Rect(0, 0, Screen.width, Screen.height), 0, 0);
+			GlobalData.auxTexture.Apply ();
+		}
+	}
     
 
 }

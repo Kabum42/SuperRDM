@@ -39,6 +39,8 @@ public static class GlobalData {
     public static float bossFatigue = 0f;
     public static float crossfadeAnimation = 0.15f;
 
+	public static Texture2D auxTexture;
+
     // Use this for initialization
     public static void Start () {
 
@@ -146,6 +148,7 @@ public static class GlobalData {
     public static void World()
     {
         worldObject.SetActive(true);
+		worldObject.transform.FindChild("Main Camera").gameObject.GetComponent<WorldScript> ().takedScreenshot = false;
     }
 
 }

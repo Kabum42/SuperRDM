@@ -36,6 +36,34 @@ public class VisualBattle : MonoBehaviour {
 
 		fading2 = this.gameObject.transform.FindChild ("Fading2").gameObject;
 
+
+		fading2.transform.localScale = new Vector3 (1.1f, 1.1f, 1.1f);
+
+		int resolution = 512;
+		Texture2D texture = new Texture2D(resolution, resolution, TextureFormat.RGB24, true);
+		
+		float offsetX = Random.Range (1000f, 2000f);
+		float offsetY = Random.Range (1000f, 2000f);
+		float offsetZ = 0f;
+		
+		float division = (float)resolution;
+		
+		for (int y = 0; y < resolution; y++) {
+			for (int x = 0; x < resolution; x++) {
+				Vector3 point = new Vector3(offsetX + (float)x/division, offsetY + (float)y/division, offsetZ);
+				float value = Noise.Sum(Noise.valueMethods[1], point, 2f, 10, 3f, 0.75f); 
+				//float value = Noise.Perlin2D(n, 1f);
+				texture.SetPixel(x, y, new Color(value, value, value));
+			}
+		}
+		
+		texture.Apply();
+		
+		fading2.GetComponent<SpriteRenderer> ().material.SetTexture ("_AlphaTex", texture);
+		fading2.GetComponent<SpriteRenderer> ().sprite = Sprite.Create(GlobalData.auxTexture, new Rect(0, 0, GlobalData.auxTexture.width, GlobalData.auxTexture.height), new Vector2(0.5f, 0.5f));
+		fading2.GetComponent<SpriteRenderer> ().material.SetTexture ("_MainTex", GlobalData.auxTexture);
+
+
 		musicBattle = gameObject.AddComponent<AudioSource>();
 		musicBattle.clip = Resources.Load("Music/Battle_Boss") as AudioClip;
 		musicBattle.volume = 1f;
@@ -57,10 +85,10 @@ public class VisualBattle : MonoBehaviour {
 					Destroy(GameObject.Find("Battle"));
 				}
 			}
-			fading2.GetComponent<MeshRenderer>().material.SetFloat("_Cutoff", 1f);
+			fading2.GetComponent<SpriteRenderer>().material.SetFloat("_Cutoff", 1f);
 		} else {
-			if (fading2.GetComponent<MeshRenderer>().material.GetFloat("_Cutoff") < 1f) {
-				fading2.GetComponent<MeshRenderer>().material.SetFloat("_Cutoff", fading2.GetComponent<MeshRenderer>().material.GetFloat("_Cutoff") + Time.deltaTime);
+			if (fading2.GetComponent<SpriteRenderer>().material.GetFloat("_Cutoff") < 1f) {
+				fading2.GetComponent<SpriteRenderer>().material.SetFloat("_Cutoff", fading2.GetComponent<SpriteRenderer>().material.GetFloat("_Cutoff") + Time.deltaTime/2f);
 			}
 		}
 
