@@ -1988,17 +1988,6 @@ public class WorldScript : MonoBehaviour {
         return false;
 
     }
-
-	/*
-	void OnPostRender() {
-		if (fadingBattle && !takedScreenshot) {
-			takedScreenshot = true;
-			GlobalData.auxTexture = new Texture2D (Screen.width, Screen.height);
-			GlobalData.auxTexture.ReadPixels(new Rect(0, 0, Screen.width, Screen.height), 0, 0);
-			GlobalData.auxTexture.Apply ();
-		}
-	}
-	*/
     
 
 }
