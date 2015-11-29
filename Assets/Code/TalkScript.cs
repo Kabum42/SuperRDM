@@ -9,6 +9,7 @@ public class TalkScript : MonoBehaviour {
 	private bool nextSound = true;
 
     private AudioSource backgroundMusic;
+	private AudioSource backgroundMusic2;
     private AudioSource menuOk;
     private AudioSource closeSpeech;
 
@@ -93,6 +94,14 @@ public class TalkScript : MonoBehaviour {
 			backgroundMusic.volume = 0f;
 			backgroundMusic.loop = true;
 			backgroundMusic.Play();
+
+			backgroundMusic2 = gameObject.AddComponent<AudioSource>();
+			backgroundMusic2.clip = Resources.Load("Music/Ron_Fireplace") as AudioClip;
+			backgroundMusic2.volume = 1f;
+			backgroundMusic2.loop = true;
+			backgroundMusic2.panStereo = 0.7f;
+			backgroundMusic2.Play();
+
 			
 			speakers = new GameObject[2];
 			speakers[0] = GameObject.Find ("Player");
