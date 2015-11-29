@@ -14,17 +14,29 @@ ESTÁ MUY COLOCAO
 
 [RANDOM_GREETINGS]
 
-* Tu cara me resulta familiar, creo que nos hemos visto en otro sueño.
+X* Eso no es lo que iba a decir. Perdona, a veces tengo premoniciones sobre lo que van a decir los demás y lo he dicho en alto.
+- Eso no es lo que iba a decir.
+
+X* Soy Ron Weasel, pero puedes llamarme Ron Weasel.
+
+X* Tu cara me resulta familiar, creo que nos hemos visto en otro sueño.
 
 * A veces cojo unas ramitas y me imagino que soy un humano sentado frente a un cristal mágico que me muestra mundos de fantasía...
 Pero luego lo pienso y es una vida muy triste.
+
+X* Oye, ¿yo no te debía 3 monedas de oro? Eh... no, espera. Quería decir 0 monedas de oro.
+
+X* Lo que para un hombre es gato muerto para otro es cena gratis.
+
+X* Hay dos cosas infinitas en este mundo : el Universo y tú madre.
+
+X* Apuesto a que debajo de esas ropas estás desnudo.
+
 
 [RANDOM_FAREWELLS]
 
 * Y recuerda... el sentido de la vida es... (aparece una explosión de 
 humo pero no se mueve del sitio) ... ¿Aún sigues ahí?
-
-[RANDOM_BOTH]
 
 * Los batidos de colillas están más allá del bien y del mal.
 
@@ -32,19 +44,14 @@ humo pero no se mueve del sitio) ... ¿Aún sigues ahí?
 
 * Mano de milenio y gamba.
 
-* Hay dos cosas infinitas : el Universo y tú madre. 
+* Lo último que se pierde son los recuerdos.
 
-* Lo último que se pierde son los recuerdos. Hahahaha!
+* Quienes creen que la magia lo hace todo, terminan haciéndolo todo por la magia.
 
-* Lo que para un hombre es gato muerto para otro es cena gratis.
+* A veces la felicidad está en el fondo de un tarro de pepinillos.
 
-* Quienes creen que el dinero lo hace todo, terminan haciéndolo todo por dinero.
 
-* La gente busca la felicidad sin saber que está en el fondo de un tarro de pepinillos.
 
-* Oye, ¿yo no te debía 3 monedas de oro? Eh... no, espera. Quería decir 0 monedas de oro.
-
-* Seguro que debajo de esas ropas estás desnudo.
 
 
 

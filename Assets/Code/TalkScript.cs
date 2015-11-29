@@ -29,8 +29,16 @@ public class TalkScript : MonoBehaviour {
     private static int eventRon = 0;
     private static int eventDouchebards = 1;
 
+	// COSAS DE RON
+	private List<List<Bubble>> ronRandomGreetings = new List<List<Bubble>>();
+	private List<List<Bubble>> ronRandomFarewells = new List<List<Bubble>>();
+	private List<List<Bubble>> ronRandomBoth = new List<List<Bubble>>();
+	//
+
     private GameObject eventRonG;
     private GameObject eventDouchebardsG;
+
+	private int currentEvent = eventRon;
 
     private float lineWidth = 0.035f;
 
@@ -66,122 +74,202 @@ public class TalkScript : MonoBehaviour {
 
         options = new OptionsSquare();
 
-        InitializeSpeakers(eventDouchebards);
+		initializeEvent (currentEvent);
 
         target = bubbles[0].text;
 
 	}
 
-    void InitializeSpeakers(int eventID)
-    {
-        
-        if (eventID == eventRon)
-        {
-            eventRonG.SetActive(true);
+	void initializeEvent(int eventID) {
 
-            backgroundMusic = gameObject.AddComponent<AudioSource>();
-            backgroundMusic.clip = Resources.Load("Music/Ron_Weasel") as AudioClip;
-            backgroundMusic.volume = 0f;
-            backgroundMusic.loop = true;
-            backgroundMusic.Play();
+		if (eventID == eventRon)
+		{
+			background.GetComponent<SpriteRenderer>().color = new Color (138f/255f, 125f/255f, 188f/255f);
 
+			eventRonG.SetActive(true);
+			
+			backgroundMusic = gameObject.AddComponent<AudioSource>();
+			backgroundMusic.clip = Resources.Load("Music/Ron_Weasel") as AudioClip;
+			backgroundMusic.volume = 0f;
+			backgroundMusic.loop = true;
+			backgroundMusic.Play();
+			
 			speakers = new GameObject[2];
-            speakers[0] = GameObject.Find ("Player");
-            speakers[1] = GameObject.Find ("Ron");
+			speakers[0] = GameObject.Find ("Player");
+			speakers[1] = GameObject.Find ("Ron");
+			
+			int localPhase;
+			List<Bubble> auxBubbles;
 
-            int localPhase = 0;
-            float randomHello = Random.Range(0f, 1f);
+			// GREETINGS
+			localPhase = 0;
+			auxBubbles = new List<Bubble>();
+			auxBubbles.Add(new Bubble(1, localPhase, localPhase, "That's not what I was going to say", new Vector2(3f, 3f), null));
+			localPhase++;
+			auxBubbles.Add(new Bubble(1, localPhase, localPhase, "Sorry", new Vector2(3f, 3f), null));
+			localPhase++;
+			auxBubbles.Add(new Bubble(1, localPhase, localPhase, "Sometimes I've got premonitions...\nI just said out loud what\n you where going to say", new Vector2(3f, 3f), null));
+			localPhase++;
+			auxBubbles.Add(new Bubble(0, localPhase, localPhase, "That's not what I was going to say", new Vector2(-3f, 3f), null));
+			localPhase++;
+			auxBubbles.Add(new Bubble(1, localPhase, localPhase, "( ͡° ͜ʖ ͡°)", new Vector2(3f, 3f), null));
+			localPhase++;
+			ronRandomGreetings.Add(auxBubbles);
 
-            if (randomHello < 1f / 3f)
-            {
-                bubbles.Add(new Bubble(1, localPhase, localPhase, "I'm Ron Weasel, but\n you can call me Ron Weasel", new Vector2(3f, 3f), null));
-                localPhase++;
-                bubbles.Add(new Bubble(1, localPhase, localPhase, "( ͡° ͜ʖ ͡°)", new Vector2(3f, 3f), null));
-                localPhase++;
-            }
-            else if (randomHello < 2f / 3f)
-            {
-                bubbles.Add(new Bubble(1, localPhase, localPhase, "Hey bro, don't trust Harry Otter", new Vector2(3f, 3f), null));
-                localPhase++;
-            }
-            else
-            {
-                bubbles.Add(new Bubble(1, localPhase, localPhase, "This shoe tastes like... sweaty foot.\nFar from strawberry candy", new Vector2(3f, 3f), null));
-                localPhase++;
-            }
+			localPhase = 0;
+			auxBubbles = new List<Bubble>();
+			auxBubbles.Add(new Bubble(1, localPhase, localPhase, "I'm Ron Weasel, but\n you can call me Ron Weasel", new Vector2(3f, 3f), null));
+			localPhase++;
+			auxBubbles.Add(new Bubble(1, localPhase, localPhase, "( ͡° ͜ʖ ͡°)", new Vector2(3f, 3f), null));
+			localPhase++;
+			ronRandomGreetings.Add(auxBubbles);
 
-            bubbles.Add(new Bubble(0, localPhase, localPhase, "...", new Vector2(-3f, 3f), null));
-            localPhase++;
+			localPhase = 0;
+			auxBubbles = new List<Bubble>();
+			auxBubbles.Add(new Bubble(1, localPhase, localPhase, "Your face looks familiar,\nI think we've met before\nin another dream", new Vector2(3f, 3f), null));
+			localPhase++;
+			ronRandomGreetings.Add(auxBubbles);
 
-            bubbles.Add(new Bubble(1, localPhase, localPhase, "If you answer my question correctly\n I will give you something VERY special", new Vector2(3f, 3f), null));
-            localPhase++;
+			localPhase = 0;
+			auxBubbles = new List<Bubble>();
+			auxBubbles.Add(new Bubble(1, localPhase, localPhase, "One man's dead cat is \nanother man's free dinner", new Vector2(3f, 3f), null));
+			localPhase++;
+			ronRandomGreetings.Add(auxBubbles);
 
-            float randomQuestion = Random.Range(0f, 1f);
+			localPhase = 0;
+			auxBubbles = new List<Bubble>();
+			auxBubbles.Add(new Bubble(1, localPhase, localPhase, "Wait a moment", new Vector2(3f, 3f), null));
+			localPhase++;
+			auxBubbles.Add(new Bubble(1, localPhase, localPhase, "Didn't I owe you 3 gold coins?", new Vector2(3f, 3f), null));
+			localPhase++;
+			auxBubbles.Add(new Bubble(1, localPhase, localPhase, "Eh... I mean...", new Vector2(3f, 3f), null));
+			localPhase++;
+			auxBubbles.Add(new Bubble(1, localPhase, localPhase, "... 0 gold coins", new Vector2(3f, 3f), null));
+			localPhase++;
+			auxBubbles.Add(new Bubble(1, localPhase, localPhase, "Forget it", new Vector2(3f, 3f), null));
+			localPhase++;
+			ronRandomGreetings.Add(auxBubbles);
 
-            if (randomQuestion < 1f)
-            {
-                bubbles.Add(new Bubble(1, localPhase, localPhase + 1, "What's the difference between a duck?", new Vector2(5f, 3f), null));
-                localPhase++;
-            }
+			localPhase = 0;
+			auxBubbles = new List<Bubble>();
+			auxBubbles.Add(new Bubble(1, localPhase, localPhase, "I should stop drinking", new Vector2(3f, 3f), null));
+			localPhase++;
+			auxBubbles.Add(new Bubble(1, localPhase, localPhase, "My hallucinations\nare getting uglier", new Vector2(3f, 3f), null));
+			localPhase++;
+			auxBubbles.Add(new Bubble(0, localPhase, localPhase, "...", new Vector2(-3f, 3f), null));
+			localPhase++;
+			auxBubbles.Add(new Bubble(1, localPhase, localPhase, "Wait, are you for real?\nHaha, I was just kidding!", new Vector2(3f, 3f), null));
+			localPhase++;
+			auxBubbles.Add(new Bubble(1, localPhase, localPhase, "I couldn't even imagine\na face like yours", new Vector2(3f, 3f), null));
+			localPhase++;
+			auxBubbles.Add(new Bubble(1, localPhase, localPhase, "( ͡° ͜ʖ ͡°)", new Vector2(3f, 3f), null));
+			localPhase++;
+			ronRandomGreetings.Add(auxBubbles);
 
-            bubbles.Add(new Bubble(0, localPhase, localPhase, "", new Vector2(-5.5f, 2.5f), new string[]{"I don't know", "A duck", "Fuck you Ron"}));
-        
-        }
-        if (eventID == eventDouchebards)
-        {
-            eventDouchebardsG.SetActive(true);
+			localPhase = 0;
+			auxBubbles = new List<Bubble>();
+			auxBubbles.Add(new Bubble(1, localPhase, localPhase, "There are 2 infinite things\nin the world :", new Vector2(3f, 3f), null));
+			localPhase++;
+			auxBubbles.Add(new Bubble(1, localPhase, localPhase, "The Universe...", new Vector2(3f, 3f), null));
+			localPhase++;
+			auxBubbles.Add(new Bubble(1, localPhase, localPhase, "...and your mother.", new Vector2(3f, 3f), null));
+			localPhase++;
+			auxBubbles.Add(new Bubble(1, localPhase, localPhase, "( ͡° ͜ʖ ͡°)", new Vector2(3f, 3f), null));
+			localPhase++;
+			ronRandomGreetings.Add(auxBubbles);
 
-            backgroundMusic = gameObject.AddComponent<AudioSource>();
-            backgroundMusic.clip = Resources.Load("Music/Douchebards") as AudioClip;
-            backgroundMusic.volume = 1f;
-            backgroundMusic.loop = true;
-            backgroundMusic.Play();
+			localPhase = 0;
+			auxBubbles = new List<Bubble>();
+			auxBubbles.Add(new Bubble(1, localPhase, localPhase, "I bet you're naked\nunder those clothes", new Vector2(3f, 3f), null));
+			localPhase++;
+			auxBubbles.Add(new Bubble(1, localPhase, localPhase, "( ͡° ͜ʖ ͡°)", new Vector2(3f, 3f), null));
+			localPhase++;
+			ronRandomGreetings.Add(auxBubbles);
 
-            speakers = new GameObject[2];
-            speakers[0] = GameObject.Find("Player");
-            speakers[1] = GameObject.Find("Leader");
+			//ronRandomGreetings.Add("Your face looks familiar, I think we've met before in another dream");
 
-            int localPhase = 0;
-            float randomHello = Random.Range(0f, 1f);
+			int randomInt = Random.Range(0, ronRandomGreetings.Count);
+			//randomInt = ronRandomGreetings.Count-1;
+			localPhase = 0;
 
-            if (randomHello < 1f / 3f)
-            {
-                bubbles.Add(new Bubble(1, localPhase, localPhase, "I'm Ron Weasel, but\n you can call me Ron Weasel", new Vector2(3f, 3f), null));
-                localPhase++;
-                bubbles.Add(new Bubble(1, localPhase, localPhase, "( ͡° ͜ʖ ͡°)", new Vector2(3f, 3f), null));
-                localPhase++;
-            }
-            else if (randomHello < 2f / 3f)
-            {
-                bubbles.Add(new Bubble(1, localPhase, localPhase, "Hey bro, don't trust Harry Otter", new Vector2(3f, 3f), null));
-                localPhase++;
-            }
-            else
-            {
-                bubbles.Add(new Bubble(1, localPhase, localPhase, "This shoe tastes like... sweaty foot.\nFar from strawberry candy", new Vector2(3f, 3f), null));
-                localPhase++;
-            }
+			for (int i = 0; i < ronRandomGreetings[randomInt].Count; i++) {
+				bubbles.Add(ronRandomGreetings[randomInt][i]);
+				localPhase = ronRandomGreetings[randomInt][i].beginPhase +1;
+			}
 
-            bubbles.Add(new Bubble(0, localPhase, localPhase, "...", new Vector2(-3f, 3f), null));
-            localPhase++;
+			
+			bubbles.Add(new Bubble(0, localPhase, localPhase, "...", new Vector2(-3f, 3f), null));
+			localPhase++;
+			
+			bubbles.Add(new Bubble(1, localPhase, localPhase, "Answer my riddle correctly\nand I will give you\nsomething VERY special", new Vector2(3f, 3f), null));
+			localPhase++;
+			
+			float randomQuestion = Random.Range(0f, 1f);
+			
+			if (randomQuestion < 1f)
+			{
+				bubbles.Add(new Bubble(1, localPhase, localPhase + 1, "What's the difference\n between a duck?", new Vector2(5f, 3f), null));
+				localPhase++;
+			}
+			
+			bubbles.Add(new Bubble(0, localPhase, localPhase, "", new Vector2(-5.5f, 2.5f), new string[]{"That's not even a proper question", "One of the two is green", "The feathers"}));
+			
+		}
+		if (eventID == eventDouchebards)
+		{
+			eventDouchebardsG.SetActive(true);
+			
+			backgroundMusic = gameObject.AddComponent<AudioSource>();
+			backgroundMusic.clip = Resources.Load("Music/Douchebards") as AudioClip;
+			backgroundMusic.volume = 1f;
+			backgroundMusic.loop = true;
+			backgroundMusic.Play();
+			
+			speakers = new GameObject[2];
+			speakers[0] = GameObject.Find("Player");
+			speakers[1] = GameObject.Find("Leader");
+			
+			int localPhase = 0;
+			float randomHello = Random.Range(0f, 1f);
+			
+			if (randomHello < 1f / 3f)
+			{
+				bubbles.Add(new Bubble(1, localPhase, localPhase, "I'm Ron Weasel, but\n you can call me Ron Weasel", new Vector2(3f, 3f), null));
+				localPhase++;
+				bubbles.Add(new Bubble(1, localPhase, localPhase, "( ͡° ͜ʖ ͡°)", new Vector2(3f, 3f), null));
+				localPhase++;
+			}
+			else if (randomHello < 2f / 3f)
+			{
+				bubbles.Add(new Bubble(1, localPhase, localPhase, "Hey bro, don't trust Harry Otter", new Vector2(3f, 3f), null));
+				localPhase++;
+			}
+			else
+			{
+				bubbles.Add(new Bubble(1, localPhase, localPhase, "This shoe tastes like... sweaty foot.\nFar from strawberry candy", new Vector2(3f, 3f), null));
+				localPhase++;
+			}
+			
+			bubbles.Add(new Bubble(0, localPhase, localPhase, "...", new Vector2(-3f, 3f), null));
+			localPhase++;
+			
+			bubbles.Add(new Bubble(1, localPhase, localPhase, "If you answer my question correctly\n I will give you something VERY special", new Vector2(3f, 3f), null));
+			localPhase++;
+			
+			float randomQuestion = Random.Range(0f, 1f);
+			
+			if (randomQuestion < 1f)
+			{
+				bubbles.Add(new Bubble(1, localPhase, localPhase + 1, "What's the difference between a duck?", new Vector2(5f, 3f), null));
+				localPhase++;
+			}
+			
+			bubbles.Add(new Bubble(0, localPhase, localPhase, "", new Vector2(-5.5f, 2.5f), new string[] { "I don't know", "A duck", "Fuck you Ron" }));
+			
+		}
 
-            bubbles.Add(new Bubble(1, localPhase, localPhase, "If you answer my question correctly\n I will give you something VERY special", new Vector2(3f, 3f), null));
-            localPhase++;
+	}
 
-            float randomQuestion = Random.Range(0f, 1f);
-
-            if (randomQuestion < 1f)
-            {
-                bubbles.Add(new Bubble(1, localPhase, localPhase + 1, "What's the difference between a duck?", new Vector2(5f, 3f), null));
-                localPhase++;
-            }
-
-            bubbles.Add(new Bubble(0, localPhase, localPhase, "", new Vector2(-5.5f, 2.5f), new string[] { "I don't know", "A duck", "Fuck you Ron" }));
-
-        }
-
-        
-    }
 
     void addTag(GameObject g, string s)
     {
@@ -192,74 +280,82 @@ public class TalkScript : MonoBehaviour {
     {
 
     }
-	
+
 	// Update is called once per frame
 	void Update () {
 
-        if (backgroundMusic.volume < 0.5f)
-        {
-            backgroundMusic.volume += Time.deltaTime/2f;
-            if (backgroundMusic.volume > 0.5f)
-            {
-                backgroundMusic.volume = 0.5f;
-            }
-        }
+		if (currentEvent == eventRon) {
 
-        if (nextPhase == 1)
-        {
-            globalPhase++;
+			updateRon();
 
-            if (toRecycle.Count > 0)
-            {
-                closeSpeech.Play();
-            }
+		}
 
-            for (int i = 0; i < toRecycle.Count; i++)
-            {
-                speechBubblePool[toRecycle[i]].text.GetComponent<TextMesh>().text = "";
-                speechBubblePool[toRecycle[i]].currentLetter = 0;
-                speechBubblePool[toRecycle[i]].root.SetActive(false);
-            }
-        }
-        nextPhase = 0;
-        toRecycle = new List<int>();
+	}
 
-        int currentSpeechBubble = 0;
+	private void updateRon() {
 
-        for (int i = 0; i < bubbles.Count; i++)
-        {
-            if (bubbles[i].beginPhase <= globalPhase && bubbles[i].endPhase >= globalPhase)
-            {
+		if (backgroundMusic.volume < 0.5f)
+		{
+			backgroundMusic.volume += Time.deltaTime/2f;
+			if (backgroundMusic.volume > 0.5f)
+			{
+				backgroundMusic.volume = 0.5f;
+			}
+		}
+		
+		if (nextPhase == 1)
+		{
+			globalPhase++;
+			
+			if (toRecycle.Count > 0)
+			{
+				closeSpeech.Play();
+			}
+			
+			for (int i = 0; i < toRecycle.Count; i++)
+			{
+				speechBubblePool[toRecycle[i]].text.GetComponent<TextMesh>().text = "";
+				speechBubblePool[toRecycle[i]].currentLetter = 0;
+				speechBubblePool[toRecycle[i]].root.SetActive(false);
+			}
+		}
+		nextPhase = 0;
+		toRecycle = new List<int>();
+		
+		int currentSpeechBubble = 0;
+		
+		for (int i = 0; i < bubbles.Count; i++)
+		{
+			if (bubbles[i].beginPhase <= globalPhase && bubbles[i].endPhase >= globalPhase)
+			{
+				
+				if (bubbles[i].options == null)
+				{
+					// ES SOLO TEXTO
+					if (speechBubblePool.Count <= currentSpeechBubble)
+					{
+						SpeechBubble s = new SpeechBubble();
+						s.root.SetActive(false);
+						speechBubblePool.Add(s);
+					}
+					Write(bubbles[i], speechBubblePool[currentSpeechBubble]);
+					currentSpeechBubble++;
+				}
+				else
+				{
+					// SON OPCIONES
+					Write(bubbles[i], options);
+				}
+				
+				
+			}
+		}
+		
+		for (int i = currentSpeechBubble; i < speechBubblePool.Count; i++)
+		{
+			speechBubblePool[i].root.SetActive(false);
+		}
 
-                if (bubbles[i].options == null)
-                {
-                    // ES SOLO TEXTO
-                    if (speechBubblePool.Count <= currentSpeechBubble)
-                    {
-                        SpeechBubble s = new SpeechBubble();
-                        s.root.SetActive(false);
-                        speechBubblePool.Add(s);
-                    }
-                    Write(bubbles[i], speechBubblePool[currentSpeechBubble]);
-                    currentSpeechBubble++;
-                }
-                else
-                {
-                    // SON OPCIONES
-                    Write(bubbles[i], options);
-                }
-
-                
-            }
-        }
-
-        for (int i = currentSpeechBubble; i < speechBubblePool.Count; i++)
-        {
-            speechBubblePool[i].root.SetActive(false);
-        }
-        
-
-	
 	}
 
     private void Write(Bubble b, SpeechBubble s)
@@ -314,7 +410,7 @@ public class TalkScript : MonoBehaviour {
 
         if (Input.GetKeyDown(KeyCode.Return) && s.currentLetter > 0)
         {
-            if (globalPhase < 10)
+            if (true)
             {
                 if (s.currentLetter < target.Length)
                 {
@@ -485,17 +581,17 @@ public class TalkScript : MonoBehaviour {
 
             bubbles.Add(new Bubble(0, globalPhase+1, globalPhase+2, b.options[o.selected], new Vector2(-3f, 3f), null));
 
-            if (b.options[o.selected] == "I don't know")
+			if (b.options[o.selected] == "That's not even a proper question")
             {
-                bubbles.Add(new Bubble(1, globalPhase + 2, globalPhase + 2, "Then go away!", new Vector2(3f, 3f), null));
+				bubbles.Add(new Bubble(1, globalPhase + 2, globalPhase + 2, "( ͡° ͜ʖ ͡°)", new Vector2(3f, 3f), null));
             }
-            if (b.options[o.selected] == "A duck")
+			if (b.options[o.selected] == "One of the two is green")
             {
                 bubbles.Add(new Bubble(1, globalPhase + 2, globalPhase + 2, "How did you know it?!", new Vector2(3f, 3f), null));
             }
-            if (b.options[o.selected] == "Fuck you Ron")
+			if (b.options[o.selected] == "The feathers")
             {
-                bubbles.Add(new Bubble(1, globalPhase + 2, globalPhase + 2, "( ͡° ͜ʖ ͡°)", new Vector2(3f, 3f), null));
+                bubbles.Add(new Bubble(1, globalPhase + 2, globalPhase + 2, "Wrong answer!", new Vector2(3f, 3f), null));
             }
             
             o.root.SetActive(false);
