@@ -99,7 +99,7 @@ public class MenuScript : MonoBehaviour {
         intro.clip = Resources.Load("Music/Menu/Intro") as AudioClip;
         intro.volume = 0f;
         intro.loop = true;
-        intro.Play();
+        //intro.Play();
 
         menuOk = gameObject.AddComponent<AudioSource>();
         menuOk.clip = Resources.Load("Music/Menu/MenuOk") as AudioClip;

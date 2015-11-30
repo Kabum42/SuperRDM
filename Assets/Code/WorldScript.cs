@@ -87,11 +87,13 @@ public class WorldScript : MonoBehaviour {
 
         //boardCells = new BoardCell[37];
 
+
         musicWorld = gameObject.AddComponent<AudioSource>();
         musicWorld.clip = Resources.Load("Music/World") as AudioClip;
         musicWorld.volume = 0f;
         musicWorld.loop = true;
-        musicWorld.Play();
+		musicWorld.playOnAwake = false;
+        //musicWorld.Play();
 
         selectCellEffect = gameObject.AddComponent<AudioSource>();
         selectCellEffect.clip = Resources.Load("Sounds/SelectCell") as AudioClip;

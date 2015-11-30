@@ -35,6 +35,8 @@ public class BattleScript : MonoBehaviour {
 	private int Top;
 	private int Bottom;
 
+	private bool Automatic;
+
 	private VisualBattle vb;
 
 	// Use this for initialization
@@ -44,17 +46,23 @@ public class BattleScript : MonoBehaviour {
 			GlobalData.Start();
 		}
 
-		InitializeGameObjects();
+		//InitializeGameObjects();
+		Automatic = true;
 		AsignCharacters ();
 		InitializeBars();
 		CheckPositions ();
-		UpdateInformation ();
+		//UpdateInformation ();
 		LogCharacters ();
 		Player = (MainCharacter) CurrentCharacters [PlayerCharacter];
 
 		vb = (Instantiate(Resources.Load("Prefabs/VisualBattleObject")) as GameObject).GetComponent<VisualBattle>();
 		vb.gameObject.transform.parent = GameObject.Find ("Battle").transform;
 		vb.setBattleScript (this);
+		if (Automatic) {
+			PlayerCharacter = -1;
+		} else {
+			PlayerCharacter = 0;
+		}
 		//vb.visualCharacters [0].Perform (GlobalData.Skills [1], vb.visualCharacters [3], new float[]{34f});
 
 	}
@@ -62,14 +70,38 @@ public class BattleScript : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
-        if (vb.hasOrders)
-        {
-            SelectedSkill = true;
-            SkillSelected = vb.skillOrder;
-            CurrentEnemy = vb.targetOrder;
-            vb.hasOrders = false;
-        }
+		if (Automatic) {
+			AutomaticMode ();
+		} else {
+			ManualMode ();
+		}
+		//UpdateInformation ();
+	}
 
+	void AutomaticMode (){
+		if (CharacterTurn == -1) {
+			CalculateProgressIP ();
+		} 
+		else {
+			if (UpdateHealth){
+				SetHealth ();
+			}
+			else {
+				Turn ();
+				SelectedSkill = false;
+			}
+		}
+	}
+
+	void ManualMode (){
+		if (vb.hasOrders)
+		{
+			SelectedSkill = true;
+			SkillSelected = vb.skillOrder;
+			CurrentEnemy = vb.targetOrder;
+			vb.hasOrders = false;
+		}
+		
 		if (CharacterTurn == -1) {
 			TimerIPBar += Time.deltaTime;
 			if (TimerIPBar > 0.01) {
@@ -96,12 +128,12 @@ public class BattleScript : MonoBehaviour {
 					}
 				} 
 				else {
-                    vb.AllowInteraction();
+					vb.AllowInteraction();
 				}
 			}
 		}
-		UpdateInformation ();
 	}
+
 
 	public Character[] getCurrentCharacters() {
 
@@ -135,6 +167,8 @@ public class BattleScript : MonoBehaviour {
         }
         else
         {
+			CurrentCharacters[auxposition] = new MainCharacter(26, "Barbarian", 175, 100, GlobalData.Classes[0]);
+			/*
             switch (GlobalData.currentBiome)
             {
                 case Biome.Prairie:
@@ -152,6 +186,7 @@ public class BattleScript : MonoBehaviour {
                 default:
                     break;
             }
+            */
             CurrentCharacters[auxposition].setBottom(false);
         }
 
@@ -314,7 +349,7 @@ public class BattleScript : MonoBehaviour {
         }
         UpdateEffects ();
 		if (lastSkill != null) {
-			SkillUsed.GetComponent<TextMesh> ().text = CurrentCharacters [CharacterTurn].getName () + " used: " + lastSkill.getName ();
+			//SkillUsed.GetComponent<TextMesh> ().text = CurrentCharacters [CharacterTurn].getName () + " used: " + lastSkill.getName ();
 			if (CheckInstantHealth()) {
 				UpdateHealth = true;
 			} 
@@ -324,8 +359,8 @@ public class BattleScript : MonoBehaviour {
 			}
 		} 
 		else {
-			SkillUsed.GetComponent<TextMesh> ().text = CurrentCharacters [CharacterTurn].getName () + " used: " 
-				+ "Simple Attack";
+			//SkillUsed.GetComponent<TextMesh> ().text = CurrentCharacters [CharacterTurn].getName () + " used: " 
+			//	+ "Simple Attack";
 			UpdateHealth = true;
 		}
 
@@ -363,6 +398,20 @@ public class BattleScript : MonoBehaviour {
 		return false;
 	}
 
+	void SetHealth(){
+		for (int i = 0; i<ActualCharacters; i++) {
+			if (CurrentCharacters[i] != null){
+				if (CurrentCharacters[i].getCurrentHealth() != CurrentCharacters[i].getPreviousHealth()){
+					CurrentCharacters[i].setPreviousHealth(CurrentCharacters[i].getCurrentHealth());
+					UpdateHealth = false;
+					CharacterTurn = -1;
+					CheckLifes ();
+					CheckEnd ();
+				}
+			}
+		}
+	}
+
 	void CheckHealth(){
 		for (int i = 0; i<ActualCharacters; i++) {
 			if (CurrentCharacters[i] != null){
@@ -390,8 +439,10 @@ public class BattleScript : MonoBehaviour {
 		for (int i = 0; i<ActualCharacters; i++) {
 			if (CurrentCharacters[i] != null){
 				if (CurrentCharacters[i].getCurrentHealth() <= 0){
-					if (CurrentCharacters[i].getBottom () != CurrentCharacters[PlayerCharacter].getBottom ()){
-						Player.setExperience(70);
+					if (PlayerCharacter != -1){
+						if (CurrentCharacters[i].getBottom () != CurrentCharacters[PlayerCharacter].getBottom ()){
+							Player.setExperience(70);
+						}
 					}
 					CurrentCharacters[i] = null;
 					CheckPositions();
@@ -422,10 +473,14 @@ public class BattleScript : MonoBehaviour {
 		}
 
 		if (Bottom == 0) {
+			LogCharacters ();
+			Debug.Log ("Top Wins");
             GlobalData.World();
             Destroy(GameObject.Find("Battle"));
 		} 
 		else if (Top == 0){
+			LogCharacters ();
+			Debug.Log ("Bot Wins");
             GlobalData.World();
             Destroy(GameObject.Find("Battle"));
 		}
