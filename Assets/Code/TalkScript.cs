@@ -35,6 +35,8 @@ public class TalkScript : MonoBehaviour {
     private float partyHard = 6.1f;
     private float partyPoints = 0f;
     private float timePartying = 0f;
+    private List<arrowParty> arrowsParty = new List<arrowParty>();
+    private int currentArrowParty = 0;
 
 
 	private List<List<Bubble>> randomGreetings = new List<List<Bubble>>();
@@ -47,9 +49,20 @@ public class TalkScript : MonoBehaviour {
     private GameObject light2;
     private GameObject light3;
     private GameObject silhouette1;
+    private List<GameObject> arrows1 = new List<GameObject>();
+    private GameObject arrowPositive1G;
+
     private GameObject silhouette2;
+    private List<GameObject> arrows2 = new List<GameObject>();
+    private GameObject arrowPositive2G;
+
     private GameObject silhouette3;
+    private List<GameObject> arrows3 = new List<GameObject>();
+    private GameObject arrowPositive3G;
+
     private GameObject silhouette4;
+    private List<GameObject> arrows4 = new List<GameObject>();
+    private GameObject arrowPositive4G;
 
     private float light1Z = 0f;
     private float light2Z = 0f;
@@ -71,14 +84,35 @@ public class TalkScript : MonoBehaviour {
         light2.SetActive(false);
         light3 = GameObject.Find("EventDouchebards/Light3/TrueLight");
         light3.SetActive(false);
-        silhouette1 = GameObject.Find("EventDouchebards/ArrowsGame/Silhouette1");
+        silhouette1 = GameObject.Find("EventDouchebards/ArrowsGame/Left/Silhouette1");
         silhouette1.SetActive(false);
-        silhouette2 = GameObject.Find("EventDouchebards/ArrowsGame/Silhouette2");
+        silhouette2 = GameObject.Find("EventDouchebards/ArrowsGame/Down/Silhouette2");
         silhouette2.SetActive(false);
-        silhouette3 = GameObject.Find("EventDouchebards/ArrowsGame/Silhouette3");
+        silhouette3 = GameObject.Find("EventDouchebards/ArrowsGame/Up/Silhouette3");
         silhouette3.SetActive(false);
-        silhouette4 = GameObject.Find("EventDouchebards/ArrowsGame/Silhouette4");
+        silhouette4 = GameObject.Find("EventDouchebards/ArrowsGame/Right/Silhouette4");
         silhouette4.SetActive(false);
+        arrowPositive1G = GameObject.Find("EventDouchebards/ArrowsGame/Left/arrowPositive");
+        arrowPositive1G.SetActive(false);
+        arrowPositive2G = GameObject.Find("EventDouchebards/ArrowsGame/Down/arrowPositive");
+        arrowPositive2G.SetActive(false);
+        arrowPositive3G = GameObject.Find("EventDouchebards/ArrowsGame/Up/arrowPositive");
+        arrowPositive3G.SetActive(false);
+        arrowPositive4G = GameObject.Find("EventDouchebards/ArrowsGame/Right/arrowPositive");
+        arrowPositive4G.SetActive(false);
+
+        for (int i = 1; i <= 6; i++)
+        {
+            arrows1.Add(GameObject.Find("EventDouchebards/ArrowsGame/Left/arrow"+i));
+            arrows1[i - 1].SetActive(false);
+            arrows2.Add(GameObject.Find("EventDouchebards/ArrowsGame/Down/arrow" + i));
+            arrows2[i - 1].SetActive(false);
+            arrows3.Add(GameObject.Find("EventDouchebards/ArrowsGame/Up/arrow" + i));
+            arrows3[i - 1].SetActive(false);
+            arrows4.Add(GameObject.Find("EventDouchebards/ArrowsGame/Right/arrow" + i));
+            arrows4[i - 1].SetActive(false);
+        }
+
         eventDouchebardsG = GameObject.Find("EventDouchebards");
         eventDouchebardsG.SetActive(false);
         
@@ -288,6 +322,44 @@ public class TalkScript : MonoBehaviour {
                 localPhase = randomGreetings[randomInt][i].beginPhase + 1;
             }
 
+            float current = 6.1f;
+            float tempo = 0.7507f;
+
+            //arrowsParty.Add(new arrowParty(current, "left"));
+            current += 0.285f;
+
+            // PHASE 1
+            for (int i = 0; i < 24; i++)
+            {
+                string direction = "none";
+                float auxRand = Random.Range(0f, 100f);
+                if (auxRand > 75f) { direction = "left"; }
+                else if (auxRand > 50f) { direction = "down"; }
+                else if (auxRand > 25f) { direction = "up"; }
+                else { direction = "right"; }
+
+                arrowsParty.Add(new arrowParty(current, direction));
+                current += tempo;
+            }
+
+            // EPIC PHASE
+
+
+            // PHASE 2
+            current = 30.421f;
+            for (int i = 0; i < 18; i++)
+            {
+                string direction = "none";
+                float auxRand = Random.Range(0f, 100f);
+                if (auxRand > 75f) { direction = "left"; }
+                else if (auxRand > 50f) { direction = "down"; }
+                else if (auxRand > 25f) { direction = "up"; }
+                else { direction = "right"; }
+
+                arrowsParty.Add(new arrowParty(current, direction));
+                current += tempo;
+            }
+
 		}
 
 	}
@@ -310,8 +382,27 @@ public class TalkScript : MonoBehaviour {
 
         if (currentEvent == eventDouchebards)
         {
+            Debug.Log(partyPoints);
+            if (backgroundMusic.isPlaying) { 
 
-            if (backgroundMusic.isPlaying) { timePartying += Time.deltaTime; }
+                timePartying += Time.deltaTime;
+                if (currentArrowParty < arrowsParty.Count && arrowsParty[currentArrowParty].timeToShine -2f <= timePartying)
+                {
+                    placeArrow(arrowsParty[currentArrowParty].direction);
+                    currentArrowParty++;
+                }
+
+                moveArrows(ref arrows1, Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.A), ref arrowPositive1G);
+                moveArrows(ref arrows2, Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.S), ref arrowPositive2G);
+                moveArrows(ref arrows3, Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.W), ref arrowPositive3G);
+                moveArrows(ref arrows4, Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.D), ref arrowPositive4G);
+
+                checkExpanding(arrowPositive1G);
+                checkExpanding(arrowPositive2G);
+                checkExpanding(arrowPositive3G);
+                checkExpanding(arrowPositive4G);
+
+            }
 
             if (backgroundMusic.isPlaying && partyHard > 0f)
             {
@@ -491,12 +582,12 @@ public class TalkScript : MonoBehaviour {
                         // MAL
                         bubbles.Add(new Bubble(1, globalPhase, globalPhase, "You're not at our\nlevel, buddy", new Vector2(2f, 3f), null));
                     }
-                    else if (partyPoints < 100f)
+                    else if (partyPoints < 99.9f)
                     {
                         // BIEN (RECOMPENSA)
                         bubbles.Add(new Bubble(1, globalPhase, globalPhase, "Wow, very nice!\nHere's your reward", new Vector2(2f, 3f), null));
                     }
-                    else if (partyPoints >= 100f)
+                    else 
                     {
                         // PERFECTO
                         bubbles.Add(new Bubble(1, globalPhase, globalPhase, "INCREDIBLE!!\n100% PERFECT", new Vector2(2f, 3f), null));
@@ -851,6 +942,74 @@ public class TalkScript : MonoBehaviour {
             
         }
 
+    }
+
+    private class arrowParty
+    {
+        public float timeToShine = 0f;
+        public string direction = "none";
+
+        public arrowParty(float time, string dir)
+        {
+            timeToShine = time;
+            direction = dir;
+        }
+
+    }
+
+    private void placeArrow(string direction)
+    {
+        List<GameObject> targetList = new List<GameObject>();
+
+        if (direction == "left") { targetList = arrows1; }
+        else if (direction == "down") { targetList = arrows2; }
+        else if (direction == "up") { targetList = arrows3; }
+        else if (direction == "right") { targetList = arrows4; }
+
+        for (int i = 0; i < targetList.Count; i++)
+        {
+            if (!targetList[i].activeInHierarchy)
+            {
+                targetList[i].transform.localPosition = new Vector3(targetList[i].transform.localPosition.x, -10f, targetList[i].transform.localPosition.z);
+                targetList[i].SetActive(true);
+                break;
+            }
+        }
+
+    }
+
+    private void moveArrows(ref List<GameObject> list, bool correctInput, ref GameObject positive)
+    {
+        for (int i = 0; i < list.Count; i++)
+        {
+            if (list[i].activeInHierarchy)
+            {
+                list[i].transform.localPosition = new Vector3(list[i].transform.localPosition.x, list[i].transform.localPosition.y + Time.deltaTime * 5f, list[i].transform.localPosition.z);
+                if (list[i].transform.localPosition.y >= -0.4f && list[i].transform.localPosition.y <= 0.4f && correctInput)
+                {
+                    partyPoints += 100f/(24f+18f);
+                    list[i].SetActive(false);
+                    positive.transform.localScale = new Vector3(0.3f, 0.3f, 0.3f);
+                    Hacks.SpriteRendererAlpha(positive, 1f);
+                    positive.SetActive(true);
+                }
+                if (list[i].transform.localPosition.y >= 3f) { list[i].SetActive(false); }
+            }
+        }
+    }
+
+    private void checkExpanding(GameObject g)
+    {
+        if (g.activeInHierarchy)
+        {
+            Hacks.SpriteRendererAlpha(g, g.GetComponent<SpriteRenderer>().color.a - Time.deltaTime * 4f);
+            float scale = g.transform.localScale.x + Time.deltaTime;
+            g.transform.localScale = new Vector3(scale, scale, scale);
+            if (g.GetComponent<SpriteRenderer>().color.a <= 0f)
+            {
+                g.SetActive(false);
+            }
+        }
     }
 
 }
