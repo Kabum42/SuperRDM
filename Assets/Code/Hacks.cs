@@ -18,12 +18,23 @@ public static class Hacks {
     // SPRITE RENDERER ALPHA
     public static void SpriteRendererAlpha(GameObject g, float a)
     {
-        g.GetComponent<SpriteRenderer>().color = new Color(g.GetComponent<SpriteRenderer>().color.r, g.GetComponent<SpriteRenderer>().color.g, g.GetComponent<SpriteRenderer>().color.b, a);
+        SpriteRendererAlpha(g.GetComponent<SpriteRenderer>(), a);
     }
 
     public static void SpriteRendererAlpha(SpriteRenderer s, float a)
     {
         s.color = new Color(s.color.r, s.color.g, s.color.b, a);
+    }
+
+    // SPRITE RENDERER COLOR
+    public static void SpriteRendererColor(GameObject g, Color c)
+    {
+        SpriteRendererColor(g.GetComponent<SpriteRenderer>(), c);
+    }
+
+    public static void SpriteRendererColor(SpriteRenderer s, Color c)
+    {
+        s.color = new Color(c.r, c.g, c.b, s.color.a);
     }
 
     // BINARY PERLIN

@@ -30,16 +30,23 @@ public class TalkScript : MonoBehaviour {
     private static int eventRon = 0;
     private static int eventDouchebards = 1;
 
-	// COSAS DE RON
-	private List<List<Bubble>> ronRandomGreetings = new List<List<Bubble>>();
-	private List<List<Bubble>> ronRandomFarewells = new List<List<Bubble>>();
-	private List<List<Bubble>> ronRandomBoth = new List<List<Bubble>>();
-	//
+    private int currentEvent = eventDouchebards;
+
+    private float partyHard = 6.1f;
+
+
+	private List<List<Bubble>> randomGreetings = new List<List<Bubble>>();
+	private List<List<Bubble>> randomFarewells = new List<List<Bubble>>();
+
 
     private GameObject eventRonG;
     private GameObject eventDouchebardsG;
-
-	private int currentEvent = eventRon;
+    private GameObject light1;
+    private GameObject light2;
+    private GameObject light3;
+    private float light1Z = 0f;
+    private float light2Z = 0f;
+    private float light3Z = 0f;
 
     private float lineWidth = 0.035f;
 
@@ -50,8 +57,16 @@ public class TalkScript : MonoBehaviour {
 
         eventRonG = GameObject.Find("EventRon");
         eventRonG.SetActive(false);
+
+        light1 = GameObject.Find("EventDouchebards/Light1/TrueLight");
+        light1.SetActive(false);
+        light2 = GameObject.Find("EventDouchebards/Light2/TrueLight");
+        light2.SetActive(false);
+        light3 = GameObject.Find("EventDouchebards/Light3/TrueLight");
+        light3.SetActive(false);
         eventDouchebardsG = GameObject.Find("EventDouchebards");
         eventDouchebardsG.SetActive(false);
+        
 
 		for (int i = 0; i < textSounds.Length; i++) {
 			textSounds[i] = gameObject.AddComponent<AudioSource>();
@@ -93,6 +108,7 @@ public class TalkScript : MonoBehaviour {
 			backgroundMusic.clip = Resources.Load("Music/Ron_Weasel") as AudioClip;
 			backgroundMusic.volume = 0f;
 			backgroundMusic.loop = true;
+            backgroundMusic.pitch = 1f;
 			backgroundMusic.Play();
 
 			backgroundMusic2 = gameObject.AddComponent<AudioSource>();
@@ -123,7 +139,7 @@ public class TalkScript : MonoBehaviour {
 			localPhase++;
 			auxBubbles.Add(new Bubble(1, localPhase, localPhase, "( ͡° ͜ʖ ͡°)", new Vector2(3f, 3f), null));
 			localPhase++;
-			ronRandomGreetings.Add(auxBubbles);
+			randomGreetings.Add(auxBubbles);
 
 			localPhase = 0;
 			auxBubbles = new List<Bubble>();
@@ -131,19 +147,19 @@ public class TalkScript : MonoBehaviour {
 			localPhase++;
 			auxBubbles.Add(new Bubble(1, localPhase, localPhase, "( ͡° ͜ʖ ͡°)", new Vector2(3f, 3f), null));
 			localPhase++;
-			ronRandomGreetings.Add(auxBubbles);
+			randomGreetings.Add(auxBubbles);
 
 			localPhase = 0;
 			auxBubbles = new List<Bubble>();
 			auxBubbles.Add(new Bubble(1, localPhase, localPhase, "Your face looks familiar,\nI think we've met before\nin another dream", new Vector2(3f, 3f), null));
 			localPhase++;
-			ronRandomGreetings.Add(auxBubbles);
+			randomGreetings.Add(auxBubbles);
 
 			localPhase = 0;
 			auxBubbles = new List<Bubble>();
 			auxBubbles.Add(new Bubble(1, localPhase, localPhase, "One man's dead cat is \nanother man's free dinner", new Vector2(3f, 3f), null));
 			localPhase++;
-			ronRandomGreetings.Add(auxBubbles);
+			randomGreetings.Add(auxBubbles);
 
 			localPhase = 0;
 			auxBubbles = new List<Bubble>();
@@ -157,7 +173,7 @@ public class TalkScript : MonoBehaviour {
 			localPhase++;
 			auxBubbles.Add(new Bubble(1, localPhase, localPhase, "Forget it", new Vector2(3f, 3f), null));
 			localPhase++;
-			ronRandomGreetings.Add(auxBubbles);
+			randomGreetings.Add(auxBubbles);
 
 			localPhase = 0;
 			auxBubbles = new List<Bubble>();
@@ -165,15 +181,11 @@ public class TalkScript : MonoBehaviour {
 			localPhase++;
 			auxBubbles.Add(new Bubble(1, localPhase, localPhase, "My hallucinations\nare getting uglier", new Vector2(3f, 3f), null));
 			localPhase++;
-			auxBubbles.Add(new Bubble(0, localPhase, localPhase, "...", new Vector2(-3f, 3f), null));
+            auxBubbles.Add(new Bubble(0, localPhase, localPhase, "(ಠ_ಠ)", new Vector2(-3f, 3f), null));
 			localPhase++;
 			auxBubbles.Add(new Bubble(1, localPhase, localPhase, "Wait, are you for real?\nHaha, I was just kidding!", new Vector2(3f, 3f), null));
 			localPhase++;
-			auxBubbles.Add(new Bubble(1, localPhase, localPhase, "I couldn't even imagine\na face like yours", new Vector2(3f, 3f), null));
-			localPhase++;
-			auxBubbles.Add(new Bubble(1, localPhase, localPhase, "( ͡° ͜ʖ ͡°)", new Vector2(3f, 3f), null));
-			localPhase++;
-			ronRandomGreetings.Add(auxBubbles);
+			randomGreetings.Add(auxBubbles);
 
 			localPhase = 0;
 			auxBubbles = new List<Bubble>();
@@ -185,7 +197,7 @@ public class TalkScript : MonoBehaviour {
 			localPhase++;
 			auxBubbles.Add(new Bubble(1, localPhase, localPhase, "( ͡° ͜ʖ ͡°)", new Vector2(3f, 3f), null));
 			localPhase++;
-			ronRandomGreetings.Add(auxBubbles);
+			randomGreetings.Add(auxBubbles);
 
 			localPhase = 0;
 			auxBubbles = new List<Bubble>();
@@ -193,17 +205,16 @@ public class TalkScript : MonoBehaviour {
 			localPhase++;
 			auxBubbles.Add(new Bubble(1, localPhase, localPhase, "( ͡° ͜ʖ ͡°)", new Vector2(3f, 3f), null));
 			localPhase++;
-			ronRandomGreetings.Add(auxBubbles);
+			randomGreetings.Add(auxBubbles);
 
 			//ronRandomGreetings.Add("Your face looks familiar, I think we've met before in another dream");
 
-			int randomInt = Random.Range(0, ronRandomGreetings.Count);
-			//randomInt = ronRandomGreetings.Count-1;
+			int randomInt = Random.Range(0, randomGreetings.Count);
 			localPhase = 0;
 
-			for (int i = 0; i < ronRandomGreetings[randomInt].Count; i++) {
-				bubbles.Add(ronRandomGreetings[randomInt][i]);
-				localPhase = ronRandomGreetings[randomInt][i].beginPhase +1;
+			for (int i = 0; i < randomGreetings[randomInt].Count; i++) {
+				bubbles.Add(randomGreetings[randomInt][i]);
+				localPhase = randomGreetings[randomInt][i].beginPhase +1;
 			}
 
 			
@@ -232,49 +243,37 @@ public class TalkScript : MonoBehaviour {
 			backgroundMusic.clip = Resources.Load("Music/Douchebards") as AudioClip;
 			backgroundMusic.volume = 1f;
 			backgroundMusic.loop = true;
-			backgroundMusic.Play();
+			//backgroundMusic.Play();
 			
 			speakers = new GameObject[2];
 			speakers[0] = GameObject.Find("Player");
-			speakers[1] = GameObject.Find("Leader");
-			
-			int localPhase = 0;
-			float randomHello = Random.Range(0f, 1f);
-			
-			if (randomHello < 1f / 3f)
-			{
-				bubbles.Add(new Bubble(1, localPhase, localPhase, "I'm Ron Weasel, but\n you can call me Ron Weasel", new Vector2(3f, 3f), null));
-				localPhase++;
-				bubbles.Add(new Bubble(1, localPhase, localPhase, "( ͡° ͜ʖ ͡°)", new Vector2(3f, 3f), null));
-				localPhase++;
-			}
-			else if (randomHello < 2f / 3f)
-			{
-				bubbles.Add(new Bubble(1, localPhase, localPhase, "Hey bro, don't trust Harry Otter", new Vector2(3f, 3f), null));
-				localPhase++;
-			}
-			else
-			{
-				bubbles.Add(new Bubble(1, localPhase, localPhase, "This shoe tastes like... sweaty foot.\nFar from strawberry candy", new Vector2(3f, 3f), null));
-				localPhase++;
-			}
-			
-			bubbles.Add(new Bubble(0, localPhase, localPhase, "...", new Vector2(-3f, 3f), null));
-			localPhase++;
-			
-			bubbles.Add(new Bubble(1, localPhase, localPhase, "If you answer my question correctly\n I will give you something VERY special", new Vector2(3f, 3f), null));
-			localPhase++;
-			
-			float randomQuestion = Random.Range(0f, 1f);
-			
-			if (randomQuestion < 1f)
-			{
-				bubbles.Add(new Bubble(1, localPhase, localPhase + 1, "What's the difference between a duck?", new Vector2(5f, 3f), null));
-				localPhase++;
-			}
-			
-			bubbles.Add(new Bubble(0, localPhase, localPhase, "", new Vector2(-5.5f, 2.5f), new string[] { "I don't know", "A duck", "Fuck you Ron" }));
-			
+            speakers[1] = GameObject.Find("EventDouchebards/Leader");
+
+            int localPhase;
+            List<Bubble> auxBubbles;
+
+            // GREETINGS
+            localPhase = 0;
+            auxBubbles = new List<Bubble>();
+            auxBubbles.Add(new Bubble(1, localPhase, localPhase, "You came to the wrong\nneighbourhood, buddy", new Vector2(2f, 3f), null));
+            localPhase++;
+            randomGreetings.Add(auxBubbles);
+
+            localPhase = 0;
+            auxBubbles = new List<Bubble>();
+            auxBubbles.Add(new Bubble(1, localPhase, localPhase, "Party Hard!", new Vector2(2f, 3f), null));
+            localPhase++;
+            randomGreetings.Add(auxBubbles);
+
+            int randomInt = Random.Range(0, randomGreetings.Count);
+            localPhase = 0;
+
+            for (int i = 0; i < randomGreetings[randomInt].Count; i++)
+            {
+                bubbles.Add(randomGreetings[randomInt][i]);
+                localPhase = randomGreetings[randomInt][i].beginPhase + 1;
+            }
+
 		}
 
 	}
@@ -293,15 +292,83 @@ public class TalkScript : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
-		if (currentEvent == eventRon) {
+		updateEvent();
 
-			updateRon();
+        if (currentEvent == eventDouchebards)
+        {
 
-		}
+            if (backgroundMusic.isPlaying && partyHard > 0f)
+            {
+                partyHard -= Time.deltaTime;
+                if (partyHard <= 0f)
+                {
+                    partyHard = 0f;
+                    light1.SetActive(true);
+                    light2.SetActive(true);
+                    light3.SetActive(true);
+                    Hacks.SpriteRendererColor(background, new Color(0.5f, 0.5f, 0.5f));
+                }
+            }
+            else if (backgroundMusic.isPlaying && partyHard == 0f)
+            {
+
+                changePartyLight(light1, ref light1Z);
+                changePartyLight(light2, ref light2Z);
+                changePartyLight(light3, ref light3Z);
+               
+            }
+
+            
+        }
 
 	}
 
-	private void updateRon() {
+    private void changePartyLight(GameObject light, ref float desiredAngle)
+    {
+
+        float min = 128f / 256f;
+        float speed = 2f;
+
+        if (light.GetComponent<SpriteRenderer>().color.r == 1f && light.GetComponent<SpriteRenderer>().color.g == min && light.GetComponent<SpriteRenderer>().color.b < 1f)
+        {
+            Hacks.SpriteRendererColor(light, new Color(light.GetComponent<SpriteRenderer>().color.r, light.GetComponent<SpriteRenderer>().color.g, Mathf.Clamp(light.GetComponent<SpriteRenderer>().color.b + Time.deltaTime * speed, min, 1f)));
+        }
+        else if (light.GetComponent<SpriteRenderer>().color.r > min && light.GetComponent<SpriteRenderer>().color.g == min && light.GetComponent<SpriteRenderer>().color.b == 1f)
+        {
+            Hacks.SpriteRendererColor(light, new Color(Mathf.Clamp(light.GetComponent<SpriteRenderer>().color.r - Time.deltaTime * speed, min, 1f), light.GetComponent<SpriteRenderer>().color.g, light.GetComponent<SpriteRenderer>().color.b));
+        }
+        else if (light.GetComponent<SpriteRenderer>().color.r == min && light.GetComponent<SpriteRenderer>().color.g < 1f && light.GetComponent<SpriteRenderer>().color.b == 1f)
+        {
+            Hacks.SpriteRendererColor(light, new Color(light.GetComponent<SpriteRenderer>().color.r, Mathf.Clamp(light.GetComponent<SpriteRenderer>().color.g + Time.deltaTime * speed, min, 1f), light.GetComponent<SpriteRenderer>().color.b));
+        }
+        else if (light.GetComponent<SpriteRenderer>().color.r == min && light.GetComponent<SpriteRenderer>().color.g == 1f && light.GetComponent<SpriteRenderer>().color.b > min)
+        {
+            Hacks.SpriteRendererColor(light, new Color(light.GetComponent<SpriteRenderer>().color.r, light.GetComponent<SpriteRenderer>().color.g, Mathf.Clamp(light.GetComponent<SpriteRenderer>().color.b - Time.deltaTime * speed, min, 1f)));
+        }
+        else if (light.GetComponent<SpriteRenderer>().color.r < 1f && light.GetComponent<SpriteRenderer>().color.g == 1f && light.GetComponent<SpriteRenderer>().color.b == min)
+        {
+            Hacks.SpriteRendererColor(light, new Color(Mathf.Clamp(light.GetComponent<SpriteRenderer>().color.r + Time.deltaTime * speed, min, 1f), light.GetComponent<SpriteRenderer>().color.g, light.GetComponent<SpriteRenderer>().color.b));
+        }
+        else if (light.GetComponent<SpriteRenderer>().color.r == 1f && light.GetComponent<SpriteRenderer>().color.g > min && light.GetComponent<SpriteRenderer>().color.b == min)
+        {
+            Hacks.SpriteRendererColor(light, new Color(light.GetComponent<SpriteRenderer>().color.r, Mathf.Clamp(light.GetComponent<SpriteRenderer>().color.g - Time.deltaTime * speed, min, 1f), light.GetComponent<SpriteRenderer>().color.b));
+        }
+
+
+        float fixedAngle = light.transform.parent.localEulerAngles.z;
+        if (fixedAngle > 60f) { fixedAngle -= 360f; }
+
+        if (Mathf.Abs((fixedAngle - desiredAngle)) < 1f)
+        {
+            desiredAngle = Random.Range(-60f, 60f);
+        }
+
+        light.transform.parent.localEulerAngles = new Vector3(light.transform.parent.localEulerAngles.x, light.transform.parent.localEulerAngles.y, Mathf.LerpAngle(light.transform.parent.localEulerAngles.z, desiredAngle, Time.deltaTime * 10f));
+           
+
+    }
+
+	private void updateEvent() {
 
 		if (backgroundMusic.volume < 0.5f)
 		{
@@ -332,11 +399,14 @@ public class TalkScript : MonoBehaviour {
 		toRecycle = new List<int>();
 		
 		int currentSpeechBubble = 0;
+        bool writingSomething = false;
 		
 		for (int i = 0; i < bubbles.Count; i++)
 		{
 			if (bubbles[i].beginPhase <= globalPhase && bubbles[i].endPhase >= globalPhase)
 			{
+
+                writingSomething = true;
 				
 				if (bubbles[i].options == null)
 				{
@@ -356,7 +426,6 @@ public class TalkScript : MonoBehaviour {
 					Write(bubbles[i], options);
 				}
 				
-				
 			}
 		}
 		
@@ -364,6 +433,11 @@ public class TalkScript : MonoBehaviour {
 		{
 			speechBubblePool[i].root.SetActive(false);
 		}
+
+        if (!writingSomething && currentEvent == eventDouchebards && !backgroundMusic.isPlaying)
+        {
+            backgroundMusic.Play();
+        }
 
 	}
 
