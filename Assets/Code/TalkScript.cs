@@ -33,6 +33,8 @@ public class TalkScript : MonoBehaviour {
     private int currentEvent = eventDouchebards;
 
     private float partyHard = 6.1f;
+    private float partyPoints = 0f;
+    private float timePartying = 0f;
 
 
 	private List<List<Bubble>> randomGreetings = new List<List<Bubble>>();
@@ -44,6 +46,11 @@ public class TalkScript : MonoBehaviour {
     private GameObject light1;
     private GameObject light2;
     private GameObject light3;
+    private GameObject silhouette1;
+    private GameObject silhouette2;
+    private GameObject silhouette3;
+    private GameObject silhouette4;
+
     private float light1Z = 0f;
     private float light2Z = 0f;
     private float light3Z = 0f;
@@ -64,6 +71,14 @@ public class TalkScript : MonoBehaviour {
         light2.SetActive(false);
         light3 = GameObject.Find("EventDouchebards/Light3/TrueLight");
         light3.SetActive(false);
+        silhouette1 = GameObject.Find("EventDouchebards/ArrowsGame/Silhouette1");
+        silhouette1.SetActive(false);
+        silhouette2 = GameObject.Find("EventDouchebards/ArrowsGame/Silhouette2");
+        silhouette2.SetActive(false);
+        silhouette3 = GameObject.Find("EventDouchebards/ArrowsGame/Silhouette3");
+        silhouette3.SetActive(false);
+        silhouette4 = GameObject.Find("EventDouchebards/ArrowsGame/Silhouette4");
+        silhouette4.SetActive(false);
         eventDouchebardsG = GameObject.Find("EventDouchebards");
         eventDouchebardsG.SetActive(false);
         
@@ -242,8 +257,7 @@ public class TalkScript : MonoBehaviour {
 			backgroundMusic = gameObject.AddComponent<AudioSource>();
 			backgroundMusic.clip = Resources.Load("Music/Douchebards") as AudioClip;
 			backgroundMusic.volume = 1f;
-			backgroundMusic.loop = true;
-			//backgroundMusic.Play();
+			backgroundMusic.loop = false;
 			
 			speakers = new GameObject[2];
 			speakers[0] = GameObject.Find("Player");
@@ -297,9 +311,17 @@ public class TalkScript : MonoBehaviour {
         if (currentEvent == eventDouchebards)
         {
 
+            if (backgroundMusic.isPlaying) { timePartying += Time.deltaTime; }
+
             if (backgroundMusic.isPlaying && partyHard > 0f)
             {
                 partyHard -= Time.deltaTime;
+
+                if (partyHard < 6f && !silhouette1.activeInHierarchy) { silhouette1.SetActive(true); }
+                if (partyHard < 4.5f && !silhouette2.activeInHierarchy) { silhouette2.SetActive(true); }
+                if (partyHard < 3f && !silhouette3.activeInHierarchy) { silhouette3.SetActive(true); }
+                if (partyHard < 1.5f && !silhouette4.activeInHierarchy) { silhouette4.SetActive(true); }
+
                 if (partyHard <= 0f)
                 {
                     partyHard = 0f;
@@ -311,6 +333,11 @@ public class TalkScript : MonoBehaviour {
             }
             else if (backgroundMusic.isPlaying && partyHard == 0f)
             {
+
+                if (timePartying > 43.5f && silhouette1.activeInHierarchy) { silhouette1.SetActive(false); }
+                if (timePartying > 43.9f && silhouette2.activeInHierarchy) { silhouette2.SetActive(false); }
+                if (timePartying > 44.3f && silhouette3.activeInHierarchy) { silhouette3.SetActive(false); }
+                if (timePartying > 44.7f && silhouette4.activeInHierarchy) { silhouette4.SetActive(false); }
 
                 changePartyLight(light1, ref light1Z);
                 changePartyLight(light2, ref light2Z);
@@ -436,7 +463,51 @@ public class TalkScript : MonoBehaviour {
 
         if (!writingSomething && currentEvent == eventDouchebards && !backgroundMusic.isPlaying)
         {
-            backgroundMusic.Play();
+            if (partyHard > 0f)
+            {
+                if (partyHard != 42f) {
+                    backgroundMusic.Play();
+                }
+            }
+            else
+            {
+
+                float alpha = light1.GetComponent<SpriteRenderer>().color.a - Time.deltaTime*2f;
+                if (alpha < 0f) { alpha = 0f; }
+
+                Hacks.SpriteRendererAlpha(light1, alpha);
+                Hacks.SpriteRendererAlpha(light2, alpha);
+                Hacks.SpriteRendererAlpha(light3, alpha);
+
+                float color = background.GetComponent<SpriteRenderer>().color.r +Time.deltaTime;
+                if (color > 1f) { color = 1f; }
+                Hacks.SpriteRendererColor(background, new Color(color, color, color));
+
+                if (alpha == 0f && color == 1f)
+                {
+                    // ADD THE RESPONSE FROM DOUCHEBARDS
+                    if (partyPoints < 75f)
+                    {
+                        // MAL
+                        bubbles.Add(new Bubble(1, globalPhase, globalPhase, "You're not at our\nlevel, buddy", new Vector2(2f, 3f), null));
+                    }
+                    else if (partyPoints < 100f)
+                    {
+                        // BIEN (RECOMPENSA)
+                        bubbles.Add(new Bubble(1, globalPhase, globalPhase, "Wow, very nice!\nHere's your reward", new Vector2(2f, 3f), null));
+                    }
+                    else if (partyPoints >= 100f)
+                    {
+                        // PERFECTO
+                        bubbles.Add(new Bubble(1, globalPhase, globalPhase, "INCREDIBLE!!\n100% PERFECT", new Vector2(2f, 3f), null));
+                        bubbles.Add(new Bubble(1, globalPhase+1, globalPhase+1, "You are a natural\nthat's for sure", new Vector2(2f, 3f), null));
+                    }
+                    // ESTO ES PARA QUE NO VUELVA A SONAR LA MUSICA NI NADA
+                    partyHard = 42f;
+                }
+
+            }
+            
         }
 
 	}
