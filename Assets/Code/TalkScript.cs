@@ -33,7 +33,9 @@ public class TalkScript : MonoBehaviour {
     private int currentEvent = eventDouchebards;
 
     private float partyHard = 6.1f;
-    private float partyPoints = 0f;
+    private int maxPartyPoints = 0;
+    private int partyPoints = 0;
+    private int partyCombo = 0;
     private float timePartying = 0f;
     private List<arrowParty> arrowsParty = new List<arrowParty>();
     private int currentArrowParty = 0;
@@ -64,9 +66,18 @@ public class TalkScript : MonoBehaviour {
     private List<GameObject> arrows4 = new List<GameObject>();
     private GameObject arrowPositive4G;
 
+    private GameObject arrowEpic;
+    private GameObject arrowText;
+    private float arrowTextShowing = 0f;
+
+    private List<string> textGoodCombo = new List<string>();
+    private List<string> textBadCombo = new List<string>();
+
     private float light1Z = 0f;
     private float light2Z = 0f;
     private float light3Z = 0f;
+
+    private GameObject playerAnimated;
 
     private float lineWidth = 0.035f;
 
@@ -100,6 +111,41 @@ public class TalkScript : MonoBehaviour {
         arrowPositive3G.SetActive(false);
         arrowPositive4G = GameObject.Find("EventDouchebards/ArrowsGame/Right/arrowPositive");
         arrowPositive4G.SetActive(false);
+        arrowEpic = GameObject.Find("EventDouchebards/ArrowsGame/Epic");
+        arrowEpic.SetActive(false);
+        arrowText = GameObject.Find("EventDouchebards/ArrowsGame/Text");
+        arrowText.GetComponent<TextMesh>().color = new Color(1f, 0.4f, 0.4f);
+        arrowText.SetActive(false);
+
+        textGoodCombo.Add("Nice");
+        textGoodCombo.Add("Good");
+        textGoodCombo.Add("Great");
+        textGoodCombo.Add("Excellent");
+        textGoodCombo.Add("Perfect");
+        textGoodCombo.Add("WOW!");
+        textGoodCombo.Add("Amazing");
+        textGoodCombo.Add("Wonderful");
+        textGoodCombo.Add("Incredible");
+        textGoodCombo.Add("Miracolous");
+        textGoodCombo.Add("Headshot");
+        textGoodCombo.Add("GOD MODE");
+
+        textBadCombo.Add("Meh");
+        textBadCombo.Add("Bad");
+        textBadCombo.Add("Poor");
+        textBadCombo.Add("Awful");
+        textBadCombo.Add("Disgusting");
+        textBadCombo.Add("Terrible");
+        textBadCombo.Add("Horrible");
+        textBadCombo.Add("Atrocious");
+        textBadCombo.Add("Dont even try");
+        textBadCombo.Add("Kill yourself");
+
+        GameObject aux = Instantiate(Resources.Load("Prefabs/Barbarian")) as GameObject;
+        aux.transform.parent = GameObject.Find("Player").transform;
+        aux.transform.localPosition = new Vector3(0f, 0f, 0f);
+        playerAnimated = aux.transform.FindChild("Animated").gameObject;
+        
 
         for (int i = 1; i <= 6; i++)
         {
@@ -309,7 +355,13 @@ public class TalkScript : MonoBehaviour {
 
             localPhase = 0;
             auxBubbles = new List<Bubble>();
-            auxBubbles.Add(new Bubble(1, localPhase, localPhase, "Party Hard!", new Vector2(2f, 3f), null));
+            auxBubbles.Add(new Bubble(1, localPhase, localPhase, "PARTY HARD !!", new Vector2(2f, 3f), null));
+            localPhase++;
+            randomGreetings.Add(auxBubbles);
+
+            localPhase = 0;
+            auxBubbles = new List<Bubble>();
+            auxBubbles.Add(new Bubble(1, localPhase, localPhase, "Stand aside, partycrasher\nthe fun is about to start!", new Vector2(2f, 3f), null));
             localPhase++;
             randomGreetings.Add(auxBubbles);
 
@@ -325,7 +377,7 @@ public class TalkScript : MonoBehaviour {
             float current = 6.1f;
             float tempo = 0.7507f;
 
-            //arrowsParty.Add(new arrowParty(current, "left"));
+
             current += 0.285f;
 
             // PHASE 1
@@ -339,6 +391,7 @@ public class TalkScript : MonoBehaviour {
                 else { direction = "right"; }
 
                 arrowsParty.Add(new arrowParty(current, direction));
+                maxPartyPoints++;
                 current += tempo;
             }
 
@@ -347,7 +400,9 @@ public class TalkScript : MonoBehaviour {
 
             // PHASE 2
             current = 30.421f;
-            for (int i = 0; i < 18; i++)
+            tempo = tempo / 2f;
+
+            for (int i = 0; i < 18*2; i++)
             {
                 string direction = "none";
                 float auxRand = Random.Range(0f, 100f);
@@ -357,6 +412,7 @@ public class TalkScript : MonoBehaviour {
                 else { direction = "right"; }
 
                 arrowsParty.Add(new arrowParty(current, direction));
+                maxPartyPoints++;
                 current += tempo;
             }
 
@@ -382,7 +438,7 @@ public class TalkScript : MonoBehaviour {
 
         if (currentEvent == eventDouchebards)
         {
-            Debug.Log(partyPoints);
+
             if (backgroundMusic.isPlaying) { 
 
                 timePartying += Time.deltaTime;
@@ -390,6 +446,21 @@ public class TalkScript : MonoBehaviour {
                 {
                     placeArrow(arrowsParty[currentArrowParty].direction);
                     currentArrowParty++;
+                }
+
+                if (!arrowEpic.activeInHierarchy)
+                {
+                    if (timePartying > 24f)
+                    {
+                        arrowEpic.SetActive(true);
+                    }
+                }
+                else
+                {
+                    if (timePartying > 28f && arrowEpic.GetComponent<ParticleSystem>().emissionRate != 0f)
+                    {
+                        arrowEpic.GetComponent<ParticleSystem>().emissionRate = 0f;
+                    }
                 }
 
                 moveArrows(ref arrows1, Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.A), ref arrowPositive1G);
@@ -401,6 +472,19 @@ public class TalkScript : MonoBehaviour {
                 checkExpanding(arrowPositive2G);
                 checkExpanding(arrowPositive3G);
                 checkExpanding(arrowPositive4G);
+
+                checkText(arrowText);
+
+                if (timePartying > 24f && playerAnimated.GetComponent<Animator>().speed == 1f)
+                {
+                    playerAnimated.GetComponent<Animator>().speed = 2f;
+                    partyCombo = 0;
+                    arrowText.GetComponent<TextMesh>().text = "FREESTYLE";
+                    Hacks.TextAlpha(arrowText, 1f);
+                    arrowText.transform.localScale = new Vector3(0.05f, 0.05f, 0.05f);
+                    arrowText.SetActive(true);
+                    arrowTextShowing = -3f;
+                }
 
             }
 
@@ -416,6 +500,7 @@ public class TalkScript : MonoBehaviour {
                 if (partyHard <= 0f)
                 {
                     partyHard = 0f;
+                    playerAnimated.GetComponent<Animator>().CrossFade("Dance", GlobalData.crossfadeAnimation/2f, 0, 0f);
                     light1.SetActive(true);
                     light2.SetActive(true);
                     light3.SetActive(true);
@@ -441,37 +526,45 @@ public class TalkScript : MonoBehaviour {
 
 	}
 
+    private Color changeColor(Color source, float min, float speed)
+    {
+        Color newColor = source;
+
+        if (source.r == 1f && source.g == min && source.b < 1f)
+        {
+            newColor = new Color(source.r, source.g, Mathf.Clamp(source.b + Time.deltaTime * speed, min, 1f), source.a);
+        }
+        else if (source.r > min && source.g == min && source.b == 1f)
+        {
+            newColor = new Color(Mathf.Clamp(source.r - Time.deltaTime * speed, min, 1f), source.g, source.b, source.a);
+        }
+        else if (source.r == min && source.g < 1f && source.b == 1f)
+        {
+            newColor = new Color(source.r, Mathf.Clamp(source.g + Time.deltaTime * speed, min, 1f), source.b, source.a);
+        }
+        else if (source.r == min && source.g == 1f && source.b > min)
+        {
+            newColor = new Color(source.r, source.g, Mathf.Clamp(source.b - Time.deltaTime * speed, min, 1f), source.a);
+        }
+        else if (source.r < 1f && source.g == 1f && source.b == min)
+        {
+            newColor = new Color(Mathf.Clamp(source.r + Time.deltaTime * speed, min, 1f), source.g, source.b, source.a);
+        }
+        else if (source.r == 1f && source.g > min && source.b == min)
+        {
+            newColor = new Color(source.r, Mathf.Clamp(source.g - Time.deltaTime * speed, min, 1f), source.b, source.a);
+        }
+
+        return newColor;
+    }
+
     private void changePartyLight(GameObject light, ref float desiredAngle)
     {
 
         float min = 128f / 256f;
         float speed = 2f;
 
-        if (light.GetComponent<SpriteRenderer>().color.r == 1f && light.GetComponent<SpriteRenderer>().color.g == min && light.GetComponent<SpriteRenderer>().color.b < 1f)
-        {
-            Hacks.SpriteRendererColor(light, new Color(light.GetComponent<SpriteRenderer>().color.r, light.GetComponent<SpriteRenderer>().color.g, Mathf.Clamp(light.GetComponent<SpriteRenderer>().color.b + Time.deltaTime * speed, min, 1f)));
-        }
-        else if (light.GetComponent<SpriteRenderer>().color.r > min && light.GetComponent<SpriteRenderer>().color.g == min && light.GetComponent<SpriteRenderer>().color.b == 1f)
-        {
-            Hacks.SpriteRendererColor(light, new Color(Mathf.Clamp(light.GetComponent<SpriteRenderer>().color.r - Time.deltaTime * speed, min, 1f), light.GetComponent<SpriteRenderer>().color.g, light.GetComponent<SpriteRenderer>().color.b));
-        }
-        else if (light.GetComponent<SpriteRenderer>().color.r == min && light.GetComponent<SpriteRenderer>().color.g < 1f && light.GetComponent<SpriteRenderer>().color.b == 1f)
-        {
-            Hacks.SpriteRendererColor(light, new Color(light.GetComponent<SpriteRenderer>().color.r, Mathf.Clamp(light.GetComponent<SpriteRenderer>().color.g + Time.deltaTime * speed, min, 1f), light.GetComponent<SpriteRenderer>().color.b));
-        }
-        else if (light.GetComponent<SpriteRenderer>().color.r == min && light.GetComponent<SpriteRenderer>().color.g == 1f && light.GetComponent<SpriteRenderer>().color.b > min)
-        {
-            Hacks.SpriteRendererColor(light, new Color(light.GetComponent<SpriteRenderer>().color.r, light.GetComponent<SpriteRenderer>().color.g, Mathf.Clamp(light.GetComponent<SpriteRenderer>().color.b - Time.deltaTime * speed, min, 1f)));
-        }
-        else if (light.GetComponent<SpriteRenderer>().color.r < 1f && light.GetComponent<SpriteRenderer>().color.g == 1f && light.GetComponent<SpriteRenderer>().color.b == min)
-        {
-            Hacks.SpriteRendererColor(light, new Color(Mathf.Clamp(light.GetComponent<SpriteRenderer>().color.r + Time.deltaTime * speed, min, 1f), light.GetComponent<SpriteRenderer>().color.g, light.GetComponent<SpriteRenderer>().color.b));
-        }
-        else if (light.GetComponent<SpriteRenderer>().color.r == 1f && light.GetComponent<SpriteRenderer>().color.g > min && light.GetComponent<SpriteRenderer>().color.b == min)
-        {
-            Hacks.SpriteRendererColor(light, new Color(light.GetComponent<SpriteRenderer>().color.r, Mathf.Clamp(light.GetComponent<SpriteRenderer>().color.g - Time.deltaTime * speed, min, 1f), light.GetComponent<SpriteRenderer>().color.b));
-        }
-
+        Hacks.SpriteRendererColor(light, changeColor(light.GetComponent<SpriteRenderer>().color, min, speed));
 
         float fixedAngle = light.transform.parent.localEulerAngles.z;
         if (fixedAngle > 60f) { fixedAngle -= 360f; }
@@ -577,22 +670,31 @@ public class TalkScript : MonoBehaviour {
                 if (alpha == 0f && color == 1f)
                 {
                     // ADD THE RESPONSE FROM DOUCHEBARDS
-                    if (partyPoints < 75f)
+                    if ((float)partyPoints/(float)maxPartyPoints < 50f/100f)
                     {
                         // MAL
                         bubbles.Add(new Bubble(1, globalPhase, globalPhase, "You're not at our\nlevel, buddy", new Vector2(2f, 3f), null));
                     }
-                    else if (partyPoints < 99.9f)
+                    else if ((float)partyPoints / (float)maxPartyPoints < 80f/100f)
                     {
                         // BIEN (RECOMPENSA)
-                        bubbles.Add(new Bubble(1, globalPhase, globalPhase, "Wow, very nice!\nHere's your reward", new Vector2(2f, 3f), null));
+                        bubbles.Add(new Bubble(1, globalPhase, globalPhase, "Not bad...\nHere's your reward", new Vector2(2f, 3f), null));
+                    }
+                    else if ((float)partyPoints / (float)maxPartyPoints <  100f/100f)
+                    {
+                        // BIEN (RECOMPENSA)
+                        bubbles.Add(new Bubble(1, globalPhase, globalPhase, "That was almost perfect!\nTake this", new Vector2(2f, 3f), null));
                     }
                     else 
                     {
                         // PERFECTO
-                        bubbles.Add(new Bubble(1, globalPhase, globalPhase, "INCREDIBLE!!\n100% PERFECT", new Vector2(2f, 3f), null));
-                        bubbles.Add(new Bubble(1, globalPhase+1, globalPhase+1, "You are a natural\nthat's for sure", new Vector2(2f, 3f), null));
+                        bubbles.Add(new Bubble(1, globalPhase, globalPhase, "INCREDIBLE !!\n100% PERFECT", new Vector2(2f, 3f), null));
+                        bubbles.Add(new Bubble(1, globalPhase+1, globalPhase+1, "Stop by here anytime\nand take this!", new Vector2(2f, 3f), null));
                     }
+
+                    playerAnimated.GetComponent<Animator>().speed = 1f;
+                    playerAnimated.GetComponent<Animator>().CrossFade("Idle", GlobalData.crossfadeAnimation / 2f, 0, 0f);
+
                     // ESTO ES PARA QUE NO VUELVA A SONAR LA MUSICA NI NADA
                     partyHard = 42f;
                 }
@@ -609,8 +711,8 @@ public class TalkScript : MonoBehaviour {
         if (!s.root.activeInHierarchy)
         {
             s.text.GetComponent<TextMesh>().text = "";
-            s.bubble.transform.localScale = new Vector3(0f, 0f, 0f);
-            s.bubble2.transform.localScale = new Vector3(0f, 0f, 0f);
+            s.bubble.transform.localScale = new Vector3(0f, 0f, 0);
+            s.bubble2.transform.localScale = new Vector3(0f, 0f, 0.1f);
             s.timer = -0.1f;
             s.root.SetActive(true);
         }
@@ -628,7 +730,7 @@ public class TalkScript : MonoBehaviour {
         s.bubble.transform.localScale = new Vector3(Mathf.Lerp(s.bubble.transform.localScale.x, (scaleX) * 0.7f, Time.deltaTime * 20f), Mathf.Lerp(s.bubble.transform.localScale.y, (scaleY) * 0.7f, Time.deltaTime * 20f), 1f);
         s.bubble.transform.position = new Vector3(s.text.GetComponent<Renderer>().bounds.center.x, s.text.GetComponent<Renderer>().bounds.center.y, s.bubble.transform.position.z);
         s.bubble2.transform.localScale = new Vector3(s.bubble.transform.localScale.x + lineWidth, s.bubble.transform.localScale.y + lineWidth, s.bubble2.transform.localScale.z);
-        s.bubble2.transform.position = s.bubble.transform.position;
+        s.bubble2.transform.position = s.bubble.transform.position + new Vector3(0f, 0f, 0.1f);
       	
 		float min = s.bubble.transform.localScale.x;
 		if (s.bubble.transform.localScale.y < min) { min = s.bubble.transform.localScale.y; }
@@ -985,15 +1087,50 @@ public class TalkScript : MonoBehaviour {
             if (list[i].activeInHierarchy)
             {
                 list[i].transform.localPosition = new Vector3(list[i].transform.localPosition.x, list[i].transform.localPosition.y + Time.deltaTime * 5f, list[i].transform.localPosition.z);
-                if (list[i].transform.localPosition.y >= -0.4f && list[i].transform.localPosition.y <= 0.4f && correctInput)
+                if (list[i].transform.localPosition.y >= -0.8f && list[i].transform.localPosition.y <= 0.8f && correctInput)
                 {
-                    partyPoints += 100f/(24f+18f);
+                    if (partyCombo < 0) { partyCombo = 0; }
+                    partyCombo++;
+                    int step = 3;
+                    float auxScale = 0.05f + ((float)partyCombo/36f)*0.15f;
+
+                    if (partyCombo % step == 0 && textGoodCombo.Count >= partyCombo/step)
+                    {
+                        arrowText.GetComponent<TextMesh>().text = textGoodCombo[-1 +partyCombo/step];
+                        Hacks.TextAlpha(arrowText, 1f);
+                        arrowText.transform.localScale = new Vector3(auxScale, auxScale, auxScale);
+                        arrowText.SetActive(true);
+                        arrowTextShowing = 0f;
+                    }
+
+                    partyPoints++;
                     list[i].SetActive(false);
                     positive.transform.localScale = new Vector3(0.3f, 0.3f, 0.3f);
                     Hacks.SpriteRendererAlpha(positive, 1f);
                     positive.SetActive(true);
                 }
-                if (list[i].transform.localPosition.y >= 3f) { list[i].SetActive(false); }
+                if (list[i].transform.localPosition.y > 0.8f && list[i].GetComponent<SpriteRenderer>().color.a == 1f)
+                {
+                    if (partyCombo > 0) { partyCombo = 0; }
+                    partyCombo--;
+
+                    int step = 3;
+                    float auxScale = 0.05f + ((float)-partyCombo / 36f) * 0.15f;
+
+                    if (-partyCombo % step == 0 && textBadCombo.Count >= -partyCombo / step)
+                    {
+                        arrowText.GetComponent<TextMesh>().text = textBadCombo[-1 - partyCombo / step];
+                        Hacks.TextAlpha(arrowText, 1f);
+                        arrowText.transform.localScale = new Vector3(auxScale, auxScale, auxScale);
+                        arrowText.SetActive(true);
+                        arrowTextShowing = 0f;
+                    }
+                    Hacks.SpriteRendererAlpha(list[i], 0.9999999f);
+                }
+                if (list[i].transform.localPosition.y >= 3f) {
+                    Hacks.SpriteRendererAlpha(list[i], 1f);
+                    list[i].SetActive(false); 
+                }
             }
         }
     }
@@ -1008,6 +1145,34 @@ public class TalkScript : MonoBehaviour {
             if (g.GetComponent<SpriteRenderer>().color.a <= 0f)
             {
                 g.SetActive(false);
+            }
+        }
+    }
+
+    private void checkText(GameObject g)
+    {
+        if (g.activeInHierarchy)
+        {
+            arrowTextShowing += Time.deltaTime;
+
+            if (arrowTextShowing > 1f)
+            {
+                Hacks.TextAlpha(g, g.GetComponent<TextMesh>().color.a - Time.deltaTime * 3f);
+            }
+
+            
+            float scale = g.transform.localScale.x + Time.deltaTime/20f;
+            g.transform.localScale = new Vector3(scale, scale, scale);
+
+            
+
+            Color c = changeColor(g.GetComponent<TextMesh>().color, 0.4f, 2f);
+            g.GetComponent<TextMesh>().color = c;
+
+            if (g.GetComponent<TextMesh>().color.a <= 0f)
+            {
+                g.SetActive(false);
+                arrowTextShowing = 0f;
             }
         }
     }

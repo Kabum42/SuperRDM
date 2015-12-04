@@ -79,6 +79,7 @@
      <None Include="Assets\Ron_Speech.txt" />
      <None Include="Assets\Shaders\Transition.shader" />
      <None Include="Assets\Shaders\TSFOutline.shader" />
+     <None Include="Assets\Resources\Fonts\karmatic-arcade\1001fonts-karmatic-arcade-eula.txt" />
      <None Include="Assets\Resources\Fonts\Comfortaa\OFL.txt" />
      <None Include="Assets\Resources\Languages.txt" />
  <Reference Include="UnityEditor.Advertisements">
