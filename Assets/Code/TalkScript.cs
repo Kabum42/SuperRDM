@@ -302,7 +302,6 @@ public class TalkScript : MonoBehaviour {
 			localPhase++;
 			randomGreetings.Add(auxBubbles);
 
-			//ronRandomGreetings.Add("Your face looks familiar, I think we've met before in another dream");
 
 			int randomInt = Random.Range(0, randomGreetings.Count);
 			localPhase = 0;
@@ -312,7 +311,6 @@ public class TalkScript : MonoBehaviour {
 				localPhase = randomGreetings[randomInt][i].beginPhase +1;
 			}
 
-			
 			bubbles.Add(new Bubble(0, localPhase, localPhase, "...", new Vector2(-3f, 3f), null));
 			localPhase++;
 			
@@ -328,7 +326,7 @@ public class TalkScript : MonoBehaviour {
 			}
 			
 			bubbles.Add(new Bubble(0, localPhase, localPhase, "", new Vector2(-5.5f, 2.5f), new string[]{"That's not even a proper question", "One of the two is green", "The feathers"}));
-			
+
 		}
 		if (eventID == eventDouchebards)
 		{
@@ -481,7 +479,7 @@ public class TalkScript : MonoBehaviour {
                     partyCombo = 0;
                     arrowText.GetComponent<TextMesh>().text = "FREESTYLE";
                     Hacks.TextAlpha(arrowText, 1f);
-                    arrowText.transform.localScale = new Vector3(0.05f, 0.05f, 0.05f);
+                    arrowText.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
                     arrowText.SetActive(true);
                     arrowTextShowing = -3f;
                 }
@@ -673,7 +671,19 @@ public class TalkScript : MonoBehaviour {
                     if ((float)partyPoints/(float)maxPartyPoints < 50f/100f)
                     {
                         // MAL
-                        bubbles.Add(new Bubble(1, globalPhase, globalPhase, "You're not at our\nlevel, buddy", new Vector2(2f, 3f), null));
+                        float auxRand = Random.Range(0f, 1f);
+                        if (auxRand < 1f / 3f)
+                        {
+                            bubbles.Add(new Bubble(1, globalPhase, globalPhase, "You're not at our\nlevel, gobermouch", new Vector2(2f, 3f), null));
+                        }
+                        else if (auxRand < 2f / 3f)
+                        {
+                            bubbles.Add(new Bubble(1, globalPhase, globalPhase, "You ruined all the fun\nGet lost, smell-feast!", new Vector2(2f, 3f), null));
+                        }
+                        else
+                        {
+                            bubbles.Add(new Bubble(1, globalPhase, globalPhase, "GTFO, cumberworld!", new Vector2(2f, 3f), null));
+                        }
                     }
                     else if ((float)partyPoints / (float)maxPartyPoints < 80f/100f)
                     {
@@ -683,13 +693,30 @@ public class TalkScript : MonoBehaviour {
                     else if ((float)partyPoints / (float)maxPartyPoints <  100f/100f)
                     {
                         // BIEN (RECOMPENSA)
-                        bubbles.Add(new Bubble(1, globalPhase, globalPhase, "That was almost perfect!\nTake this", new Vector2(2f, 3f), null));
+                        float auxRand = Random.Range(0f, 1f);
+                        if (auxRand < 1f / 3f)
+                        {
+                            bubbles.Add(new Bubble(1, globalPhase, globalPhase, "Beautiful! Almost perfect!\n", new Vector2(2f, 3f), null));
+                            bubbles.Add(new Bubble(1, globalPhase + 1, globalPhase + 1, "You're the most effulgent\nmotherfucker I've seen in a while", new Vector2(2f, 3f), null));
+                            bubbles.Add(new Bubble(1, globalPhase + 2, globalPhase + 2, "Take this cool\nrandomly selected item", new Vector2(2f, 3f), null));
+                        }
+                        else if (auxRand < 2f / 3f)
+                        {
+                            bubbles.Add(new Bubble(1, globalPhase, globalPhase, "Bro, so close\n to perfect score!", new Vector2(2f, 3f), null));
+                            bubbles.Add(new Bubble(1, globalPhase + 1, globalPhase + 1, "But you're a one recalcitrant\nasshole, that's for sure", new Vector2(2f, 3f), null));
+                            bubbles.Add(new Bubble(1, globalPhase + 2, globalPhase + 2, "Take this item, I can't\nuse it since I'm an NPC", new Vector2(2f, 3f), null));
+                        }
+                        else
+                        {
+                            bubbles.Add(new Bubble(1, globalPhase, globalPhase, "That was so close!", new Vector2(2f, 3f), null));
+                            bubbles.Add(new Bubble(1, globalPhase, globalPhase, "Such a tenacious scumbag\ndeserves an appropriate reward", new Vector2(2f, 3f), null));
+                        }
                     }
                     else 
                     {
                         // PERFECTO
-                        bubbles.Add(new Bubble(1, globalPhase, globalPhase, "INCREDIBLE !!\n100% PERFECT", new Vector2(2f, 3f), null));
-                        bubbles.Add(new Bubble(1, globalPhase+1, globalPhase+1, "Stop by here anytime\nand take this!", new Vector2(2f, 3f), null));
+                        bubbles.Add(new Bubble(1, globalPhase, globalPhase, "HOLY SHIT !!\n100% PERFECT", new Vector2(2f, 3f), null));
+                        bubbles.Add(new Bubble(1, globalPhase+1, globalPhase+1, "I'm going to tattoo\nyour face on my butt!", new Vector2(2f, 3f), null));
                     }
 
                     playerAnimated.GetComponent<Animator>().speed = 1f;
@@ -926,22 +953,80 @@ public class TalkScript : MonoBehaviour {
 
             //menuOk.Play();
 
-            bubbles.Add(new Bubble(0, globalPhase+1, globalPhase+2, b.options[o.selected], new Vector2(-3f, 3f), null));
+            int localPhase = globalPhase + 1;
+
+            bubbles.Add(new Bubble(0, localPhase, localPhase+1, b.options[o.selected], new Vector2(-3f, 3f), null));
+            localPhase++;
 
 			if (b.options[o.selected] == "That's not even a proper question")
             {
-				bubbles.Add(new Bubble(1, globalPhase + 2, globalPhase + 2, "( ͡° ͜ʖ ͡°)", new Vector2(3f, 3f), null));
+				bubbles.Add(new Bubble(1, localPhase, localPhase, "( ͡° ͜ʖ ͡°)", new Vector2(3f, 3f), null));
+                localPhase++;
             }
 			if (b.options[o.selected] == "One of the two is green")
             {
-                bubbles.Add(new Bubble(1, globalPhase + 2, globalPhase + 2, "How did you know it?!", new Vector2(3f, 3f), null));
+                bubbles.Add(new Bubble(1, localPhase, localPhase, "How did you know it?!", new Vector2(3f, 3f), null));
+                localPhase++;
             }
 			if (b.options[o.selected] == "The feathers")
             {
-                bubbles.Add(new Bubble(1, globalPhase + 2, globalPhase + 2, "Wrong answer!", new Vector2(3f, 3f), null));
+                bubbles.Add(new Bubble(1, localPhase, localPhase, "Wrong answer!", new Vector2(3f, 3f), null));
+                localPhase++;
             }
             
             o.root.SetActive(false);
+
+            bubbles.Add(new Bubble(1, localPhase, localPhase, "And remember...", new Vector2(3f, 3f), null));
+            localPhase++;
+
+            int originalLocalPhase = localPhase;
+            List<Bubble> auxBubbles;
+
+            // FAREWELLS
+            localPhase = originalLocalPhase;
+            auxBubbles = new List<Bubble>();
+            auxBubbles.Add(new Bubble(1, localPhase, localPhase, "Cigar smoothies are\nbeyond good and evil", new Vector2(3f, 3f), null));
+            localPhase++;
+            randomFarewells.Add(auxBubbles);
+
+            localPhase = originalLocalPhase;
+            auxBubbles = new List<Bubble>();
+            auxBubbles.Add(new Bubble(1, localPhase, localPhase, "Without X, life would\nbe an error", new Vector2(3f, 3f), null));
+            localPhase++;
+            randomFarewells.Add(auxBubbles);
+
+            localPhase = originalLocalPhase;
+            auxBubbles = new List<Bubble>();
+            auxBubbles.Add(new Bubble(1, localPhase, localPhase, "The last thing one\nloses... it's memories\n*sigh*", new Vector2(3f, 3f), null));
+            localPhase++;
+            randomFarewells.Add(auxBubbles);
+
+            localPhase = originalLocalPhase;
+            auxBubbles = new List<Bubble>();
+            auxBubbles.Add(new Bubble(1, localPhase, localPhase, "Millennium Hand and Shrimp!", new Vector2(3f, 3f), null));
+            localPhase++;
+            randomFarewells.Add(auxBubbles);
+
+            localPhase = originalLocalPhase;
+            auxBubbles = new List<Bubble>();
+            auxBubbles.Add(new Bubble(1, localPhase, localPhase, "Sometimes happiness is\nat the bottom of\na pickle jar", new Vector2(3f, 3f), null));
+            localPhase++;
+            randomFarewells.Add(auxBubbles);
+
+            localPhase = originalLocalPhase;
+            auxBubbles = new List<Bubble>();
+            auxBubbles.Add(new Bubble(1, localPhase, localPhase, "Those who believe that\nmagic does everything", new Vector2(3f, 3f), null));
+            localPhase++;
+            auxBubbles.Add(new Bubble(1, localPhase, localPhase, "end up doing\neverything for magic", new Vector2(3f, 3f), null));
+            localPhase++;
+            randomFarewells.Add(auxBubbles);
+
+            int randomInt = Random.Range(0, randomFarewells.Count);
+
+            for (int i = 0; i < randomFarewells[randomInt].Count; i++)
+            {
+                bubbles.Add(randomFarewells[randomInt][i]);
+            }
 
         }
 
@@ -1155,14 +1240,19 @@ public class TalkScript : MonoBehaviour {
         {
             arrowTextShowing += Time.deltaTime;
 
+            
             if (arrowTextShowing > 1f)
             {
                 Hacks.TextAlpha(g, g.GetComponent<TextMesh>().color.a - Time.deltaTime * 3f);
             }
 
+            if (arrowTextShowing > 0f)
+            {
+                float scale = g.transform.localScale.x + Time.deltaTime / 12f;
+                g.transform.localScale = new Vector3(scale, scale, scale);
+            }
             
-            float scale = g.transform.localScale.x + Time.deltaTime/20f;
-            g.transform.localScale = new Vector3(scale, scale, scale);
+            
 
             
 
