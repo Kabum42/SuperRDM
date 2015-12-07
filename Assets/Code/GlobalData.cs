@@ -13,6 +13,7 @@ public static class GlobalData {
     public static int[] positionCharacterCombat = new int[2];
 
     public static Biome currentBiome;
+    public static int currentSpecialEvent = TalkScript.eventRon;
     public static int myAgent = 0;
     public static int[] order;
     public static int currentAgentTurn = 0;
@@ -143,10 +144,14 @@ public static class GlobalData {
         Application.LoadLevelAdditive("Battle");
     }
 
+    public static void Event()
+    {
+        Application.LoadLevelAdditive("Talk");
+    }
+
     public static void World()
     {
         worldObject.SetActive(true);
-		worldObject.transform.FindChild("Main Camera").gameObject.GetComponent<WorldScript> ().takedScreenshot = false;
     }
 
 }

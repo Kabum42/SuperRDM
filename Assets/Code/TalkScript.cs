@@ -17,8 +17,8 @@ public class TalkScript : MonoBehaviour {
 
 	private string target;
 
-    private static List<SpeechBubble> speechBubblePool = new List<SpeechBubble>();
-    private static List<int> toRecycle = new List<int>();
+    private static List<SpeechBubble> speechBubblePool;
+    private static List<int> toRecycle;
     private static OptionsSquare options;
 
     private GameObject[] speakers;
@@ -27,10 +27,13 @@ public class TalkScript : MonoBehaviour {
     private int nextPhase = 0;
     private int globalPhase = 0;
 
-    private static int eventRon = 0;
-    private static int eventDouchebards = 1;
+    private GameObject fading;
+    private float fadingMode = 0f;
 
-    private int currentEvent = eventDouchebards;
+    public static int eventRon = 0;
+    public static int eventDouchebards = 1;
+
+    private int currentEvent = 0;
 
     private float partyHard = 6.1f;
     private int maxPartyPoints = 0;
@@ -81,13 +84,23 @@ public class TalkScript : MonoBehaviour {
 
     private float lineWidth = 0.035f;
 
+    private float endCondition = 0f;
+
 	// Use this for initialization
 	void Start () {
+
+        currentEvent = GlobalData.currentSpecialEvent;
+
+        speechBubblePool = new List<SpeechBubble>();
+        toRecycle = new List<int>();
 
 		background = GameObject.Find("Background");
 
         eventRonG = GameObject.Find("EventRon");
         eventRonG.SetActive(false);
+
+        fading = this.gameObject.transform.FindChild("Fading").gameObject;
+        fading.GetComponent<SpriteRenderer>().color = new Color(0f, 0f, 0f, 1f);
 
         light1 = GameObject.Find("EventDouchebards/Light1/TrueLight");
         light1.SetActive(false);
@@ -181,13 +194,17 @@ public class TalkScript : MonoBehaviour {
         closeSpeech.playOnAwake = false;
 
         SpeechBubble s = new SpeechBubble();
+        s.root.transform.parent = this.gameObject.transform;
         speechBubblePool.Add(s);
 
         options = new OptionsSquare();
+        options.root.transform.parent = this.gameObject.transform;
 
 		initializeEvent (currentEvent);
 
         target = bubbles[0].text;
+
+        GlobalData.worldObject.SetActive(false);
 
 	}
 
@@ -432,15 +449,41 @@ public class TalkScript : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
-		updateEvent();
+        if (endCondition == 100f)
+        {
+            fadingMode = 2;
+        }
+
+        if (fadingMode == 0f)
+        {
+            float auxAlpha = fading.GetComponent<SpriteRenderer>().color.a - Time.deltaTime;
+            Hacks.SpriteRendererAlpha(fading, auxAlpha);
+            if (auxAlpha <= 0f)
+            {
+                fadingMode = 1;
+            }
+        }
+        else if (fadingMode == 2)
+        {
+            float aux = fading.GetComponent<SpriteRenderer>().color.a + Time.deltaTime;
+            Hacks.SpriteRendererAlpha(fading, aux);
+            if (aux >= 1f)
+            {
+                GlobalData.World();
+                Destroy(this.gameObject);
+            }
+        }
+
+        updateEvent();
 
         if (currentEvent == eventDouchebards)
         {
 
-            if (backgroundMusic.isPlaying) { 
+            if (backgroundMusic.isPlaying)
+            {
 
                 timePartying += Time.deltaTime;
-                if (currentArrowParty < arrowsParty.Count && arrowsParty[currentArrowParty].timeToShine -2f <= timePartying)
+                if (currentArrowParty < arrowsParty.Count && arrowsParty[currentArrowParty].timeToShine - 2f <= timePartying)
                 {
                     placeArrow(arrowsParty[currentArrowParty].direction);
                     currentArrowParty++;
@@ -498,7 +541,7 @@ public class TalkScript : MonoBehaviour {
                 if (partyHard <= 0f)
                 {
                     partyHard = 0f;
-                    playerAnimated.GetComponent<Animator>().CrossFade("Dance", GlobalData.crossfadeAnimation/2f, 0, 0f);
+                    playerAnimated.GetComponent<Animator>().CrossFade("Dance", GlobalData.crossfadeAnimation / 2f, 0, 0f);
                     light1.SetActive(true);
                     light2.SetActive(true);
                     light3.SetActive(true);
@@ -516,11 +559,11 @@ public class TalkScript : MonoBehaviour {
                 changePartyLight(light1, ref light1Z);
                 changePartyLight(light2, ref light2Z);
                 changePartyLight(light3, ref light3Z);
-               
+
             }
 
-            
-        }
+
+        }	
 
 	}
 
@@ -623,6 +666,7 @@ public class TalkScript : MonoBehaviour {
 					if (speechBubblePool.Count <= currentSpeechBubble)
 					{
 						SpeechBubble s = new SpeechBubble();
+                        s.root.transform.parent = this.gameObject.transform;
 						s.root.SetActive(false);
 						speechBubblePool.Add(s);
 					}
@@ -637,6 +681,15 @@ public class TalkScript : MonoBehaviour {
 				
 			}
 		}
+
+        if (!writingSomething && currentEvent == eventRon && endCondition == 50f)
+        {
+            endCondition = 100f;
+        }
+        else if (!writingSomething && currentEvent == eventDouchebards && endCondition == 50f)
+        {
+            endCondition = 100f;
+        }
 		
 		for (int i = currentSpeechBubble; i < speechBubblePool.Count; i++)
 		{
@@ -692,7 +745,7 @@ public class TalkScript : MonoBehaviour {
                     }
                     else if ((float)partyPoints / (float)maxPartyPoints <  100f/100f)
                     {
-                        // BIEN (RECOMPENSA)
+                        // MUY BIEN (RECOMPENSA)
                         float auxRand = Random.Range(0f, 1f);
                         if (auxRand < 1f / 3f)
                         {
@@ -709,14 +762,18 @@ public class TalkScript : MonoBehaviour {
                         else
                         {
                             bubbles.Add(new Bubble(1, globalPhase, globalPhase, "That was so close!", new Vector2(2f, 3f), null));
-                            bubbles.Add(new Bubble(1, globalPhase, globalPhase, "Such a tenacious scumbag\ndeserves an appropriate reward", new Vector2(2f, 3f), null));
+                            bubbles.Add(new Bubble(1, globalPhase +1 , globalPhase + 1, "Such a tenacious scumbag\ndeserves an appropriate reward", new Vector2(2f, 3f), null));
                         }
                     }
                     else 
                     {
                         // PERFECTO
+                        float auxRand = Random.Range(0f, 1f);
                         bubbles.Add(new Bubble(1, globalPhase, globalPhase, "HOLY SHIT !!\n100% PERFECT", new Vector2(2f, 3f), null));
-                        bubbles.Add(new Bubble(1, globalPhase+1, globalPhase+1, "I'm going to tattoo\nyour face on my butt!", new Vector2(2f, 3f), null));
+
+                        bubbles.Add(new Bubble(1, globalPhase + 1, globalPhase + 1, "I'm going to tattoo\nyour face on my butt!", new Vector2(2f, 3f), null));
+                        bubbles.Add(new Bubble(1, globalPhase + 2, globalPhase + 2, "Take this\nyou've earned it", new Vector2(2f, 3f), null));
+
                     }
 
                     playerAnimated.GetComponent<Animator>().speed = 1f;
@@ -724,6 +781,9 @@ public class TalkScript : MonoBehaviour {
 
                     // ESTO ES PARA QUE NO VUELVA A SONAR LA MUSICA NI NADA
                     partyHard = 42f;
+
+                    endCondition = 50f;
+
                 }
 
             }
@@ -1027,6 +1087,8 @@ public class TalkScript : MonoBehaviour {
             {
                 bubbles.Add(randomFarewells[randomInt][i]);
             }
+
+            endCondition = 50f;
 
         }
 

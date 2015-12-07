@@ -6,6 +6,7 @@ public class WorldScript : MonoBehaviour {
 
     public GameObject board;
     public BoardCell[] boardCells;
+    public List<SpecialEvent> specialEvents = new List<SpecialEvent>();
     private int currentCell = 0;
     private int[] cellsPerRing;
 
@@ -73,7 +74,7 @@ public class WorldScript : MonoBehaviour {
     private GameObject action2Option2;
 
 	private bool fadingBattle = false;
-	public bool takedScreenshot = false;
+    private bool fadingEvent = false;
 
     private float thinkingIA = 1f;
 
@@ -230,6 +231,13 @@ public class WorldScript : MonoBehaviour {
         }
 
 
+        int normalCells = 0;
+        for (int i = 0; i < cellsPerRing.Length; i++)
+        {
+            normalCells += cellsPerRing[i];
+        }
+        specialEvents.Add(new SpecialEvent(Random.Range(0, normalCells), this));
+
 	}
 
     void OnDisconnectedFromServer(NetworkDisconnection info)
@@ -311,6 +319,29 @@ public class WorldScript : MonoBehaviour {
         usedAction = false;
         usedTurn = false;
         clickedCell = -1;
+
+        if (Random.Range(0f, 1f) > 1f/3f)
+        {
+            int normalCells = 0;
+            for (int i = 0; i < cellsPerRing.Length; i++)
+            {
+                normalCells += cellsPerRing[i];
+            }
+            int targetLocation = Random.Range(0, normalCells);
+            bool correct = true;
+            for (int i = 0; i < specialEvents.Count; i++)
+            {
+                if (specialEvents[i].cellPosition == targetLocation)
+                {
+                    correct = false;
+                    break;
+                }
+            }
+            if (correct)
+            {
+                specialEvents.Add(new SpecialEvent(targetLocation, this));
+            }
+        }
     }
 
     void previousTurn()
@@ -748,7 +779,7 @@ public class WorldScript : MonoBehaviour {
     void Update()
     {
 
-		if (!fadingBattle && fading.GetComponent<SpriteRenderer> ().color.a > 0f) {
+		if (!fadingBattle && !fadingEvent && fading.GetComponent<SpriteRenderer> ().color.a > 0f) {
 
 			fading.GetComponent<SpriteRenderer>().color = new Color(fading.GetComponent<SpriteRenderer>().color.r, fading.GetComponent<SpriteRenderer>().color.g, fading.GetComponent<SpriteRenderer>().color.b, fading.GetComponent<SpriteRenderer> ().color.a -Time.deltaTime*2f);
 
@@ -761,7 +792,7 @@ public class WorldScript : MonoBehaviour {
 
         if (lastTurn != GlobalData.currentAgentTurn && GlobalData.currentAgentTurn == GlobalData.myAgent)
         {
-            ribbon.transform.position = new Vector3(0f, 8f, -4f);
+            ribbon.transform.position = new Vector3(0f, 7f, -4f);
             ribbon.SetActive(true);
             ribbonOver.SetActive(true);
             Hacks.SpriteRendererAlpha(ribbon, 0f);
@@ -775,7 +806,7 @@ public class WorldScript : MonoBehaviour {
             if (ribbonAppearing) {
                 Hacks.SpriteRendererAlpha(ribbon, Mathf.Lerp(ribbon.GetComponent<SpriteRenderer>().color.a, 1f, Time.deltaTime*5f));
                 Hacks.SpriteRendererAlpha(ribbonOver, Mathf.Lerp(ribbon.GetComponent<SpriteRenderer>().color.a, 1f, Time.deltaTime*5f));
-                ribbon.transform.position = new Vector3(0f, Mathf.Lerp(ribbon.transform.position.y, 6.3f, Time.deltaTime*5f), -4f); 
+                ribbon.transform.position = new Vector3(0f, Mathf.Lerp(ribbon.transform.position.y, 5.3f, Time.deltaTime*5f), -4f); 
                 if (ribbon.GetComponent<SpriteRenderer>().color.a >= 0.99f) {
                     ribbonAppearing = false;
                 }
@@ -1281,9 +1312,18 @@ public class WorldScript : MonoBehaviour {
 
             }
 
-            if (selected != null)
+            for (int i = 0; i < boardCells.Length; i++)
+            {
+                boardCells[i].root.transform.localScale = new Vector3(1f, 1f, 1f);
+                boardCells[i].root.transform.localPosition = new Vector3(boardCells[i].root.transform.localPosition.x, boardCells[i].root.transform.localPosition.y, 0f);
+            }
+
+            if (selected != null && selectedSprite.activeInHierarchy)
             {
                 selectedSprite.transform.position = new Vector3(selected.root.transform.position.x, selected.root.transform.position.y, selectedSprite.transform.position.z);
+                selectedSprite.transform.localScale = new Vector3(1.15f, 1.15f, 1.15f);
+                selected.root.transform.localScale = new Vector3(1.15f, 1.15f, 1.15f);
+                selected.root.transform.localPosition = new Vector3(selected.root.transform.localPosition.x, selected.root.transform.localPosition.y, -0.1f);
             }
             if (clickedCell == -1)
             {
@@ -1323,6 +1363,15 @@ public class WorldScript : MonoBehaviour {
                         action2.SetActive(false);
                     }
 
+                    bool hasSpecialEvent = false;
+                    for (int i = 0; i < specialEvents.Count; i++)
+                    {
+                        if (specialEvents[i].cellPosition == clickedCell) { hasSpecialEvent = true; break; }
+                    }
+
+                    if (hasSpecialEvent) { action1Option1.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("BoardCells/Actions/Look"); }
+                    else { action1Option1.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("BoardCells/Actions/Attack"); }
+
                     action1.SetActive(true);
                     Hacks.SpriteRendererAlpha(action1, (float)Mathf.Lerp(action1.GetComponent<SpriteRenderer>().color.a, 1f, Time.deltaTime * 5f));
                     Hacks.SpriteRendererAlpha(action1Option1, action1.GetComponent<SpriteRenderer>().color.a);
@@ -1345,6 +1394,15 @@ public class WorldScript : MonoBehaviour {
                         Hacks.SpriteRendererAlpha(action1Option1, 0f);
                         action1.SetActive(false);
                     }
+
+                    bool hasSpecialEvent = false;
+                    for (int i = 0; i < specialEvents.Count; i++)
+                    {
+                        if (specialEvents[i].cellPosition == clickedCell) { hasSpecialEvent = true; break; }
+                    }
+
+                    if (hasSpecialEvent) { action2Option1.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("BoardCells/Actions/Look"); }
+                    else { action2Option1.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("BoardCells/Actions/Attack"); }
 
                     action2.SetActive(true);
                     Hacks.SpriteRendererAlpha(action2, (float)Mathf.Lerp(action2.GetComponent<SpriteRenderer>().color.a, 1f, Time.deltaTime * 5f));
@@ -1384,11 +1442,19 @@ public class WorldScript : MonoBehaviour {
         {
             if (usedTurn)
             {
-				if (fadingBattle) {
+				if (fadingBattle || fadingEvent) {
 					fading.GetComponent<SpriteRenderer>().color = new Color(fading.GetComponent<SpriteRenderer>().color.r, fading.GetComponent<SpriteRenderer>().color.g, fading.GetComponent<SpriteRenderer>().color.b, fading.GetComponent<SpriteRenderer>().color.a +Time.deltaTime*2f);
 					if (fading.GetComponent<SpriteRenderer>().color.a >= 1f) {
-						fadingBattle = false;
-						GlobalData.Battle();
+                        if (fadingBattle)
+                        {
+                            fadingBattle = false;
+                            GlobalData.Battle();
+                        }
+                        if (fadingEvent)
+                        {
+                            fadingEvent = false;
+                            GlobalData.Event();
+                        }
 					}
 				}
 				else {
@@ -1414,9 +1480,30 @@ public class WorldScript : MonoBehaviour {
             else if (usedAction)
             {
                 usedTurn = true;
-                GlobalData.positionCharacterCombat = new int[] {GlobalData.myAgent, -1};
-                GlobalData.currentBiome = boardCells[GlobalData.agents[GlobalData.currentAgentTurn].currentCell].biome;
-				fadingBattle = true;
+
+                bool hasSpecialEvent = false;
+                for (int i = 0; i < specialEvents.Count; i++)
+                {
+                    if (specialEvents[i].cellPosition == GlobalData.agents[GlobalData.currentAgentTurn].currentCell) { 
+                        hasSpecialEvent = true;
+                        Destroy(specialEvents[i].root);
+                        specialEvents.RemoveAt(i);
+                        break; 
+                    }
+                    
+                }
+
+                if (hasSpecialEvent) {
+                    GlobalData.currentBiome = boardCells[GlobalData.agents[GlobalData.currentAgentTurn].currentCell].biome;
+                    GlobalData.currentSpecialEvent = Random.Range(0, 2);
+                    fadingEvent = true;
+                }
+                else {
+                    GlobalData.positionCharacterCombat = new int[] { GlobalData.myAgent, -1 };
+                    GlobalData.currentBiome = boardCells[GlobalData.agents[GlobalData.currentAgentTurn].currentCell].biome;
+                    fadingBattle = true;
+                }
+                
             }
         }
         
@@ -1986,6 +2073,23 @@ public class WorldScript : MonoBehaviour {
         }
 
         return false;
+
+    }
+
+    public class SpecialEvent
+    {
+
+        public int cellPosition;
+        public GameObject root;
+
+        public SpecialEvent(int auxCellPosition, WorldScript auxWorld)
+        {
+            cellPosition = auxCellPosition;
+            root = Instantiate(Resources.Load("Prefabs/SpecialEvent")) as GameObject;
+            root.transform.parent = auxWorld.board.transform;
+            Vector3 target = auxWorld.boardCells[auxCellPosition].root.transform.localPosition;
+            root.transform.localPosition = new Vector3(target.x, target.y, target.z - 0.15f);
+        }
 
     }
     
