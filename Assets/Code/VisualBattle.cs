@@ -21,6 +21,8 @@ public class VisualBattle : MonoBehaviour {
 
 	private AudioSource musicBattle;
 
+    public SkillBar skillBar;
+
 	// Use this for initialization
 	void Start () {
 
@@ -38,6 +40,7 @@ public class VisualBattle : MonoBehaviour {
 
 		fading2.transform.localScale = new Vector3 (3000f, 3000f, 1.1f);
 
+        skillBar = (Instantiate(Resources.Load("Prefabs/SkillBarObject")) as GameObject).GetComponent<SkillBar>();
 
 		musicBattle = gameObject.AddComponent<AudioSource>();
 		musicBattle.clip = Resources.Load("Music/Battle_Boss") as AudioClip;
