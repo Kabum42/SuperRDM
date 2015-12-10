@@ -322,25 +322,31 @@ public class WorldScript : MonoBehaviour {
 
         if (Random.Range(0f, 1f) > 1f/3f)
         {
-            int normalCells = 0;
+
+            List<int> normalCells = new List<int>();
+            int numAux = 0;
+
             for (int i = 0; i < cellsPerRing.Length; i++)
             {
-                normalCells += cellsPerRing[i];
+                numAux += cellsPerRing[i];
             }
-            int targetLocation = Random.Range(0, normalCells);
-            bool correct = true;
+
+            for (int i = 0; i < numAux; i++)
+            {
+                normalCells.Add(i);
+            }
+
+            normalCells.Remove(GlobalData.agents[GlobalData.currentAgentTurn].currentCell);
+            
             for (int i = 0; i < specialEvents.Count; i++)
             {
-                if (specialEvents[i].cellPosition == targetLocation)
-                {
-                    correct = false;
-                    break;
-                }
+                normalCells.Remove(specialEvents[i].cellPosition);
             }
-            if (correct)
-            {
-                specialEvents.Add(new SpecialEvent(targetLocation, this));
-            }
+
+            int targetLocation = Random.Range(0, normalCells.Count);
+
+            specialEvents.Add(new SpecialEvent(targetLocation, this));
+            
         }
     }
 
