@@ -824,7 +824,7 @@ public class WorldScript : MonoBehaviour {
         // BRIGHTNESS CELLS
         if (phase == 2)
         {
-            if (usedDijkstra && GlobalData.currentAgentTurn == GlobalData.myAgent && reachables != null)
+            if (usedDijkstra && GlobalData.currentAgentTurn == GlobalData.myAgent && reachables != null && selectedSprite.activeInHierarchy)
             {
                 for (int i = 0; i < boardCells.Length; i++)
                 {

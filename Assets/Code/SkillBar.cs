@@ -34,6 +34,9 @@ public class SkillBar : MonoBehaviour {
     private AudioSource BolingaByeSound;
     private AudioSource BolingaPressedSound;
 
+    public bool isActive = false;
+    public float precision = -1f;
+
 	// Use this for initialization
 	void Start() {
 
@@ -69,7 +72,6 @@ public class SkillBar : MonoBehaviour {
 		if (root.transform.localScale.x < 0.99f && numBounces < 3) {
 			float scaleRoot = Mathf.Lerp (root.transform.localScale.x, 1f, Time.deltaTime * 10f);
 			root.transform.localScale = new Vector3 (scaleRoot, scaleRoot, scaleRoot);
-            root.SetActive(true);
 		}
         else if (root.transform.localScale.x > 0.01f && numBounces >= 3)
         {
@@ -81,6 +83,10 @@ public class SkillBar : MonoBehaviour {
             {
                 float scaleRoot = Mathf.Lerp(root.transform.localScale.x, 0f, Time.deltaTime * 25f);
                 root.transform.localScale = new Vector3(scaleRoot, scaleRoot, scaleRoot);
+                if (scaleRoot <= 0.01f)
+                {
+                    isActive = false;
+                }
             }
         }
 
@@ -156,13 +162,18 @@ public class SkillBar : MonoBehaviour {
 
 		if (circleX > vectorCritical.x && circleX < vectorCritical.y) {
 			Debug.Log ("CRITICAL HIT");
+            precision = 1f;
 		} else if (circleX > vectorGood.x && circleX < vectorGood.y) {
 			Debug.Log ("GOOD HIT");
+            precision = 0.66f;
 		} else if (circleX > vectorBad.x && circleX < vectorBad.y) {
 			Debug.Log ("BAD HIT");
+            precision = 0.33f;
 		} else {
 			Debug.Log ("MISS HIT");
+            precision = 0f;
 		}
+
         numBounces = 3;
         delay = 0.5f;
         BolingaPressedSound.Play();
@@ -223,6 +234,9 @@ public class SkillBar : MonoBehaviour {
         vectorBad = originalVectorBad;
         vectorGood = originalVectorGood;
         vectorCritical = originalVectorCritical;
+
+        isActive = true;
+        precision = -1f;
 
 	}
 

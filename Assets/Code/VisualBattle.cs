@@ -13,6 +13,7 @@ public class VisualBattle : MonoBehaviour {
     public bool hasOrders = false;
     public int skillOrder = -1;
     public int targetOrder = -1;
+    public float precisionOrder = -1f;
 
 	public GameObject fading;
 	public GameObject fading2;
@@ -114,13 +115,21 @@ public class VisualBattle : MonoBehaviour {
 
     public void AllowInteraction()
     {
-        vInterface.AllowInteraction();
+        if (!skillBar.isActive)
+        {
+            vInterface.AllowInteraction();
+        }
     }
 
     public void setOrders(int skill, int target)
     {
         skillOrder = skill;
         targetOrder = target;
+    }
+
+    public void setPrecision(float auxPrecision)
+    {
+        precisionOrder = auxPrecision;
         hasOrders = true;
     }
 
@@ -169,12 +178,12 @@ public class VisualBattle : MonoBehaviour {
 
 	public bool isWaiting() {
 
-		bool aux = false;
+		bool aux = true;
 
 		for (int i = 0; i < visualCharacters.Length; i++) {
 			if (visualCharacters [i] != null) {
 				if (visualCharacters[i].performing != -1 || visualCharacters[i].representing != -1) {
-					aux = true;
+					aux = false;
 					break;
 				}
 			}

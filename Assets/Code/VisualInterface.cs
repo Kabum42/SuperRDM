@@ -61,6 +61,12 @@ public class VisualInterface : MonoBehaviour {
     // Update is called once per frame
     void Update() {
 
+        if (vBattle.skillBar.precision >= 0f)
+        {
+            vBattle.setPrecision(vBattle.skillBar.precision);
+            vBattle.skillBar.precision = -1f;
+        }
+
         if (skillSelectable)
         {
 
@@ -122,6 +128,8 @@ public class VisualInterface : MonoBehaviour {
                     vBattle.setOrders(currentSkillHolder, availableTargets[currentSkillHolder][currentCharacterTarget]);
                     currentSkillHolder = 0;
                     currentCharacterTarget = 0;
+                    vBattle.skillBar.setRandom(0.8f, 0.5f, 0.125f);
+                    vBattle.skillBar.Reset();
                 }
 
 				
@@ -148,7 +156,7 @@ public class VisualInterface : MonoBehaviour {
                 pointer.transform.localScale = new Vector3(1f, 1f, 1f);
                 skillSelected.transform.localPosition = new Vector3(skillHolders[currentSkillHolder].transform.localPosition.x, skillSelected.transform.localPosition.y, skillSelected.transform.localPosition.z);
 
-                if (Input.GetKeyDown(KeyCode.Return))
+                if (Input.GetKeyDown(KeyCode.Return) && !vBattle.skillBar.isActive)
                 {
                     menuOk.Play();
                     if (availableTargets[currentSkillHolder].Count == 0)
@@ -158,6 +166,8 @@ public class VisualInterface : MonoBehaviour {
                         vBattle.setOrders(currentSkillHolder, -1);
                         currentSkillHolder = 0;
                         currentCharacterTarget = 0;
+                        vBattle.skillBar.setRandom(0.8f, 0.5f, 0.125f);
+                        vBattle.skillBar.Reset();
                     }
                     else
                     {
