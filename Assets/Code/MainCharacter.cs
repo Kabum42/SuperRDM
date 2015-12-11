@@ -27,7 +27,7 @@ public class MainCharacter : Character {
 		this.Experience = 0;
 		this.CurrentLevel = 1;
 
-        MaxMP = 6;
+        MaxMP = 2;
         CurrentMP = MaxMP;
 
 		switch (OwnClass.getName ()) {
@@ -267,6 +267,7 @@ public class MainCharacter : Character {
 
     public int getMaxSteps()
     {
+		MaxMP = 2 + (int) Mathf.Floor(getCurrentLevel() / 2);
         return MaxMP;
     }
 
@@ -277,7 +278,7 @@ public class MainCharacter : Character {
 
     public int getCurrentLevel()
     {
-        return CurrentLevel;
+        return CheckLevel();
     }
 
     public float getCurrentFatigue()

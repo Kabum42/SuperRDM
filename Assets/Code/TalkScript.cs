@@ -354,7 +354,8 @@ public class TalkScript : MonoBehaviour {
 			responses.Add("Water");
 			responses.Add("A pussy");
 			responses.Add("An armpit");
-			responses.Add("Your mother");
+			responses.Add("Fire");
+			responses.Add("A table");
 			// EXTRA
 			responses.Add("Fuck you, Ron");
 			responses.Add("( ͡° ͜ʖ ͡°)");
@@ -517,15 +518,30 @@ public class TalkScript : MonoBehaviour {
 			auxResponses = copyList(responses);
 			currentResponses = new string[3];
 			auxCorrect = Random.Range(0, 3);
-			currentResponses[auxCorrect] = "Your mother";
-			auxResponses.Remove("Your mother");
+			currentResponses[auxCorrect] = "Fire";
+			auxResponses.Remove("Fire");
 			assignResponses(currentResponses, auxResponses);
 			auxBubbles = new List<Bubble>();
-			auxBubbles.Add(new Bubble(1, localPhase, localPhase + 1, "What is the thing\nI love the most?", new Vector2(5f, 3f)));
+			auxBubbles.Add(new Bubble(1, localPhase, localPhase + 1, "What always eats\nbut is always hungry?", new Vector2(5f, 3f)));
 			localPhase++;
 			auxBubbles.Add(new Bubble(0, localPhase, localPhase, "", new Vector2(-5.5f, 2.5f), new string[]{currentResponses[0], currentResponses[1], currentResponses[2]}, auxCorrect));
 			localPhase++;
 			randomRiddles.Add(auxBubbles);
+
+			localPhase = auxLocalPhase;
+			auxResponses = copyList(responses);
+			currentResponses = new string[3];
+			auxCorrect = Random.Range(0, 3);
+			currentResponses[auxCorrect] = "A table";
+			auxResponses.Remove("A table");
+			assignResponses(currentResponses, auxResponses);
+			auxBubbles = new List<Bubble>();
+			auxBubbles.Add(new Bubble(1, localPhase, localPhase + 1, "What has four legs\nand can't walk?", new Vector2(5f, 3f)));
+			localPhase++;
+			auxBubbles.Add(new Bubble(0, localPhase, localPhase, "", new Vector2(-5.5f, 2.5f), new string[]{currentResponses[0], currentResponses[1], currentResponses[2]}, auxCorrect));
+			localPhase++;
+			randomRiddles.Add(auxBubbles);
+
 
 
 
@@ -964,7 +980,18 @@ public class TalkScript : MonoBehaviour {
                     else if ((float)partyPoints / (float)maxPartyPoints < 80f/100f)
                     {
                         // BIEN (RECOMPENSA)
-                        bubbles.Add(new Bubble(1, globalPhase, globalPhase, "Not bad...\nHere's your reward", new Vector2(2f, 3f)));
+						float auxRand = Random.Range(0f, 1f);
+						if (auxRand < 1f / 3f)
+						{
+							bubbles.Add(new Bubble(1, globalPhase, globalPhase, "Not bad... for a beginner\nHere's your reward", new Vector2(2f, 3f)));
+						}
+						else if (auxRand < 2f / 3f)
+						{
+							bubbles.Add(new Bubble(1, globalPhase, globalPhase, "I've seen worse...\nTake this, it's dangerous\nto go alone", new Vector2(2f, 3f)));
+						}
+						else {
+							bubbles.Add(new Bubble(1, globalPhase, globalPhase, "Very impressive for a noob\nHave this and get lost", new Vector2(2f, 3f)));
+						}
                     }
                     else if ((float)partyPoints / (float)maxPartyPoints <  100f/100f)
                     {
@@ -1276,7 +1303,7 @@ public class TalkScript : MonoBehaviour {
 				else if (randomFloat <= 0.5f + (2f/extraOptions)*0.5f) {
 					bubbles.Add(new Bubble(1, localPhase, localPhase, "...", new Vector2(3f, 3f)));
 					localPhase++;
-					bubbles.Add(new Bubble(1, localPhase, localPhase, "Well, that was funny\nbut still a wrong answer!", new Vector2(3f, 3f)));
+					bubbles.Add(new Bubble(1, localPhase, localPhase, "I admit that was funny\nbut still a wrong answer!", new Vector2(3f, 3f)));
 					localPhase++;
 				}
                 
