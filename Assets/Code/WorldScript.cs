@@ -14,8 +14,8 @@ public class WorldScript : MonoBehaviour {
     private List<int> auxSanctuaryAvailable = new List<int> { 0, 1, 2, 3, 4, 5 };
     private int selectedSanctuaries = 0;
 
-    private float cellWidth = 1.30f;
-    private float cellHeight = 1.51f;
+    private float cellWidth = 1.61f;
+    private float cellHeight = 1.48f;
 
     private Vector3 lastMousePosition;
     private BoardCell selected;
@@ -701,7 +701,7 @@ public class WorldScript : MonoBehaviour {
         int bestValue = -1;
 
         for (int i = 0; i < availableCells.Count; i++) {
-            if (cellValue(availableCells[i], agent) > bestValue) {
+            if (cellValue(availableCells[i], agent) >= bestValue) {
                 bestAux = i;
                 bestValue = cellValue(availableCells[i], agent);
             }
@@ -709,6 +709,8 @@ public class WorldScript : MonoBehaviour {
 
         if (bestAux < 0 || bestAux >= availableCells.Count)
         {
+			// SI SE LLEGA HASTA AQUI PORQUE availableCells.Count es 0, lo que debe hacer la IA es no moverse y simplemente atacar
+			Debug.Log ("COUNT: "+availableCells.Count);
             Debug.Log("BEST AUX:" + bestAux);
             Debug.Log("BEST VALUE:" + bestValue);
             Debug.Log("LOLASO:" + availableCells.Count);
@@ -718,6 +720,12 @@ public class WorldScript : MonoBehaviour {
     }
 
     int cellValue(int cell, int agent) {
+
+		// SI NO PUEDE LLEGAR HASTA ALLI
+		if (GlobalData.getBiomeCost (boardCells [cell].biome, cell, agent) > GlobalData.agents [agent].getCurrentSteps ()
+		    || cell == GlobalData.agents [agent].currentCell) {
+			return -1;
+		}
 
         // SI TIENE LA FATIGA MUY ALTA
         if (GlobalData.agents[agent].getCurrentFatigue() > 0.5f && cell == GlobalData.agents[agent].sanctuary) {
@@ -777,13 +785,17 @@ public class WorldScript : MonoBehaviour {
             return GlobalData.getBiomeCost(boardCells[cell].biome, cell, GlobalData.currentAgentTurn);
         }
 
-        return 0;
+        return -1;
     }
 
 
     // Update is called once per frame
     void Update()
     {
+
+		for (int i = 0; i < UIAgents.Length; i++) {
+			UIAgents[i].transform.FindChild("Level").GetComponent<TextMesh>().text = ""+GlobalData.agents[i].getCurrentLevel();
+		}
 
 		if (!fadingBattle && !fadingEvent && fading.GetComponent<SpriteRenderer> ().color.a > 0f) {
 

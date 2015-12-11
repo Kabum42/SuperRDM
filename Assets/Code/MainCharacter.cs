@@ -219,7 +219,7 @@ public class MainCharacter : Character {
 		} else if (Experience < 70*10) {
 			CurrentLevel = 10;
 		}
-		Debug.Log ("Level: " + this.CurrentLevel + "\n" + "Experience: " + this.Experience);
+		//Debug.Log ("Level: " + this.CurrentLevel + "\n" + "Experience: " + this.Experience);
         return CurrentLevel;
 	}
 
