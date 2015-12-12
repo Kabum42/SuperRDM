@@ -285,6 +285,11 @@ public class MainCharacter : Character {
     {
         return CurrentFatigue;
     }
+
+    public void setCurrentFatigue(float newFatigue)
+    {
+        CurrentFatigue = Mathf.Clamp(newFatigue, 0f, 1f);
+    }
 	
 	
 }

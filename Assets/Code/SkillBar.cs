@@ -43,7 +43,7 @@ public class SkillBar : MonoBehaviour {
         root = this.gameObject;
 
         circle = root.transform.FindChild("Circle").gameObject;
-        circle.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Battle/Bolinga2");
+        circle.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Battle/Bolinga");
         circle.transform.localPosition = new Vector3(-width/2 +circle.GetComponent<Renderer>().bounds.size.x, circle.transform.localPosition.y, circle.transform.localPosition.z);
 
         circleBase = circle.transform.FindChild("Base").gameObject;
@@ -69,11 +69,11 @@ public class SkillBar : MonoBehaviour {
 
     void Update()
     {
-		if (root.transform.localScale.x < 0.99f && numBounces < 3) {
+		if (root.transform.localScale.x < 0.99f && numBounces < 2) {
 			float scaleRoot = Mathf.Lerp (root.transform.localScale.x, 1f, Time.deltaTime * 10f);
 			root.transform.localScale = new Vector3 (scaleRoot, scaleRoot, scaleRoot);
 		}
-        else if (root.transform.localScale.x > 0.01f && numBounces >= 3)
+        else if (root.transform.localScale.x > 0.01f && numBounces >= 2)
         {
             if (delay > 0f)
             {
@@ -90,7 +90,7 @@ public class SkillBar : MonoBehaviour {
             }
         }
 
-        if (numBounces < 3)
+        if (numBounces < 2)
         {
             bad.transform.localScale = new Vector3(Mathf.Lerp(bad.transform.localScale.x, (vectorBad.y - vectorBad.x) * miss.transform.localScale.x / 2f, Time.deltaTime * 15f), bad.transform.localScale.y, bad.transform.localScale.z);
             bad.transform.localPosition = new Vector3(Mathf.Lerp(bad.transform.localPosition.x, vectorBad.x * miss.GetComponent<Renderer>().bounds.size.x / 2f + bad.GetComponent<Renderer>().bounds.size.x / 2f, Time.deltaTime * 15f), bad.transform.localPosition.y, bad.transform.localPosition.z);
@@ -102,7 +102,7 @@ public class SkillBar : MonoBehaviour {
             critical.transform.localPosition = new Vector3(Mathf.Lerp(critical.transform.localPosition.x, vectorCritical.x * miss.GetComponent<Renderer>().bounds.size.x / 2f + critical.GetComponent<Renderer>().bounds.size.x / 2f, Time.deltaTime * 15f), critical.transform.localPosition.y, critical.transform.localPosition.z);
 
 
-            if (Input.GetKeyDown(KeyCode.Return) && numBounces < 3 && circle.GetComponent<SpriteRenderer>().sprite == Resources.Load<Sprite>("Battle/Bolinga"))
+            if (Input.GetKeyDown(KeyCode.Return) && numBounces < 2 && circle.GetComponent<SpriteRenderer>().sprite == Resources.Load<Sprite>("Battle/Bolinga") && root.transform.localScale.x >= 0.99f)
             {
                 pressedButton();
             }
@@ -174,7 +174,7 @@ public class SkillBar : MonoBehaviour {
             precision = 0f;
 		}
 
-        numBounces = 3;
+        numBounces = 2;
         delay = 0.5f;
         BolingaPressedSound.Play();
 
@@ -185,7 +185,7 @@ public class SkillBar : MonoBehaviour {
         numBounces++;
         
 
-        if (numBounces >= 3)
+        if (numBounces >= 2)
         {
             // NOTHING
             BolingaByeSound.Play();
@@ -225,11 +225,11 @@ public class SkillBar : MonoBehaviour {
 
 		root.transform.localScale = new Vector3 (0.01f, 0.01f, 0.01f);
 
-        circle.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Battle/Bolinga2");
+        circle.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Battle/Bolinga");
 
-		circleX = 1.5f;
+		circleX = -1.5f;
 		speed = 2f;
-		right = false;
+		right = true;
 
         vectorBad = originalVectorBad;
         vectorGood = originalVectorGood;

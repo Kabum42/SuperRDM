@@ -454,5 +454,12 @@ public class BattleScript : MonoBehaviour {
         return CurrentCharacters;
     }
 
+    public static void simulateBattle(int i) {
+
+        GlobalData.agents[i].setExperience(70);
+        GlobalData.agents[i].setCurrentFatigue(GlobalData.agents[i].getCurrentFatigue() + Random.Range(0f, 0.5f));
+
+    }
+
 }
 
