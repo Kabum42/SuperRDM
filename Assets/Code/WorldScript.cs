@@ -14,8 +14,8 @@ public class WorldScript : MonoBehaviour {
     private List<int> auxSanctuaryAvailable = new List<int> { 0, 1, 2, 3, 4, 5 };
     private int selectedSanctuaries = 0;
 
-    private float cellWidth = 1.61f;
-    private float cellHeight = 1.48f;
+    private float cellWidth = 1.623f;
+    private float cellHeight = 1.486f;
 
     private Vector3 lastMousePosition;
     private BoardCell selected;
@@ -78,6 +78,8 @@ public class WorldScript : MonoBehaviour {
 
     private float thinkingIA = 1f;
 
+    private Master master;
+
 
     // Use this for initialization
     void Start () {
@@ -131,6 +133,8 @@ public class WorldScript : MonoBehaviour {
 
         UIAgents = new UIAgent[GlobalData.activeAgents];
 
+        master = new Master();
+
         int numCells = 1;
         
         cellsPerRing = new int[numRings+1];
@@ -157,6 +161,7 @@ public class WorldScript : MonoBehaviour {
         {
             BoardCell b = new BoardCell();
             b.root = Instantiate(Resources.Load("Prefabs/BoardCell")) as GameObject;
+            if (Random.Range(0f, 1f) > 0.5f) { b.root.transform.localScale = new Vector3(-1f, b.root.transform.localScale.y, b.root.transform.localScale.z); }
             b.text = b.root.transform.FindChild("Text").gameObject;
             b.text.SetActive(false);
             b.chains = b.root.transform.FindChild("Chains").gameObject;
@@ -226,7 +231,7 @@ public class WorldScript : MonoBehaviour {
         {
             normalCells += cellsPerRing[i];
         }
-        specialEvents.Add(new SpecialEvent(Random.Range(0, normalCells), this));
+        specialEvents.Add(new SpecialEvent(Random.Range(1, normalCells), this));
 
 	}
 
@@ -1379,8 +1384,18 @@ public class WorldScript : MonoBehaviour {
 
                 if (action1.activeInHierarchy && ClickedOn(action1Option1))
                 {
-                    clickedCell = -1;
-                    usedAction = true;
+                    if (action1Option1.GetComponent<SpriteRenderer>().sprite == Resources.Load<Sprite>("BoardCells/Actions/Attack") ||
+                        action1Option1.GetComponent<SpriteRenderer>().sprite == Resources.Load<Sprite>("BoardCells/Actions/Look") ||
+                        action1Option1.GetComponent<SpriteRenderer>().sprite == Resources.Load<Sprite>("BoardCells/Actions/Heal"))
+                    {
+                        clickedCell = -1;
+                        usedAction = true;
+                    }
+                    else if (action1Option1.GetComponent<SpriteRenderer>().sprite == Resources.Load<Sprite>("BoardCells/Actions/Walk"))
+                    {
+                        moveTo(clickedCell);
+                        clickedCell = -1;
+                    }
                 }
                 else if (action2.activeInHierarchy && ClickedOn(action2Option1))
                 {
@@ -1430,7 +1445,7 @@ public class WorldScript : MonoBehaviour {
 
             for (int i = 0; i < boardCells.Length; i++)
             {
-                boardCells[i].root.transform.localScale = new Vector3(1f, 1f, 1f);
+                boardCells[i].root.transform.localScale = new Vector3(boardCells[i].root.transform.localScale.x / Mathf.Abs(boardCells[i].root.transform.localScale.x), 1f, 1f);
                 boardCells[i].root.transform.localPosition = new Vector3(boardCells[i].root.transform.localPosition.x, boardCells[i].root.transform.localPosition.y, 0f);
                 boardCells[i].root.transform.position = new Vector3(boardCells[i].root.transform.position.x, boardCells[i].root.transform.position.y, -0.1f + boardCells[i].root.transform.position.y / cellHeight * 0.01f);
             }
@@ -1439,7 +1454,7 @@ public class WorldScript : MonoBehaviour {
             {
                 selectedSprite.transform.position = new Vector3(selected.root.transform.position.x, selected.root.transform.position.y, selectedSprite.transform.position.z);
                 selectedSprite.transform.localScale = new Vector3(1.15f, 1.15f, 1.15f);
-                selected.root.transform.localScale = new Vector3(1.15f, 1.15f, 1.15f);
+                selected.root.transform.localScale = new Vector3(selected.root.transform.localScale.x / Mathf.Abs(selected.root.transform.localScale.x)*1.15f, 1.15f, 1.15f);
                 selected.root.transform.localPosition = new Vector3(selected.root.transform.localPosition.x, selected.root.transform.localPosition.y, -0.2f);
             }
             if (clickedCell == -1)
@@ -1470,7 +1485,7 @@ public class WorldScript : MonoBehaviour {
             else
             {
 
-                if (clickedCell == GlobalData.agents[GlobalData.myAgent].currentCell)
+                if (clickedCell == GlobalData.agents[GlobalData.myAgent].currentCell || boardCells[clickedCell].chains.activeInHierarchy)
                 {
                     if (action2.activeInHierarchy)
                     {
@@ -1487,6 +1502,8 @@ public class WorldScript : MonoBehaviour {
                     }
 
                     if (hasSpecialEvent) { action1Option1.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("BoardCells/Actions/Look"); }
+                    else if (boardCells[clickedCell].chains.activeInHierarchy) { action1Option1.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("BoardCells/Actions/Walk"); }
+                    else if (clickedCell == GlobalData.agents[GlobalData.currentAgentTurn].sanctuary) { action1Option1.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("BoardCells/Actions/Heal"); }
                     else { action1Option1.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("BoardCells/Actions/Attack"); }
 
                     action1.SetActive(true);
@@ -1519,6 +1536,7 @@ public class WorldScript : MonoBehaviour {
                     }
 
                     if (hasSpecialEvent) { action2Option1.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("BoardCells/Actions/Look"); }
+                    else if (clickedCell == GlobalData.agents[GlobalData.currentAgentTurn].sanctuary) { action2Option1.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("BoardCells/Actions/Heal"); }
                     else { action2Option1.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("BoardCells/Actions/Attack"); }
 
                     action2.SetActive(true);
@@ -1597,9 +1615,6 @@ public class WorldScript : MonoBehaviour {
             else if (usedAction)
             {
                 usedTurn = true;
-                boardCells[GlobalData.agents[GlobalData.currentAgentTurn].currentCell].chains.SetActive(true);
-                boardCells[GlobalData.agents[GlobalData.currentAgentTurn].currentCell].chainsColor = GlobalData.colorCharacters[GlobalData.currentAgentTurn];
-                boardCells[GlobalData.agents[GlobalData.currentAgentTurn].currentCell].chainsCountDown = 3;
 
                 if (GlobalData.agents[GlobalData.currentAgentTurn].IA)
                 {
@@ -1622,6 +1637,10 @@ public class WorldScript : MonoBehaviour {
                     else
                     {
                         BattleScript.simulateBattle(GlobalData.currentAgentTurn);
+
+                        boardCells[GlobalData.agents[GlobalData.currentAgentTurn].currentCell].chains.SetActive(true);
+                        boardCells[GlobalData.agents[GlobalData.currentAgentTurn].currentCell].chainsColor = GlobalData.colorCharacters[GlobalData.currentAgentTurn];
+                        boardCells[GlobalData.agents[GlobalData.currentAgentTurn].currentCell].chainsCountDown = 3;
                     }
 
                     
@@ -1646,10 +1665,23 @@ public class WorldScript : MonoBehaviour {
                         GlobalData.currentBiome = boardCells[GlobalData.agents[GlobalData.currentAgentTurn].currentCell].biome;
                         GlobalData.currentSpecialEvent = Random.Range(0, 2);
                         fadingEvent = true;
+
+                        boardCells[GlobalData.agents[GlobalData.currentAgentTurn].currentCell].chains.SetActive(true);
+                        boardCells[GlobalData.agents[GlobalData.currentAgentTurn].currentCell].chainsColor = GlobalData.colorCharacters[GlobalData.currentAgentTurn];
+                        boardCells[GlobalData.agents[GlobalData.currentAgentTurn].currentCell].chainsCountDown = 3;
+                    }
+                    else if (GlobalData.agents[GlobalData.currentAgentTurn].currentCell == GlobalData.agents[GlobalData.currentAgentTurn].sanctuary)
+                    {
+                        GlobalData.agents[GlobalData.currentAgentTurn].setCurrentFatigue(0f);
                     }
                     else
                     {
                         BattleScript.simulateBattle(GlobalData.currentAgentTurn);
+
+                        boardCells[GlobalData.agents[GlobalData.currentAgentTurn].currentCell].chains.SetActive(true);
+                        boardCells[GlobalData.agents[GlobalData.currentAgentTurn].currentCell].chainsColor = GlobalData.colorCharacters[GlobalData.currentAgentTurn];
+                        boardCells[GlobalData.agents[GlobalData.currentAgentTurn].currentCell].chainsCountDown = 3;
+
                         /*
                         GlobalData.positionCharacterCombat = new int[] { GlobalData.myAgent, -1 };
                         GlobalData.currentBiome = boardCells[GlobalData.agents[GlobalData.currentAgentTurn].currentCell].biome;
@@ -2273,6 +2305,36 @@ public class WorldScript : MonoBehaviour {
             root.transform.FindChild("Legend").GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Legends/" + currentLegend);
             level = root.transform.FindChild("Level").gameObject;
             fatigue = root.transform.FindChild("Fatigue").gameObject;
+        }
+
+    }
+
+    public class Master
+    {
+
+        public GameObject root;
+        private Vector3 hidingPosition = new Vector3(-10f, -15f, -1f);
+        private Vector3 showingPosition = new Vector3(-10f, -5f, -1f);
+        public bool isHiding = true;
+
+        public Master()
+        {
+            root = Instantiate(Resources.Load("Prefabs/Master")) as GameObject;
+            root.transform.parent = GameObject.Find("World").transform;
+            root.transform.position = showingPosition;
+        }
+
+        public void Update() {
+
+            if (isHiding)
+            {
+                root.transform.position = new Vector3(-10f, Mathf.Lerp(root.transform.position.y, hidingPosition.y, Time.deltaTime * 5f), -1f);
+            }
+            else
+            {
+                root.transform.position = new Vector3(-10f, Mathf.Lerp(root.transform.position.y, showingPosition.y, Time.deltaTime * 5f), -1f);
+            }
+
         }
 
     }

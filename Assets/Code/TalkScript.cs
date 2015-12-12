@@ -266,6 +266,8 @@ public class TalkScript : MonoBehaviour {
 			auxBubbles = new List<Bubble>();
 			auxBubbles.Add(new Bubble(1, localPhase, localPhase, "Your face looks familiar,\nI think we've met before\nin another dream", new Vector2(3f, 3f)));
 			localPhase++;
+            auxBubbles.Add(new Bubble(0, localPhase, localPhase, "(ಠ_ಠ)", new Vector2(-3f, 3f)));
+            localPhase++;
 			randomGreetings.Add(auxBubbles);
 
 			localPhase = 0;
@@ -286,6 +288,8 @@ public class TalkScript : MonoBehaviour {
 			localPhase++;
 			auxBubbles.Add(new Bubble(1, localPhase, localPhase, "Forget it", new Vector2(3f, 3f)));
 			localPhase++;
+            auxBubbles.Add(new Bubble(0, localPhase, localPhase, "...", new Vector2(-3f, 3f)));
+            localPhase++;
 			randomGreetings.Add(auxBubbles);
 
 			localPhase = 0;
@@ -306,10 +310,12 @@ public class TalkScript : MonoBehaviour {
 			localPhase++;
 			auxBubbles.Add(new Bubble(1, localPhase, localPhase, "The Universe...", new Vector2(3f, 3f)));
 			localPhase++;
-			auxBubbles.Add(new Bubble(1, localPhase, localPhase, "...and your mother.", new Vector2(3f, 3f)));
+			auxBubbles.Add(new Bubble(1, localPhase, localPhase, "...and my magic wand", new Vector2(3f, 3f)));
 			localPhase++;
 			auxBubbles.Add(new Bubble(1, localPhase, localPhase, "( ͡° ͜ʖ ͡°)", new Vector2(3f, 3f)));
 			localPhase++;
+            auxBubbles.Add(new Bubble(0, localPhase, localPhase, "...", new Vector2(-3f, 3f)));
+            localPhase++;
 			randomGreetings.Add(auxBubbles);
 
 			localPhase = 0;
@@ -329,9 +335,7 @@ public class TalkScript : MonoBehaviour {
 				localPhase = randomGreetings[randomInt][i].beginPhase +1;
 			}
 
-			bubbles.Add(new Bubble(0, localPhase, localPhase, "...", new Vector2(-3f, 3f)));
-			localPhase++;
-			
+
 			bubbles.Add(new Bubble(1, localPhase, localPhase, "Answer my riddle correctly\nand I will give you\nsomething VERY special", new Vector2(3f, 3f)));
 			localPhase++;
 
@@ -1353,6 +1357,12 @@ public class TalkScript : MonoBehaviour {
             auxBubbles.Add(new Bubble(1, localPhase, localPhase, "Those who believe that\nmagic does everything", new Vector2(3f, 3f)));
             localPhase++;
             auxBubbles.Add(new Bubble(1, localPhase, localPhase, "end up doing\neverything for magic", new Vector2(3f, 3f)));
+            localPhase++;
+            randomFarewells.Add(auxBubbles);
+
+            localPhase = originalLocalPhase;
+            auxBubbles = new List<Bubble>();
+            auxBubbles.Add(new Bubble(1, localPhase, localPhase, "Jet fuel can't melt\nsteal beams", new Vector2(3f, 3f)));
             localPhase++;
             randomFarewells.Add(auxBubbles);
 
