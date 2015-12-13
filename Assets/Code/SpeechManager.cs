@@ -20,9 +20,12 @@ public class SpeechManager
 
     public bool writingSomething = false;
 
-    public SpeechManager(GameObject auxPhysical)
+    public int eventSpeech = -1;
+
+    public SpeechManager(GameObject auxPhysical, int auxEventSpeech)
     {
         physical = auxPhysical;
+        eventSpeech = auxEventSpeech;
         bubbles = new List<Bubble>();
         speechBubblePool = new List<SpeechBubble>();
         toRecycle = new List<int>();
@@ -31,6 +34,7 @@ public class SpeechManager
         SpeechBubble s = new SpeechBubble(this);
         s.root.transform.parent = physical.transform;
         speechBubblePool.Add(s);
+        s.root.SetActive(false);
 
         options = new OptionsSquare(this);
         options.root.transform.parent = physical.transform;
@@ -102,7 +106,7 @@ public class SpeechManager
                 else
                 {
                     // SON OPCIONES
-                    //Write(bubbles[i], options);
+                    options.Write(bubbles[i]);
                 }
 
             }

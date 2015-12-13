@@ -161,7 +161,7 @@ public class WorldScript : MonoBehaviour {
         {
             BoardCell b = new BoardCell();
             b.root = Instantiate(Resources.Load("Prefabs/BoardCell")) as GameObject;
-            if (Random.Range(0f, 1f) > 0.5f) { b.root.transform.localScale = new Vector3(-1f, b.root.transform.localScale.y, b.root.transform.localScale.z); }
+            //if (Random.Range(0f, 1f) > 0.5f) { b.root.transform.localScale = new Vector3(-1f, b.root.transform.localScale.y, b.root.transform.localScale.z); }
             b.text = b.root.transform.FindChild("Text").gameObject;
             b.text.SetActive(false);
             b.chains = b.root.transform.FindChild("Chains").gameObject;

@@ -16,8 +16,9 @@ public class Bubble
     {
         if (auxG == null)
         {
-            auxG = new GameObject();
+            auxG = new GameObject("Auxiliar_Bubble");
             auxG.AddComponent<TextMesh>();
+            auxG.SetActive(false);
         }
 
         speaker = auxSpeaker;

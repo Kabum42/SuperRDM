@@ -57,6 +57,11 @@ public class VisualInterface : MonoBehaviour {
 		availableTargets [1] = vBattle.bs.getTargets (vBattle.myCharacter, 1);
 		availableTargets [2] = vBattle.bs.getTargets (vBattle.myCharacter, 2);
     }
+    public void DisallowInteraction()
+    {
+        skills.SetActive(false);
+        skillSelectable = false;
+    }
 
     // Update is called once per frame
     void Update() {

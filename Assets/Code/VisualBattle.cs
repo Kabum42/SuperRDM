@@ -22,10 +22,12 @@ public class VisualBattle : MonoBehaviour {
 	private bool endingBattle = false;
 
 	private AudioSource musicBattle;
+    private bool finalBoss = false;
+    private int finalBossPhase = -1;
 
     public SkillBar skillBar;
 
-    private List<Bubble> bubbles = new List<Bubble>();
+    private SpeechManager speechManager;
 
 	// Use this for initialization
 	void Start () {
@@ -45,12 +47,12 @@ public class VisualBattle : MonoBehaviour {
 		fading2.transform.localScale = new Vector3 (3000f, 3000f, 1.1f);
 
         skillBar = (Instantiate(Resources.Load("Prefabs/SkillBarObject")) as GameObject).GetComponent<SkillBar>();
+        skillBar.transform.parent = this.gameObject.transform;
 
 		musicBattle = gameObject.AddComponent<AudioSource>();
-		musicBattle.clip = Resources.Load("Music/Battle_Boss") as AudioClip;
-		musicBattle.volume = 1f;
-		musicBattle.loop = true;
-		musicBattle.Play();
+        musicBattle.clip = Resources.Load("Music/Battle_Boss") as AudioClip;
+        musicBattle.volume = 1f;
+        musicBattle.loop = true;
 
 		GlobalData.worldObject.SetActive (false);
 	
@@ -58,6 +60,15 @@ public class VisualBattle : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+
+        if (speechManager != null)
+        {
+            speechManager.update();
+            if (speechManager.writingSomething)
+            {
+                vInterface.DisallowInteraction();
+            }
+        }
 
 		if (endingBattle) {
 			if (fading.GetComponent<SpriteRenderer> ().color.a < 1f) {
@@ -107,7 +118,43 @@ public class VisualBattle : MonoBehaviour {
 			}
 		}
 
+        if (finalBoss)
+        {
+            if (finalBossPhase == -1 && !speechManager.writingSomething)
+            {
+                finalBossPhase = 0;
+                musicBattle.Play();
+            }
+            else if (finalBossPhase == 0)
+            {
+                float percentHealth = visualCharacters[1].previousHealth / visualCharacters[1].currentTrueMaxHealth;
+                if (percentHealth <= 2f / 3f)
+                {
+                    finalBossPhase = 1;
+                    speechManager.bubbles.Add(new Bubble(1, speechManager.globalPhase, speechManager.globalPhase, "I have less than\n66% of life left", new Vector2(3f, 3f)));
+                }
+            }
+            else if (finalBossPhase == 1)
+            {
+                float percentHealth = visualCharacters[1].previousHealth / visualCharacters[1].currentTrueMaxHealth;
+                if (percentHealth <= 1f / 3f)
+                {
+                    finalBossPhase = 2;
+                    speechManager.bubbles.Add(new Bubble(1, speechManager.globalPhase, speechManager.globalPhase, "I have less than\n33% of life left", new Vector2(3f, 3f)));
+                }
+            }
+            else if (finalBossPhase == 2)
+            {
+                float percentHealth = visualCharacters[1].previousHealth / visualCharacters[1].currentTrueMaxHealth;
+                if (percentHealth <= 0f / 3f)
+                {
+                    finalBossPhase = 3;
+                    speechManager.bubbles.Add(new Bubble(1, speechManager.globalPhase, speechManager.globalPhase, "Now I'm dead", new Vector2(3f, 3f)));
+                }
+            }
+        }
 
+        
 	
 	}
 
@@ -118,7 +165,7 @@ public class VisualBattle : MonoBehaviour {
 
     public void AllowInteraction()
     {
-        if (!skillBar.isActive)
+        if (!skillBar.isActive && (speechManager == null || !speechManager.writingSomething))
         {
             vInterface.AllowInteraction();
         }
@@ -176,6 +223,26 @@ public class VisualBattle : MonoBehaviour {
 			}
 
 		}
+
+        if (temp[1].getOwnClass().getName() == "FinalBoss")
+        {
+
+            finalBoss = true;
+
+            speechManager = new SpeechManager(this.gameObject, GlobalData.eventFinalBoss);
+
+            Debug.Log(visualCharacters[0].gameObject);
+            Debug.Log(speechManager);
+            
+            speechManager.addSpeaker(visualCharacters[0].gameObject);
+            speechManager.addSpeaker(visualCharacters[1].gameObject);
+
+            speechManager.bubbles.Add(new Bubble(1, speechManager.globalPhase, speechManager.globalPhase, "Prepare to die!", new Vector2(3f, 3f)));
+            speechManager.bubbles.Add(new Bubble(1, speechManager.globalPhase+1, speechManager.globalPhase+1, "My power keeps\ngetting bigga", new Vector2(3f, 3f)));
+            speechManager.bubbles.Add(new Bubble(1, speechManager.globalPhase+2, speechManager.globalPhase+2, "because Jesuschrist\nis my nigga", new Vector2(3f, 3f)));
+
+        }
+        
 
 	}
 

@@ -27,6 +27,8 @@ public class OptionsSquare
     public float timer = 0f;
     public int selected = 0;
 
+    public float auxFloat1 = 0f;
+
     public OptionsSquare(SpeechManager auxM)
     {
 
@@ -174,123 +176,133 @@ public class OptionsSquare
 
             //menuOk.Play();
 
-            int localPhase = m.globalPhase + 1;
+            // PARA RON
 
-            m.bubbles.Add(new Bubble(0, localPhase, localPhase + 1, b.options[selected], new Vector2(-3f, 3f)));
-            localPhase++;
-
-            if (b.options[selected] == b.options[b.correctOption])
+            if (m.eventSpeech == GlobalData.eventRon)
             {
-                m.bubbles.Add(new Bubble(1, localPhase, localPhase, "How did you know it?!", new Vector2(3f, 3f)));
-                localPhase++;
-                m.bubbles.Add(new Bubble(1, localPhase, localPhase, "Well, it's clear now\nthat you deserve this prize", new Vector2(3f, 3f)));
-                localPhase++;
+                endRon(b);
             }
-            else if (b.options[selected] == "( ͡° ͜ʖ ͡°)")
-            {
-                m.bubbles.Add(new Bubble(1, localPhase, localPhase, "You...", new Vector2(3f, 3f)));
-                localPhase++;
-                m.bubbles.Add(new Bubble(1, localPhase, localPhase, "I like you", new Vector2(3f, 3f)));
-                localPhase++;
-                m.bubbles.Add(new Bubble(1, localPhase, localPhase, "That was not the correct answer\nbut take the prize anyway", new Vector2(3f, 3f)));
-                localPhase++;
-            }
-            else if (b.options[selected] == "Fuck you, Ron")
-            {
-                m.bubbles.Add(new Bubble(1, localPhase, localPhase, "( ͡° ͜ʖ ͡°)", new Vector2(3f, 3f)));
-                localPhase++;
-            }
-            else
-            {
-                float randomFloat = Random.Range(0f, 1f);
-                float extraOptions = 2f;
-
-                if (randomFloat <= 0.5f)
-                {
-                    m.bubbles.Add(new Bubble(1, localPhase, localPhase, "That's the most fucked up\nshit I ever heard", new Vector2(3f, 3f)));
-                    localPhase++;
-                }
-                else if (randomFloat <= 0.5f + (1f / extraOptions) * 0.5f)
-                {
-                    m.bubbles.Add(new Bubble(1, localPhase, localPhase, "Whaaaat?!", new Vector2(3f, 3f)));
-                    localPhase++;
-                }
-                else if (randomFloat <= 0.5f + (2f / extraOptions) * 0.5f)
-                {
-                    m.bubbles.Add(new Bubble(1, localPhase, localPhase, "...", new Vector2(3f, 3f)));
-                    localPhase++;
-                    m.bubbles.Add(new Bubble(1, localPhase, localPhase, "I admit that was funny\nbut still a wrong answer!", new Vector2(3f, 3f)));
-                    localPhase++;
-                }
-
-            }
-
-            root.SetActive(false);
-
-            m.bubbles.Add(new Bubble(1, localPhase, localPhase, "And remember...", new Vector2(3f, 3f)));
-            localPhase++;
-
-            int originalLocalPhase = localPhase;
-            List<Bubble> auxBubbles;
-
-            // FAREWELLS
-            List<List<Bubble>> randomFarewells = new List<List<Bubble>>();
-
-            localPhase = originalLocalPhase;
-            auxBubbles = new List<Bubble>();
-            auxBubbles.Add(new Bubble(1, localPhase, localPhase, "Cigar smoothies are\nbeyond good and evil", new Vector2(3f, 3f)));
-            localPhase++;
-            randomFarewells.Add(auxBubbles);
-
-            localPhase = originalLocalPhase;
-            auxBubbles = new List<Bubble>();
-            auxBubbles.Add(new Bubble(1, localPhase, localPhase, "Without X, life would\nbe an error", new Vector2(3f, 3f)));
-            localPhase++;
-            randomFarewells.Add(auxBubbles);
-
-            localPhase = originalLocalPhase;
-            auxBubbles = new List<Bubble>();
-            auxBubbles.Add(new Bubble(1, localPhase, localPhase, "The last thing one\nloses... it's memories\n*sigh*", new Vector2(3f, 3f)));
-            localPhase++;
-            randomFarewells.Add(auxBubbles);
-
-            localPhase = originalLocalPhase;
-            auxBubbles = new List<Bubble>();
-            auxBubbles.Add(new Bubble(1, localPhase, localPhase, "Millennium Hand and Shrimp!", new Vector2(3f, 3f)));
-            localPhase++;
-            randomFarewells.Add(auxBubbles);
-
-            localPhase = originalLocalPhase;
-            auxBubbles = new List<Bubble>();
-            auxBubbles.Add(new Bubble(1, localPhase, localPhase, "Sometimes happiness is\nat the bottom of\na pickle jar", new Vector2(3f, 3f)));
-            localPhase++;
-            randomFarewells.Add(auxBubbles);
-
-            localPhase = originalLocalPhase;
-            auxBubbles = new List<Bubble>();
-            auxBubbles.Add(new Bubble(1, localPhase, localPhase, "Those who believe that\nmagic does everything", new Vector2(3f, 3f)));
-            localPhase++;
-            auxBubbles.Add(new Bubble(1, localPhase, localPhase, "end up doing\neverything for magic", new Vector2(3f, 3f)));
-            localPhase++;
-            randomFarewells.Add(auxBubbles);
-
-            localPhase = originalLocalPhase;
-            auxBubbles = new List<Bubble>();
-            auxBubbles.Add(new Bubble(1, localPhase, localPhase, "Jet fuel can't melt\nsteal beams", new Vector2(3f, 3f)));
-            localPhase++;
-            randomFarewells.Add(auxBubbles);
-
-            int randomInt = Random.Range(0, randomFarewells.Count);
-
-            for (int i = 0; i < randomFarewells[randomInt].Count; i++)
-            {
-                m.bubbles.Add(randomFarewells[randomInt][i]);
-            }
-
-            endCondition = 50f;
 
         }
 
+    }
+
+    private void endRon(Bubble b)
+    {
+        int localPhase = m.globalPhase + 1;
+
+        m.bubbles.Add(new Bubble(0, localPhase, localPhase + 1, b.options[selected], new Vector2(-3f, 3f)));
+        localPhase++;
+
+        if (b.options[selected] == b.options[b.correctOption])
+        {
+            m.bubbles.Add(new Bubble(1, localPhase, localPhase, "How did you know it?!", new Vector2(3f, 3f)));
+            localPhase++;
+            m.bubbles.Add(new Bubble(1, localPhase, localPhase, "Well, it's clear now\nthat you deserve this prize", new Vector2(3f, 3f)));
+            localPhase++;
+        }
+        else if (b.options[selected] == "( ͡° ͜ʖ ͡°)")
+        {
+            m.bubbles.Add(new Bubble(1, localPhase, localPhase, "You...", new Vector2(3f, 3f)));
+            localPhase++;
+            m.bubbles.Add(new Bubble(1, localPhase, localPhase, "I like you", new Vector2(3f, 3f)));
+            localPhase++;
+            m.bubbles.Add(new Bubble(1, localPhase, localPhase, "That was not the correct answer\nbut take the prize anyway", new Vector2(3f, 3f)));
+            localPhase++;
+        }
+        else if (b.options[selected] == "Fuck you, Ron")
+        {
+            m.bubbles.Add(new Bubble(1, localPhase, localPhase, "( ͡° ͜ʖ ͡°)", new Vector2(3f, 3f)));
+            localPhase++;
+        }
+        else
+        {
+            float randomFloat = Random.Range(0f, 1f);
+            float extraOptions = 2f;
+
+            if (randomFloat <= 0.5f)
+            {
+                m.bubbles.Add(new Bubble(1, localPhase, localPhase, "That's the most fucked up\nshit I ever heard", new Vector2(3f, 3f)));
+                localPhase++;
+            }
+            else if (randomFloat <= 0.5f + (1f / extraOptions) * 0.5f)
+            {
+                m.bubbles.Add(new Bubble(1, localPhase, localPhase, "Whaaaat?!", new Vector2(3f, 3f)));
+                localPhase++;
+            }
+            else if (randomFloat <= 0.5f + (2f / extraOptions) * 0.5f)
+            {
+                m.bubbles.Add(new Bubble(1, localPhase, localPhase, "...", new Vector2(3f, 3f)));
+                localPhase++;
+                m.bubbles.Add(new Bubble(1, localPhase, localPhase, "I admit that was funny\nbut still a wrong answer!", new Vector2(3f, 3f)));
+                localPhase++;
+            }
+
+        }
+
+        root.SetActive(false);
+
+        m.bubbles.Add(new Bubble(1, localPhase, localPhase, "And remember...", new Vector2(3f, 3f)));
+        localPhase++;
+
+        int originalLocalPhase = localPhase;
+        List<Bubble> auxBubbles;
+
+        // FAREWELLS
+        List<List<Bubble>> randomFarewells = new List<List<Bubble>>();
+
+        localPhase = originalLocalPhase;
+        auxBubbles = new List<Bubble>();
+        auxBubbles.Add(new Bubble(1, localPhase, localPhase, "Cigar smoothies are\nbeyond good and evil", new Vector2(3f, 3f)));
+        localPhase++;
+        randomFarewells.Add(auxBubbles);
+
+        localPhase = originalLocalPhase;
+        auxBubbles = new List<Bubble>();
+        auxBubbles.Add(new Bubble(1, localPhase, localPhase, "Without X, life would\nbe an error", new Vector2(3f, 3f)));
+        localPhase++;
+        randomFarewells.Add(auxBubbles);
+
+        localPhase = originalLocalPhase;
+        auxBubbles = new List<Bubble>();
+        auxBubbles.Add(new Bubble(1, localPhase, localPhase, "The last thing one\nloses... it's memories\n*sigh*", new Vector2(3f, 3f)));
+        localPhase++;
+        randomFarewells.Add(auxBubbles);
+
+        localPhase = originalLocalPhase;
+        auxBubbles = new List<Bubble>();
+        auxBubbles.Add(new Bubble(1, localPhase, localPhase, "Millennium Hand and Shrimp!", new Vector2(3f, 3f)));
+        localPhase++;
+        randomFarewells.Add(auxBubbles);
+
+        localPhase = originalLocalPhase;
+        auxBubbles = new List<Bubble>();
+        auxBubbles.Add(new Bubble(1, localPhase, localPhase, "Sometimes happiness is\nat the bottom of\na pickle jar", new Vector2(3f, 3f)));
+        localPhase++;
+        randomFarewells.Add(auxBubbles);
+
+        localPhase = originalLocalPhase;
+        auxBubbles = new List<Bubble>();
+        auxBubbles.Add(new Bubble(1, localPhase, localPhase, "Those who believe that\nmagic does everything", new Vector2(3f, 3f)));
+        localPhase++;
+        auxBubbles.Add(new Bubble(1, localPhase, localPhase, "end up doing\neverything for magic", new Vector2(3f, 3f)));
+        localPhase++;
+        randomFarewells.Add(auxBubbles);
+
+        localPhase = originalLocalPhase;
+        auxBubbles = new List<Bubble>();
+        auxBubbles.Add(new Bubble(1, localPhase, localPhase, "Jet fuel can't melt\nsteal beams", new Vector2(3f, 3f)));
+        localPhase++;
+        randomFarewells.Add(auxBubbles);
+
+        int randomInt = Random.Range(0, randomFarewells.Count);
+
+        for (int i = 0; i < randomFarewells[randomInt].Count; i++)
+        {
+            m.bubbles.Add(randomFarewells[randomInt][i]);
+        }
+
+        auxFloat1 = 50f;
     }
 
 }

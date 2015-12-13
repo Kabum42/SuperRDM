@@ -18,9 +18,6 @@ public class TalkScript : MonoBehaviour {
     private GameObject fading;
     private float fadingMode = 0f;
 
-    public static int eventRon = 0;
-    public static int eventDouchebards = 1;
-
     private int currentEvent = 0;
 
     private float partyHard = 6.1f;
@@ -79,7 +76,7 @@ public class TalkScript : MonoBehaviour {
 
         currentEvent = GlobalData.currentSpecialEvent;
 
-        speechManager = new SpeechManager(this.gameObject);
+        speechManager = new SpeechManager(this.gameObject, currentEvent);
 
 		background = GameObject.Find("Background");
 
@@ -176,7 +173,7 @@ public class TalkScript : MonoBehaviour {
 
 	void initializeEvent(int eventID) {
 
-		if (eventID == eventRon)
+		if (eventID == GlobalData.eventRon)
 		{
 			background.GetComponent<SpriteRenderer>().color = new Color (138f/255f, 125f/255f, 188f/255f);
 
@@ -524,7 +521,7 @@ public class TalkScript : MonoBehaviour {
 
 
 		}
-		if (eventID == eventDouchebards)
+		if (eventID == GlobalData.eventDouchebards)
 		{
 			eventDouchebardsG.SetActive(true);
 			
@@ -682,7 +679,7 @@ public class TalkScript : MonoBehaviour {
 
         updateEvent();
 
-        if (currentEvent == eventDouchebards)
+        if (currentEvent == GlobalData.eventDouchebards)
         {
 
             if (backgroundMusic.isPlaying)
@@ -839,18 +836,18 @@ public class TalkScript : MonoBehaviour {
 
         speechManager.update();
 
-        if (!speechManager.writingSomething && currentEvent == eventRon && endCondition == 50f)
+        if (!speechManager.writingSomething && currentEvent == GlobalData.eventRon && speechManager.options.auxFloat1 == 50f)
         {
             endCondition = 100f;
         }
-        else if (!speechManager.writingSomething && currentEvent == eventDouchebards && endCondition == 50f)
+        else if (!speechManager.writingSomething && currentEvent == GlobalData.eventDouchebards && endCondition == 50f)
         {
             endCondition = 100f;
         }
 		
 		
 
-        if (!speechManager.writingSomething && currentEvent == eventDouchebards && !backgroundMusic.isPlaying)
+        if (!speechManager.writingSomething && currentEvent == GlobalData.eventDouchebards && !backgroundMusic.isPlaying)
         {
             if (partyHard > 0f)
             {
