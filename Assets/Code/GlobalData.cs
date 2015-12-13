@@ -13,7 +13,7 @@ public static class GlobalData {
     public static int[] positionCharacterCombat = new int[2];
 
     public static Biome currentBiome;
-    public static int currentSpecialEvent = eventRon;
+    public static int currentSpecialEvent = 2;
     public static int myAgent = 0;
     public static int[] order;
     public static int currentAgentTurn = 0;
@@ -42,7 +42,9 @@ public static class GlobalData {
 
     public static int eventRon = 0;
     public static int eventDouchebards = 1;
-    public static int eventFinalBoss = 2;
+    public static int eventExpert = 2;
+
+    public static int eventFinalBoss = 42;
 
     // Use this for initialization
     public static void Start () {

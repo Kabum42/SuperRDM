@@ -18,7 +18,7 @@ public class TalkScript : MonoBehaviour {
     private GameObject fading;
     private float fadingMode = 0f;
 
-    private int currentEvent = 0;
+    private int currentEvent;
 
     private float partyHard = 6.1f;
     private int maxPartyPoints = 0;
@@ -35,6 +35,8 @@ public class TalkScript : MonoBehaviour {
 
     private GameObject eventRonG;
     private GameObject eventDouchebardsG;
+    private GameObject eventExpertG;
+
     private GameObject light1;
     private GameObject light2;
     private GameObject light3;
@@ -64,6 +66,13 @@ public class TalkScript : MonoBehaviour {
     private float light1Z = 0f;
     private float light2Z = 0f;
     private float light3Z = 0f;
+
+    private string expertSubject;
+
+    private GameObject expertItem1;
+    private GameObject expertItem2;
+    private GameObject expertItem3;
+    private GameObject expertTheBest;
 
     private GameObject playerAnimated;
 
@@ -158,6 +167,14 @@ public class TalkScript : MonoBehaviour {
 
         eventDouchebardsG = GameObject.Find("EventDouchebards");
         eventDouchebardsG.SetActive(false);
+
+        expertItem1 = GameObject.Find("EventExpert/Item1");
+        expertItem2 = GameObject.Find("EventExpert/Item2");
+        expertItem3 = GameObject.Find("EventExpert/Item3");
+        expertTheBest = GameObject.Find("EventExpert/TheBest"); ;
+
+        eventExpertG = GameObject.Find("EventExpert");
+        eventExpertG.SetActive(false);
         
         menuOk = gameObject.AddComponent<AudioSource>();
         menuOk.clip = Resources.Load("Music/Menu/MenuOk") as AudioClip;
@@ -521,7 +538,7 @@ public class TalkScript : MonoBehaviour {
 
 
 		}
-		if (eventID == GlobalData.eventDouchebards)
+		else if (eventID == GlobalData.eventDouchebards)
 		{
 			eventDouchebardsG.SetActive(true);
 			
@@ -607,6 +624,54 @@ public class TalkScript : MonoBehaviour {
             }
 
 		}
+        else if (currentEvent == GlobalData.eventExpert)
+        {
+
+            eventExpertG.SetActive(true);
+
+            backgroundMusic = gameObject.AddComponent<AudioSource>();
+            backgroundMusic.clip = Resources.Load("Music/Expert") as AudioClip;
+            backgroundMusic.volume = 0f;
+            backgroundMusic.loop = true;
+            backgroundMusic.Play();
+
+            speechManager.addSpeaker(GameObject.Find("Player"));
+            speechManager.addSpeaker(GameObject.Find("EventExpert/Expert"));
+
+            int localPhase;
+            List<Bubble> auxBubbles;
+
+            // EXPERT SUBJECTS
+            List<string> subjects = new List<string>();
+            //subjects.Add("jelly");
+            //subjects.Add("chicken");
+            subjects.Add("dumi");
+
+            expertSubject = subjects[Random.Range(0, subjects.Count)];
+
+            // GREETINGS
+            localPhase = 0;
+            auxBubbles = new List<Bubble>();
+            auxBubbles.Add(new Bubble(1, localPhase, localPhase, "Oh hi", new Vector2(4f, 3f)));
+            localPhase++;
+            auxBubbles.Add(new Bubble(1, localPhase, localPhase, "I'm the\n"+expertSubject+" expert", new Vector2(4f, 3f)));
+            localPhase++;
+            auxBubbles.Add(new Bubble(0, localPhase, localPhase, "...", new Vector2(-3f, 3f)));
+            localPhase++;
+            auxBubbles.Add(new Bubble(1, localPhase, localPhase, "What?\nAren't you surprised?", new Vector2(4f, 3f)));
+            localPhase++;
+            auxBubbles.Add(new Bubble(1, localPhase, localPhase, "Pfft, I bet you couldn't\nidentify the best "+expertSubject+"\nif I do this", new Vector2(4f, 3f)));
+            localPhase++;
+
+            localPhase = 0;
+
+            for (int i = 0; i < auxBubbles.Count; i++)
+            {
+                speechManager.bubbles.Add(auxBubbles[i]);
+                localPhase = auxBubbles[i].beginPhase + 1;
+            }
+
+        }
 
 	}
 

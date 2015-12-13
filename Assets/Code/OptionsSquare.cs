@@ -227,14 +227,12 @@ public class OptionsSquare
             }
             else if (randomFloat <= 0.5f + (1f / extraOptions) * 0.5f)
             {
-                m.bubbles.Add(new Bubble(1, localPhase, localPhase, "Whaaaat?!", new Vector2(3f, 3f)));
+                m.bubbles.Add(new Bubble(1, localPhase, localPhase, "Wrong answer!", new Vector2(3f, 3f)));
                 localPhase++;
             }
             else if (randomFloat <= 0.5f + (2f / extraOptions) * 0.5f)
             {
-                m.bubbles.Add(new Bubble(1, localPhase, localPhase, "...", new Vector2(3f, 3f)));
-                localPhase++;
-                m.bubbles.Add(new Bubble(1, localPhase, localPhase, "I admit that was funny\nbut still a wrong answer!", new Vector2(3f, 3f)));
+                m.bubbles.Add(new Bubble(1, localPhase, localPhase, "Nope", new Vector2(3f, 3f)));
                 localPhase++;
             }
 
