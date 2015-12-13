@@ -39,6 +39,7 @@ public static class GlobalData {
 
     public static float bossFatigue = 0f;
     public static float crossfadeAnimation = 0.15f;
+    //public static float lineWidth = 0.035f;
 
     // Use this for initialization
     public static void Start () {
@@ -134,6 +135,7 @@ public static class GlobalData {
 		RandomEnemies [0] = new EventCharacter (3, "Rabbit", 50, 100, Classes [6], Biome.Prairie);
 		RandomEnemies[1] = new EventCharacter (4, "Wolf", 50, 100, Classes [6], Biome.Forest);
 		RandomEnemies[2] = new EventCharacter (5, "Frog", 50, 100, Classes [6], Biome.Swamp);
+        RandomEnemies[3] = new EventCharacter(6, "FinalBoss", 100, 100, Classes[6], Biome.TheEvil);
 
 	}
 

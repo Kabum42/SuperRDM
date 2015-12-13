@@ -148,6 +148,10 @@ public class BattleScript : MonoBehaviour {
                     CurrentCharacters[auxposition] = GlobalData.RandomEnemies[2];
                     break;
 
+                case Biome.TheEvil:
+                    CurrentCharacters[auxposition] = GlobalData.RandomEnemies[3];
+                    break;
+
                 default:
                     break;
             }

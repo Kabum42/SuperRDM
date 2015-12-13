@@ -49,6 +49,7 @@
      <Compile Include="Assets\Code\Biome.cs" />
      <Compile Include="Assets\Code\Board.cs" />
      <Compile Include="Assets\Code\BoardCell.cs" />
+     <Compile Include="Assets\Code\Bubble.cs" />
      <Compile Include="Assets\Code\Cell.cs" />
      <Compile Include="Assets\Code\Character.cs" />
      <Compile Include="Assets\Code\Class.cs" />
@@ -63,11 +64,14 @@
      <Compile Include="Assets\Code\Mission.cs" />
      <Compile Include="Assets\Code\NetworkManager.cs" />
      <Compile Include="Assets\Code\Noise.cs" />
+     <Compile Include="Assets\Code\OptionsSquare.cs" />
      <Compile Include="Assets\Code\PrefabEmitter.cs" />
      <Compile Include="Assets\Code\PreludeScript.cs" />
      <Compile Include="Assets\Code\PreparationScript.cs" />
      <Compile Include="Assets\Code\Skill.cs" />
      <Compile Include="Assets\Code\SkillBar.cs" />
+     <Compile Include="Assets\Code\SpeechBubble.cs" />
+     <Compile Include="Assets\Code\SpeechManager.cs" />
      <Compile Include="Assets\Code\TalkScript.cs" />
      <Compile Include="Assets\Code\TestScript.cs" />
      <Compile Include="Assets\Code\VisualBattle.cs" />

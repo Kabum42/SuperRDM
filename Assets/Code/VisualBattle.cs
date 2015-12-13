@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class VisualBattle : MonoBehaviour {
 
@@ -23,6 +24,8 @@ public class VisualBattle : MonoBehaviour {
 	private AudioSource musicBattle;
 
     public SkillBar skillBar;
+
+    private List<Bubble> bubbles = new List<Bubble>();
 
 	// Use this for initialization
 	void Start () {

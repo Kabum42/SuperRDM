@@ -133,7 +133,7 @@ public class WorldScript : MonoBehaviour {
 
         UIAgents = new UIAgent[GlobalData.activeAgents];
 
-        master = new Master();
+        //master = new Master();
 
         int numCells = 1;
         
@@ -232,6 +232,9 @@ public class WorldScript : MonoBehaviour {
             normalCells += cellsPerRing[i];
         }
         specialEvents.Add(new SpecialEvent(Random.Range(1, normalCells), this));
+
+        GlobalData.agents[GlobalData.myAgent].setExperience(700);
+        Debug.Log(GlobalData.agents[GlobalData.myAgent].getCurrentLevel());
 
 	}
 
@@ -1676,17 +1679,17 @@ public class WorldScript : MonoBehaviour {
                     }
                     else
                     {
-                        BattleScript.simulateBattle(GlobalData.currentAgentTurn);
+                        //BattleScript.simulateBattle(GlobalData.currentAgentTurn);
 
                         boardCells[GlobalData.agents[GlobalData.currentAgentTurn].currentCell].chains.SetActive(true);
                         boardCells[GlobalData.agents[GlobalData.currentAgentTurn].currentCell].chainsColor = GlobalData.colorCharacters[GlobalData.currentAgentTurn];
                         boardCells[GlobalData.agents[GlobalData.currentAgentTurn].currentCell].chainsCountDown = 3;
 
-                        /*
+                        
                         GlobalData.positionCharacterCombat = new int[] { GlobalData.myAgent, -1 };
                         GlobalData.currentBiome = boardCells[GlobalData.agents[GlobalData.currentAgentTurn].currentCell].biome;
                         fadingBattle = true;
-                         * */
+                        
                     }
                 }
                 
