@@ -224,24 +224,31 @@ public class VisualBattle : MonoBehaviour {
 
 		}
 
-        if (temp[1].getOwnClass().getName() == "FinalBoss")
-        {
+        if (temp [1].getOwnClass ().getName () == "FinalBoss") {
 
-            finalBoss = true;
+			finalBoss = true;
 
-            speechManager = new SpeechManager(this.gameObject, GlobalData.eventFinalBoss);
+			speechManager = new SpeechManager (this.gameObject, GlobalData.eventFinalBoss);
 
-            Debug.Log(visualCharacters[0].gameObject);
-            Debug.Log(speechManager);
+			Debug.Log (visualCharacters [0].gameObject);
+			Debug.Log (speechManager);
             
-            speechManager.addSpeaker(visualCharacters[0].gameObject);
-            speechManager.addSpeaker(visualCharacters[1].gameObject);
+			speechManager.addSpeaker (visualCharacters [0].gameObject);
+			speechManager.addSpeaker (visualCharacters [1].gameObject);
 
-            speechManager.bubbles.Add(new Bubble(1, speechManager.globalPhase, speechManager.globalPhase, "Prepare to die!", new Vector2(3f, 3f)));
-            speechManager.bubbles.Add(new Bubble(1, speechManager.globalPhase+1, speechManager.globalPhase+1, "My power keeps\ngetting bigga", new Vector2(3f, 3f)));
-            speechManager.bubbles.Add(new Bubble(1, speechManager.globalPhase+2, speechManager.globalPhase+2, "because Jesuschrist\nis my nigga", new Vector2(3f, 3f)));
+			speechManager.bubbles.Add (new Bubble (1, speechManager.globalPhase, speechManager.globalPhase, "Prepare to die!", new Vector2 (3f, 3f)));
+			speechManager.bubbles.Add (new Bubble (1, speechManager.globalPhase + 1, speechManager.globalPhase + 1, "My power keeps\ngetting bigga", new Vector2 (3f, 3f)));
+			speechManager.bubbles.Add (new Bubble (1, speechManager.globalPhase + 2, speechManager.globalPhase + 2, "because Jesuschrist\nis my nigga", new Vector2 (3f, 3f)));
 
-        }
+		} else {
+
+			musicBattle = gameObject.AddComponent<AudioSource>();
+			musicBattle.clip = Resources.Load("Music/Battle_Players") as AudioClip;
+			musicBattle.volume = 1f;
+			musicBattle.loop = true;
+			musicBattle.Play();
+
+		}
         
 
 	}
