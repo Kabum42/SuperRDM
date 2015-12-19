@@ -78,6 +78,8 @@ public class WorldScript : MonoBehaviour {
 
     private float thinkingIA = 1f;
 
+    public AudioSource specialEventSound;
+
     private Master master;
 
 
@@ -122,6 +124,11 @@ public class WorldScript : MonoBehaviour {
         ribbonSound.clip = Resources.Load("Music/RibbonSound") as AudioClip;
         ribbonSound.volume = 1f;
         ribbonSound.playOnAwake = false;
+
+        specialEventSound = gameObject.AddComponent<AudioSource>();
+        specialEventSound.clip = Resources.Load("Music/Epic_ching") as AudioClip;
+        specialEventSound.volume = 1f;
+        specialEventSound.playOnAwake = false;
 
         action1 = GameObject.Find("Action1");
         action1Option1 = GameObject.Find("Action1/Option1");
@@ -226,15 +233,12 @@ public class WorldScript : MonoBehaviour {
         }
 
 
-        int normalCells = 0;
-        for (int i = 0; i < cellsPerRing.Length; i++)
-        {
-            normalCells += cellsPerRing[i];
-        }
-        specialEvents.Add(new SpecialEvent(Random.Range(1, normalCells), this));
+
+        addSpecialEvent();
 
         GlobalData.agents[GlobalData.myAgent].setExperience(700);
-        Debug.Log(GlobalData.agents[GlobalData.myAgent].getCurrentLevel());
+        
+        //Debug.Log(GlobalData.agents[GlobalData.myAgent].getCurrentLevel());
 
 	}
 
@@ -320,46 +324,7 @@ public class WorldScript : MonoBehaviour {
         if (Random.Range(0f, 1f) < 1f/5f)
         {
 
-            List<int> normalCells = new List<int>();
-            int numAux = 0;
-
-            for (int i = 0; i < cellsPerRing.Length; i++)
-            {
-                numAux += cellsPerRing[i];
-            }
-
-            for (int i = 0; i < numAux; i++)
-            {
-                normalCells.Add(i);
-            }
-
-            // EN LA CASILLA DEL BOSS NO PUEDE HABER MISIONES
-            normalCells.Remove(0);
-
-            for (int i = 0; i < GlobalData.agents.Length; i++)
-            {
-                if (GlobalData.agents[i] != null)
-                {
-                    normalCells.Remove(GlobalData.agents[i].currentCell);
-                }
-            }
-
-            for (int i = 0; i < specialEvents.Count; i++)
-            {
-                normalCells.Remove(specialEvents[i].cellPosition);
-            }
-
-            for (int i = 0; i < boardCells.Length; i++)
-            {
-                if (boardCells[i].chains.activeInHierarchy)
-                {
-                    normalCells.Remove(i);
-                }
-            }
-
-            int targetLocation = normalCells[Random.Range(0, normalCells.Count)];
-
-            specialEvents.Add(new SpecialEvent(targetLocation, this));
+            addSpecialEvent();
             
         }
 
@@ -839,6 +804,11 @@ public class WorldScript : MonoBehaviour {
             UIAgents[i].fatigue.GetComponent<TextMesh>().text = "" + GlobalData.agents[i].getCurrentFatigue().ToString("0.###");
 		}
 
+        for (int i = 0; i < specialEvents.Count; i++)
+        {
+            specialEvents[i].Update();
+        }
+
 		if (!fadingBattle && !fadingEvent && fading.GetComponent<SpriteRenderer> ().color.a > 0f) {
 
 			fading.GetComponent<SpriteRenderer>().color = new Color(fading.GetComponent<SpriteRenderer>().color.r, fading.GetComponent<SpriteRenderer>().color.g, fading.GetComponent<SpriteRenderer>().color.b, fading.GetComponent<SpriteRenderer> ().color.a -Time.deltaTime*2f);
@@ -975,12 +945,13 @@ public class WorldScript : MonoBehaviour {
         }
 
 
-
+        /*
         if (Input.GetKey(KeyCode.Return))
         {
             GlobalData.boardSeed = Random.Range(0f, 100f);
             GenerateBoard();
         }
+        */
 
         if (Input.GetKeyDown(KeyCode.Space) && GlobalData.currentAgentTurn == GlobalData.myAgent && phase >= 2)
         {
@@ -1048,7 +1019,7 @@ public class WorldScript : MonoBehaviour {
                     current_y += 0.5f;
                 }
 
-                UIAgents[j].root.transform.localPosition = new Vector3(9.64f, Mathf.Lerp(UIAgents[j].root.transform.localPosition.y, (total_y - 1) / 2f - current_y, Time.deltaTime*10f), 0f);
+                UIAgents[j].root.transform.localPosition = new Vector3(-9.64f, Mathf.Lerp(UIAgents[j].root.transform.localPosition.y, (total_y - 1) / 2f - current_y, Time.deltaTime*10f), 0f);
 
                 if (GlobalData.currentAgentTurn == GlobalData.order[i])
                 {
@@ -1150,7 +1121,7 @@ public class WorldScript : MonoBehaviour {
                                 if (isOver(auxSanctuaryCells[auxSanctuaryAvailable[i]].root))
                                 {
                                     selectedSprite.SetActive(true);
-                                    selectedSprite.transform.position = new Vector3(auxSanctuaryCells[auxSanctuaryAvailable[i]].root.transform.position.x, auxSanctuaryCells[auxSanctuaryAvailable[i]].root.transform.position.y, selectedSprite.transform.position.z);
+                                    selectedSprite.transform.position = new Vector3(auxSanctuaryCells[auxSanctuaryAvailable[i]].root.transform.position.x, auxSanctuaryCells[auxSanctuaryAvailable[i]].root.transform.position.y, auxSanctuaryCells[auxSanctuaryAvailable[i]].root.transform.position.z + 0.001f);
                                 }
 
                                 if (ClickedOn(auxSanctuaryCells[auxSanctuaryAvailable[i]].root))
@@ -1191,7 +1162,7 @@ public class WorldScript : MonoBehaviour {
                             if (isOver(auxSanctuaryCells[auxSanctuaryAvailable[i]].root))
                             {
                                 selectedSprite.SetActive(true);
-                                selectedSprite.transform.position = new Vector3(auxSanctuaryCells[auxSanctuaryAvailable[i]].root.transform.position.x, auxSanctuaryCells[auxSanctuaryAvailable[i]].root.transform.position.y, selectedSprite.transform.position.z);
+                                selectedSprite.transform.position = new Vector3(auxSanctuaryCells[auxSanctuaryAvailable[i]].root.transform.position.x, auxSanctuaryCells[auxSanctuaryAvailable[i]].root.transform.position.y, auxSanctuaryCells[auxSanctuaryAvailable[i]].root.transform.position.z + 0.001f);
                             }
 
                             if (ClickedOn(auxSanctuaryCells[auxSanctuaryAvailable[i]].root))
@@ -1232,7 +1203,7 @@ public class WorldScript : MonoBehaviour {
 
                             if (isOver(auxSanctuaryCells[auxSanctuaryAvailable[i]].root)) {
                                 selectedSprite.SetActive(true);
-                                selectedSprite.transform.position = new Vector3(auxSanctuaryCells[auxSanctuaryAvailable[i]].root.transform.position.x, auxSanctuaryCells[auxSanctuaryAvailable[i]].root.transform.position.y, selectedSprite.transform.position.z);
+                                selectedSprite.transform.position = new Vector3(auxSanctuaryCells[auxSanctuaryAvailable[i]].root.transform.position.x, auxSanctuaryCells[auxSanctuaryAvailable[i]].root.transform.position.y, auxSanctuaryCells[auxSanctuaryAvailable[i]].root.transform.position.z + 0.001f);
                             }
 
                             if (ClickedOn(auxSanctuaryCells[auxSanctuaryAvailable[i]].root)) {
@@ -1455,10 +1426,10 @@ public class WorldScript : MonoBehaviour {
 
             if (selected != null && selectedSprite.activeInHierarchy)
             {
-                selectedSprite.transform.position = new Vector3(selected.root.transform.position.x, selected.root.transform.position.y, selectedSprite.transform.position.z);
-                selectedSprite.transform.localScale = new Vector3(1.15f, 1.15f, 1.15f);
                 selected.root.transform.localScale = new Vector3(selected.root.transform.localScale.x / Mathf.Abs(selected.root.transform.localScale.x)*1.15f, 1.15f, 1.15f);
                 selected.root.transform.localPosition = new Vector3(selected.root.transform.localPosition.x, selected.root.transform.localPosition.y, -0.2f);
+                selectedSprite.transform.position = new Vector3(selected.root.transform.position.x, selected.root.transform.position.y, selected.root.transform.position.z +0.001f);
+                selectedSprite.transform.localScale = new Vector3(1.15f, 1.15f, 1.15f);
             }
             if (clickedCell == -1)
             {
@@ -1695,7 +1666,24 @@ public class WorldScript : MonoBehaviour {
                 
             }
         }
-        
+
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            Application.Quit();
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            GlobalData.currentSpecialEvent = GlobalData.eventRon;
+            fadingEvent = true;
+            usedTurn = true;
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            GlobalData.currentSpecialEvent = GlobalData.eventDouchebards;
+            fadingEvent = true;
+            usedTurn = true;
+        }
 
     }
 
@@ -2271,14 +2259,33 @@ public class WorldScript : MonoBehaviour {
 
         public int cellPosition;
         public GameObject root;
+        public float angle = 0f;
+        public Vector3 targetPosition;
 
         public SpecialEvent(int auxCellPosition, WorldScript auxWorld)
         {
             cellPosition = auxCellPosition;
             root = Instantiate(Resources.Load("Prefabs/SpecialEvent")) as GameObject;
             root.transform.parent = auxWorld.board.transform;
-            Vector3 target = auxWorld.boardCells[auxCellPosition].root.transform.localPosition;
-            root.transform.localPosition = new Vector3(target.x, target.y +0.15f, target.z - 0.15f);
+            targetPosition = auxWorld.boardCells[cellPosition].root.transform.localPosition;
+            root.transform.localPosition = new Vector3(targetPosition.x, targetPosition.y +0.15f, targetPosition.z - 0.15f);
+            root.transform.localScale = new Vector3(0f, 0f, 0f);
+            auxWorld.specialEventSound.Play();
+        }
+
+        public void Update()
+        {
+
+            angle += Time.deltaTime * 180f;
+            if (angle >= 360f) { angle -= 360f; }
+
+            root.transform.localPosition = new Vector3(targetPosition.x, targetPosition.y + 0.15f + Mathf.Cos(Mathf.Deg2Rad * angle)*0.1f, targetPosition.z - 0.15f);
+
+            if (root.transform.localScale.x < 0.99f)
+            {
+                float aux = Mathf.Lerp(root.transform.localScale.x, 1f, Time.deltaTime*5f);
+                root.transform.localScale = new Vector3(aux, aux, aux);
+            }
         }
 
     }
@@ -2339,6 +2346,56 @@ public class WorldScript : MonoBehaviour {
             }
 
         }
+
+    }
+
+    private void addSpecialEvent()
+    {
+
+        List<int> normalCells = new List<int>();
+        int numAux = 0;
+
+        for (int i = 0; i < cellsPerRing.Length; i++)
+        {
+            numAux += cellsPerRing[i];
+        }
+
+        for (int i = 0; i < numAux; i++)
+        {
+            normalCells.Add(i);
+        }
+
+        // EN LA CASILLA DEL BOSS NO PUEDE HABER MISIONES
+        normalCells.Remove(0);
+
+        // DONDE ESTAN LOS PERSONAJES NO PUEDE HABER MISIONES
+        for (int i = 0; i < GlobalData.agents.Length; i++)
+        {
+            if (GlobalData.agents[i] != null)
+            {
+                normalCells.Remove(GlobalData.agents[i].currentCell);
+            }
+        }
+
+        // DONDE YA HAY MISIONES NO PUEDE HABER NUEVAS MISIONES
+        for (int i = 0; i < specialEvents.Count; i++)
+        {
+            normalCells.Remove(specialEvents[i].cellPosition);
+        }
+
+        // EN LUGARES EXHAUSTOS O QUE SEAN LAGOS NO PUEDEN HABER MISIONES
+        for (int i = 0; i < boardCells.Length; i++)
+        {
+            if (boardCells[i].chains.activeInHierarchy || boardCells[i].biome == Biome.Lake)
+            {
+                normalCells.Remove(i);
+            }
+        }
+
+
+        int targetLocation = normalCells[Random.Range(0, normalCells.Count)];
+
+        specialEvents.Add(new SpecialEvent(targetLocation, this));
 
     }
     
