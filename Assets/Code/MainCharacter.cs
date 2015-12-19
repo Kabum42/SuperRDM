@@ -8,20 +8,20 @@ public class MainCharacter : Character {
 	private Sprite Icon;
 	private int CurrentMP;
 	private int MaxMP;
-	private int Experience;
-	private int CurrentLevel;
-    private float CurrentFatigue;
+	private float Experience;
+	private float CurrentFatigue = 0.50f;
     public NetworkPlayer player;
     public bool IA = false;
     public int currentCell;
     public int sanctuary;
     public GameObject cellChampion;
 
-	public MainCharacter(int ID, string Name, float MaxHealth, float MaxIP, Class OwnClass)
+	public MainCharacter(int ID, string Name, float BaseHealth, float MaxIP, Class OwnClass)
 	{
 		this.ID = ID; 
 		this.Name = Name;
-		this.MaxHealth = MaxHealth;
+		this.BaseHealth = BaseHealth;
+		this.MaxHealth = BaseHealth;
 		this.MaxIPBar = MaxIP;
 		this.OwnClass = OwnClass;
 		this.Experience = 0;
@@ -40,7 +40,7 @@ public class MainCharacter : Character {
 				this.Aerial = true;
 				break;
 
-			case "DreamWalker":
+			default:
 				this.Aerial = false;
 				break;
 		}
@@ -49,7 +49,7 @@ public class MainCharacter : Character {
 	}
 
 	public void ApplyEnemyIA(int Attacker, ref Character[] CharactersInBattle){
-		int SkillSelected = -1;
+		int SkillSelected = 0;
 		int FocusEnemy = 0;
 		switch (OwnClass.getName ()) {
 			case "Boar Ryder":
@@ -81,7 +81,6 @@ public class MainCharacter : Character {
 						FocusEnemy =  CheckLowestHPEnemy (Attacker, CharactersInBattle);
 					}
 				}
-				UseSkill(SkillSelected, Attacker, ref CharactersInBattle, FocusEnemy);
 				break;
 
 			case "Pilumantic":
@@ -124,7 +123,6 @@ public class MainCharacter : Character {
 					}
 				}
 
-				UseSkill(SkillSelected, Attacker, ref CharactersInBattle, FocusEnemy);
 				break;
 
 			case "Dreamwalker":
@@ -168,9 +166,70 @@ public class MainCharacter : Character {
 						SkillSelected = 2;
 					}
 				}
-				UseSkill (SkillSelected, Attacker, ref CharactersInBattle, FocusEnemy);
+				break;
+
+			case "Henmancer":
+				
+				// Check number of chickens in battle
+				int NumberChickens = 0;
+				for (int i = 0; i < CharactersInBattle.Length; i++){
+					if (CharactersInBattle[i] != null){
+						if (CharactersInBattle[i].getName() == "Chicken"){
+							NumberChickens += 1;
+						}
+					}
+				}
+
+				if (CurrentHealth > 25){
+					if (NumberChickens > 2){
+						SkillSelected = 2;
+						FocusEnemy = CheckLowestHPEnemy(Attacker, CharactersInBattle);
+					}
+					else {
+						SkillSelected = 0;
+					}
+				}
+				else {
+					if (NumberChickens > 0){
+						SkillSelected = 1;
+					}
+					else {
+						SkillSelected = 0;
+					}
+				}
+				break;
+
+			case "Disembodied":
+				FocusEnemy = CheckLowestHPEnemy(Attacker, CharactersInBattle);
+				if (CharactersInBattle[FocusEnemy].getCurrentHealth() <= 20){
+					SkillSelected = 1;
+				}
+				else {
+					if (getDurationEffect("Dark Pact Effect") > 0){
+						if (CharactersInBattle[FocusEnemy].getDurationEffect("Haunt Effect") > 0){
+							SkillSelected = 1;
+						}
+						else {
+							SkillSelected = 0;
+						}
+					}
+					else {
+						if(getCurrentHealth() < 40){
+							if (CharactersInBattle[FocusEnemy].getDurationEffect("Haunt Effect") > 0){
+								SkillSelected = 1;
+							}
+							else {
+								SkillSelected = 0;
+							}
+						}
+						else {
+							SkillSelected = 2;
+						}
+					}
+				}
 				break;
 		}
+		UseSkill (SkillSelected, Attacker, ref CharactersInBattle, FocusEnemy);
 	}
 		
 	private int CheckLowestHPEnemy(int Attacker, Character[] CharactersInBattle){
@@ -182,8 +241,10 @@ public class MainCharacter : Character {
 				}
 				else {
 					if (CharactersInBattle[i].getBottom() != CharactersInBattle[Attacker].getBottom ()){
-						if (CharactersInBattle[i].getCurrentHealth() < CharactersInBattle[LowestHPEnemy].getCurrentHealth()){
-							LowestHPEnemy = i;
+						if (CharactersInBattle[i].getName () != "Chicken"){
+							if (CharactersInBattle[i].getCurrentHealth() < CharactersInBattle[LowestHPEnemy].getCurrentHealth()){
+								LowestHPEnemy = i;
+							}
 						}
 					}
 				}
@@ -192,32 +253,17 @@ public class MainCharacter : Character {
 		return LowestHPEnemy;
 	}
 
-	public void setExperience(int Experience){
+	public void setExperience(float Experience){
 		this.Experience += Experience;
 		CheckLevel();
 	}
 
 	private void CheckLevel(){
-		if (Experience < 100) {
-			CurrentLevel = 1;
-		} else if (Experience < 300) {
-			CurrentLevel = 2;
-		} else if (Experience < 700) {
-			CurrentLevel = 3;
-		} else if (Experience < 1500) {
-			CurrentLevel = 4;
-		} else if (Experience < 3100) {
-			CurrentLevel = 5;
-		} else if (Experience < 6300) {
-			CurrentLevel = 6;
-		} else if (Experience < 12700) {
-			CurrentLevel = 7;
-		} else if (Experience < 25500) {
-			CurrentLevel = 8;
-		} else if (Experience < 51000) {
-			CurrentLevel = 9;
-		} else if (Experience < 102200) {
-			CurrentLevel = 10;
+		for (int i = 0; i<GlobalData.ExperienceEachLevel.Length; i++) {
+			if (Experience < GlobalData.ExperienceEachLevel[i]){
+				setCurrentLevel(i+1);
+				break;
+			}
 		}
 		Debug.Log ("Level: " + this.CurrentLevel + "\n" + "Experience: " + this.Experience);
 	}
@@ -251,6 +297,20 @@ public class MainCharacter : Character {
 					}
 				}
 				break;
+
+			case "Haunt Effect":
+				for (int i = 0; i<CharactersInBattle.Length; i++){
+					if (CharactersInBattle[i] != null){
+						if (CharactersInBattle[i].getBottom() != this.getBottom()){
+							CharactersInBattle[i].newEffect(Effect, 0, 0, 5, IDCreator);
+						}
+					}
+				}
+				break;
+
+			case "Dark Pact Effect":
+				CharactersInBattle[CharacterAffected].newEffect(Effect, 0, 0, -10, IDCreator);
+				break;
 		}
 	}
 
@@ -283,6 +343,10 @@ public class MainCharacter : Character {
     {
         return CurrentFatigue;
     }
+
+	public void setCurrentFatigue(float Fatigue){
+		this.CurrentFatigue = Fatigue;
+	}
 	
 	
 }
