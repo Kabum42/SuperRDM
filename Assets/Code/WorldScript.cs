@@ -321,7 +321,7 @@ public class WorldScript : MonoBehaviour {
             }
         }
 
-        if (Random.Range(0f, 1f) < 1f/5f)
+        if (Random.Range(0f, 1f) < 1f/5f || specialEvents.Count == 0)
         {
 
             addSpecialEvent();
