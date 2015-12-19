@@ -55,7 +55,6 @@ public class BattleScript : MonoBehaviour {
 		vb = (Instantiate(Resources.Load("Prefabs/VisualBattleObject")) as GameObject).GetComponent<VisualBattle>();
 		vb.gameObject.transform.parent = GameObject.Find ("Battle").transform;
 		vb.setBattleScript (this);
-		//vb.visualCharacters [0].Perform (GlobalData.Skills [1], vb.visualCharacters [3], new float[]{34f});
 
 	}
 	
@@ -147,6 +146,10 @@ public class BattleScript : MonoBehaviour {
 
                 case Biome.Swamp:
                     CurrentCharacters[auxposition] = GlobalData.RandomEnemies[2];
+                    break;
+
+                case Biome.TheEvil:
+                    CurrentCharacters[auxposition] = GlobalData.RandomEnemies[3];
                     break;
 
                 default:
@@ -422,12 +425,10 @@ public class BattleScript : MonoBehaviour {
 		}
 
 		if (Bottom == 0) {
-            GlobalData.World();
-            Destroy(GameObject.Find("Battle"));
+			vb.EndBattle();
 		} 
 		else if (Top == 0){
-            GlobalData.World();
-            Destroy(GameObject.Find("Battle"));
+			vb.EndBattle();
 		}
 	}
 
@@ -451,6 +452,18 @@ public class BattleScript : MonoBehaviour {
 		return aux;
 
 	}
+
+    public Character[] GetCurrentCharacters()
+    {
+        return CurrentCharacters;
+    }
+
+    public static void simulateBattle(int i) {
+
+        GlobalData.agents[i].setExperience(70);
+        GlobalData.agents[i].setCurrentFatigue(GlobalData.agents[i].getCurrentFatigue() + Random.Range(0f, 0.5f));
+
+    }
 
 }
 

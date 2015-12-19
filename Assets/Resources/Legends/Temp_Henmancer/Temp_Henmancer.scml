@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spriter_data scml_version="1.0" generator="BrashMonkey Spriter" generator_version="r5">
+    <folder id="0">
+        <file id="0" name="Idle.png" width="557" height="702" pivot_x="0.727778" pivot_y="0.0190896"/>
+        <file id="1" name="Hurt.png" width="669" height="735" pivot_x="0.725806" pivot_y="-0.001466"/>
+        <file id="2" name="Order.png" width="873" height="715" pivot_x="0.860577" pivot_y="0.013196"/>
+        <file id="3" name="Sacrifice.png" width="673" height="751" pivot_x="0.523732" pivot_y="0.01173"/>
+        <file id="4" name="Sumon.png" width="709" height="639" pivot_x="0.715092" pivot_y="0.014085"/>
+        <file id="5" name="Hen1.png" width="200" height="229" pivot_x="0.515" pivot_y="0.043668"/>
+        <file id="6" name="Hen2.png" width="274" height="225" pivot_x="0.635036" pivot_y="0.0444444"/>
+        <file id="7" name="Hen3.png" width="260" height="206" pivot_x="0.623077" pivot_y="0.092233"/>
+    </folder>
+    <entity id="0" name="Henmancer">
+        <animation id="0" name="Idle" length="1000" interval="100">
+            <mainline>
+                <key id="0">
+                    <object_ref id="0" timeline="0" key="0" z_index="0"/>
+                </key>
+            </mainline>
+            <timeline id="0" name="Idle">
+                <key id="0" spin="0">
+                    <object folder="0" file="0" x="69" y="-15"/>
+                </key>
+            </timeline>
+        </animation>
+        <animation id="1" name="Hurt" length="1000" interval="100">
+            <mainline>
+                <key id="0">
+                    <object_ref id="0" timeline="0" key="0" z_index="0"/>
+                </key>
+            </mainline>
+            <timeline id="0" name="Idle">
+                <key id="0" spin="0">
+                    <object folder="0" file="1" x="69" y="-15"/>
+                </key>
+            </timeline>
+        </animation>
+        <animation id="2" name="S1" length="1000" interval="100">
+            <mainline>
+                <key id="0">
+                    <object_ref id="0" timeline="0" key="0" z_index="0"/>
+                </key>
+            </mainline>
+            <timeline id="0" name="Idle">
+                <key id="0" spin="0">
+                    <object folder="0" file="4" x="69" y="-15"/>
+                </key>
+            </timeline>
+        </animation>
+        <animation id="3" name="S2" length="1000" interval="100">
+            <mainline>
+                <key id="0">
+                    <object_ref id="0" timeline="0" key="0" z_index="0"/>
+                </key>
+            </mainline>
+            <timeline id="0" name="Idle">
+                <key id="0" spin="0">
+                    <object folder="0" file="3" x="69" y="-15"/>
+                </key>
+            </timeline>
+        </animation>
+        <animation id="4" name="S3" length="1000" interval="100">
+            <mainline>
+                <key id="0">
+                    <object_ref id="0" timeline="0" key="0" z_index="0"/>
+                </key>
+            </mainline>
+            <timeline id="0" name="Idle">
+                <key id="0" spin="0">
+                    <object folder="0" file="2" x="69" y="-15"/>
+                </key>
+            </timeline>
+        </animation>
+    </entity>
+    <entity id="1" name="Hen">
+        <animation id="0" name="Idle" length="1000" interval="100">
+            <mainline>
+                <key id="0">
+                    <object_ref id="0" timeline="0" key="0" z_index="0"/>
+                </key>
+            </mainline>
+            <timeline id="0" name="Hen1">
+                <key id="0" spin="0">
+                    <object folder="0" file="5" x="15" y="-1"/>
+                </key>
+            </timeline>
+        </animation>
+        <animation id="1" name="Hurt" length="1000" interval="100">
+            <mainline>
+                <key id="0">
+                    <object_ref id="0" timeline="0" key="0" z_index="0"/>
+                </key>
+            </mainline>
+            <timeline id="0" name="Hen1">
+                <key id="0" spin="0">
+                    <object folder="0" file="6" x="15" y="-1"/>
+                </key>
+            </timeline>
+        </animation>
+        <animation id="2" name="S1" length="500" interval="100">
+            <mainline>
+                <key id="0">
+                    <object_ref id="0" timeline="0" key="0" z_index="0"/>
+                </key>
+                <key id="1" time="250">
+                    <object_ref id="0" timeline="0" key="1" z_index="0"/>
+                </key>
+            </mainline>
+            <timeline id="0" name="Hen1">
+                <key id="0" spin="0">
+                    <object folder="0" file="6" x="15" y="-1"/>
+                </key>
+                <key id="1" time="250" spin="0">
+                    <object folder="0" file="5" x="15" y="-1"/>
+                </key>
+            </timeline>
+        </animation>
+        <animation id="3" name="S1_000" length="500" interval="100" looping="false">
+            <mainline>
+                <key id="0">
+                    <object_ref id="0" timeline="0" key="0" z_index="0"/>
+                </key>
+                <key id="1" time="250">
+                    <object_ref id="0" timeline="0" key="1" z_index="0"/>
+                </key>
+            </mainline>
+            <timeline id="0" name="Hen1">
+                <key id="0" spin="0">
+                    <object folder="0" file="6" x="15" y="-1"/>
+                </key>
+                <key id="1" time="250" spin="0">
+                    <object folder="0" file="7" x="15" y="-1"/>
+                </key>
+            </timeline>
+        </animation>
+    </entity>
+</spriter_data>

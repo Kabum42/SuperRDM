@@ -13,6 +13,7 @@ public static class GlobalData {
     public static int[] positionCharacterCombat = new int[2];
 
     public static Biome currentBiome;
+    public static int currentSpecialEvent = 2;
     public static int myAgent = 0;
     public static int[] order;
     public static int currentAgentTurn = 0;
@@ -29,7 +30,7 @@ public static class GlobalData {
 
 	public static EventCharacter[] RandomEnemies = new EventCharacter[25];
 	public static Skill[] Skills = new Skill[24];
-	public static Class[] Classes = new Class[7];
+	public static Class[] Classes = new Class[8];
 
     public static bool online = false;
     public static bool hosting = false;
@@ -38,6 +39,12 @@ public static class GlobalData {
 
     public static float bossFatigue = 0f;
     public static float crossfadeAnimation = 0.15f;
+
+    public static int eventRon = 0;
+    public static int eventDouchebards = 1;
+    public static int eventExpert = 2;
+
+    public static int eventFinalBoss = 42;
 
     // Use this for initialization
     public static void Start () {
@@ -122,6 +129,7 @@ public static class GlobalData {
         Classes [4] = new Class (4, "Disembodied", Skills [0], Skills [1], Skills [2]);
         Classes [5] = new Class (5, "Black Shield", Skills [0], Skills [1], Skills [2]);
 		Classes [6] = new Class (6, "Animal", null, null, null);
+        Classes [7] = new Class (7, "FinalBoss", null, null, null);
 	}
 
 
@@ -133,6 +141,7 @@ public static class GlobalData {
 		RandomEnemies [0] = new EventCharacter (3, "Rabbit", 50, 100, Classes [6], Biome.Prairie);
 		RandomEnemies[1] = new EventCharacter (4, "Wolf", 50, 100, Classes [6], Biome.Forest);
 		RandomEnemies[2] = new EventCharacter (5, "Frog", 50, 100, Classes [6], Biome.Swamp);
+        RandomEnemies[3] = new EventCharacter(6, "FinalBoss", 100, 100, Classes[7], Biome.TheEvil);
 
 	}
 
@@ -140,8 +149,12 @@ public static class GlobalData {
 
     public static void Battle()
     {
-        worldObject.SetActive(false);
         Application.LoadLevelAdditive("Battle");
+    }
+
+    public static void Event()
+    {
+        Application.LoadLevelAdditive("Talk");
     }
 
     public static void World()

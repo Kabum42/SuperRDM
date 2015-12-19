@@ -20,6 +20,9 @@ public class VisualInterface : MonoBehaviour {
 
 	private List<int>[] availableTargets = new List<int>[3];
 
+    private AudioSource menuOk;
+    private AudioSource menuBack;
+
 	// Use this for initialization
 	void Awake () {
 
@@ -35,6 +38,14 @@ public class VisualInterface : MonoBehaviour {
 
         skills.transform.localScale = new Vector3(0f, 0f, 0f);
         skills.SetActive(false);
+
+        menuOk = gameObject.AddComponent<AudioSource>();
+        menuOk.clip = Resources.Load("Music/Menu/MenuOk") as AudioClip;
+        menuOk.volume = 0.85f;
+
+        menuBack = gameObject.AddComponent<AudioSource>();
+        menuBack.clip = Resources.Load("Music/Menu/MenuBack") as AudioClip;
+        menuBack.volume = 0.85f;
 	
 	}
 
@@ -46,9 +57,20 @@ public class VisualInterface : MonoBehaviour {
 		availableTargets [1] = vBattle.bs.getTargets (vBattle.myCharacter, 1);
 		availableTargets [2] = vBattle.bs.getTargets (vBattle.myCharacter, 2);
     }
+    public void DisallowInteraction()
+    {
+        skills.SetActive(false);
+        skillSelectable = false;
+    }
 
     // Update is called once per frame
     void Update() {
+
+        if (vBattle.skillBar.precision >= 0f)
+        {
+            vBattle.setPrecision(vBattle.skillBar.precision);
+            vBattle.skillBar.precision = -1f;
+        }
 
         if (skillSelectable)
         {
@@ -94,6 +116,7 @@ public class VisualInterface : MonoBehaviour {
 
                 if (Input.GetKeyDown(KeyCode.Escape))
                 {
+                    menuBack.Play();
                     characterSelectable = false;
                 }
 
@@ -104,11 +127,14 @@ public class VisualInterface : MonoBehaviour {
 
                 if (Input.GetKeyDown(KeyCode.Return))
                 {
+                    menuOk.Play();
                     skillSelectable = false;
                     characterSelectable = false;
                     vBattle.setOrders(currentSkillHolder, availableTargets[currentSkillHolder][currentCharacterTarget]);
                     currentSkillHolder = 0;
                     currentCharacterTarget = 0;
+                    vBattle.skillBar.setRandom(0.8f, 0.5f, 0.125f);
+                    vBattle.skillBar.Reset();
                 }
 
 				
@@ -135,8 +161,9 @@ public class VisualInterface : MonoBehaviour {
                 pointer.transform.localScale = new Vector3(1f, 1f, 1f);
                 skillSelected.transform.localPosition = new Vector3(skillHolders[currentSkillHolder].transform.localPosition.x, skillSelected.transform.localPosition.y, skillSelected.transform.localPosition.z);
 
-                if (Input.GetKeyDown(KeyCode.Return))
+                if (Input.GetKeyDown(KeyCode.Return) && !vBattle.skillBar.isActive)
                 {
+                    menuOk.Play();
                     if (availableTargets[currentSkillHolder].Count == 0)
                     {
                         skillSelectable = false;
@@ -144,6 +171,8 @@ public class VisualInterface : MonoBehaviour {
                         vBattle.setOrders(currentSkillHolder, -1);
                         currentSkillHolder = 0;
                         currentCharacterTarget = 0;
+                        vBattle.skillBar.setRandom(0.8f, 0.5f, 0.125f);
+                        vBattle.skillBar.Reset();
                     }
                     else
                     {

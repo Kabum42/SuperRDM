@@ -72,8 +72,14 @@
      <Compile Include="Assets\ThirdParty\Spriter2Unity\Editor\Utils\PrefabUtils.cs" />
      <Compile Include="Assets\ThirdParty\Spriter2Unity\Editor\Utils\XmlUtils.cs" />
      <Compile Include="Assets\ThirdParty\Spriter2Unity\Example\Editor\AnimationTestScriptInspector.cs" />
+     <None Include="Assets\Shaders\Transition2.shader" />
+     <None Include="Assets\Shaders\TSF.shader" />
      <None Include="Assets\ThirdParty\Spriter2Unity\Example\Spriter Project\GreyGuy\Copyright_Information_Please_Read.txt" />
      <None Include="Assets\Shaders\HSVDefault.shader" />
+     <None Include="Assets\Ron_Speech.txt" />
+     <None Include="Assets\Shaders\Transition.shader" />
+     <None Include="Assets\Shaders\TSFOutline.shader" />
+     <None Include="Assets\Resources\Fonts\karmatic-arcade\1001fonts-karmatic-arcade-eula.txt" />
      <None Include="Assets\Resources\Fonts\Comfortaa\OFL.txt" />
      <None Include="Assets\Resources\Languages.txt" />
  <Reference Include="UnityEditor.Advertisements">

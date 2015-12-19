@@ -15,6 +15,7 @@ public class VisualCharacter : MonoBehaviour {
     private GameObject animated2;
 	private string lastAnimationOrder;
     public Bounds characterBounds;
+    public GameObject health;
     private GameObject text1;
     private GameObject text2;
     private GameObject blood1;
@@ -36,6 +37,13 @@ public class VisualCharacter : MonoBehaviour {
 
     private string statusPerformance = "none";
 
+	public float previousHealth;
+	public float currentVirtualHealth;
+	public float currentTrueHealth;
+	public float currentTrueMaxHealth;
+
+	public int positionInArray;
+
 	//public Material palette1;
 	//public Material palette2;
 	//public Material palette3;
@@ -44,7 +52,7 @@ public class VisualCharacter : MonoBehaviour {
 	void Awake () {
         root = this.gameObject;
 
-        //Time.timeScale = 0.25f;
+        //Time.timeScale = 0.1f;
 
         //setClass(GlobalData.Classes[0]);
 
@@ -65,6 +73,8 @@ public class VisualCharacter : MonoBehaviour {
 
         bloodBFAnimation = root.transform.FindChild("BloodBFAnimation").gameObject;
         bloodBFAnimation.SetActive(false);
+
+        health = root.transform.FindChild("Health").gameObject;
 
         bloodBFSplat = root.transform.FindChild("BloodBFSplat").gameObject;
         bloodBFSplat.transform.localScale = new Vector3(0f, 0f, 0f);
@@ -93,10 +103,11 @@ public class VisualCharacter : MonoBehaviour {
         animated2 = Instantiate(animated) as GameObject;
         animated2.SetActive(false);
         animated2.transform.parent = character.transform;
-        animated2.transform.localPosition = new Vector3(-4f, 7f, 0f);
-        animated2.transform.localScale = new Vector3(1f, 1f, 1f);
+        animated2.transform.localPosition = new Vector3(-7f, 4.2f, animated2.transform.localPosition.z);
+        animated2.transform.localScale = new Vector3(1f, 1.1f, 1f);
 
         characterBounds = GetChildRendererBounds(character);
+        characterBounds = new Bounds(characterBounds.center, characterBounds.size * Mathf.Abs(character.transform.localScale.x));
 
     }
 
@@ -147,6 +158,7 @@ public class VisualCharacter : MonoBehaviour {
 	void Update () {
 
 
+
         if (statusPerformance == "chasing")
         {
             // ACERCARSE
@@ -155,7 +167,7 @@ public class VisualCharacter : MonoBehaviour {
 
             if (side)
             {
-                if ((root.transform.position.x + characterBounds.size.x) < targetPerformance.root.transform.position.x)
+                if ((root.transform.position.x + characterBounds.size.x*2f) < targetPerformance.root.transform.position.x)
                 {
 					root.transform.position = new Vector3(root.transform.position.x + Time.deltaTime * 20f, Mathf.Lerp(root.transform.position.y, targetPerformance.root.transform.position.y, Time.deltaTime * 10f), root.transform.position.z);
                 }
@@ -166,7 +178,7 @@ public class VisualCharacter : MonoBehaviour {
             }
             else
             {
-                if ((root.transform.position.x - characterBounds.size.x) > targetPerformance.root.transform.position.x)
+                if ((root.transform.position.x - characterBounds.size.x*2f) > targetPerformance.root.transform.position.x)
                 {
 					root.transform.position = new Vector3(root.transform.position.x - Time.deltaTime * 20f, Mathf.Lerp(root.transform.position.y, targetPerformance.root.transform.position.y, Time.deltaTime * 10f), root.transform.position.z);
                 }
@@ -183,6 +195,7 @@ public class VisualCharacter : MonoBehaviour {
                 {
                     statusPerformance = "executing";
                     animated.GetComponent<Animator>().CrossFade("S1", GlobalData.crossfadeAnimation, 0, 0f);
+                    lastAnimationOrder = "S1";
                     int aux = Random.Range(1, 5);
                     audio1.clip = Resources.Load("Music/Battle/Barbarian_" + aux.ToString("00")) as AudioClip;
                     audio1.Play();
@@ -192,6 +205,7 @@ public class VisualCharacter : MonoBehaviour {
                 {
                     statusPerformance = "executing";
                     animated.GetComponent<Animator>().CrossFade("S3", GlobalData.crossfadeAnimation, 0, 0f);
+                    lastAnimationOrder = "S3";
                     int aux = Random.Range(1, 5);
                     audio1.clip = Resources.Load("Music/Battle/Barbarian_" + aux.ToString("00")) as AudioClip;
                     audio1.Play();
@@ -259,7 +273,7 @@ public class VisualCharacter : MonoBehaviour {
             {
                 // ES EL S1 DEL BARBARO
 
-                if (animated.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.7f && targetPerformance != null)
+                if (animated.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.675f && animated.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName(lastAnimationOrder) && lastAnimationOrder == "S1" && targetPerformance != null)
                 {
                     targetPerformance.Represent(GlobalData.Skills[performing], importantFloats);
                     targetPerformance = null;
@@ -284,7 +298,7 @@ public class VisualCharacter : MonoBehaviour {
                     animated2.transform.localPosition = new Vector3(animated2.transform.localPosition.x - Time.deltaTime * 40f , animated2.transform.localPosition.y, animated2.transform.localPosition.z);
                     animated2.transform.position = new Vector3(animated2.transform.position.x, Mathf.Lerp(animated2.transform.position.y, targetPerformance.transform.position.y, Time.deltaTime*3.5f), -1f);
 
-                    if (!auxBool1 && animated2.transform.position.x * (root.transform.localScale.x / Mathf.Abs(root.transform.localScale.x)) > targetPerformance.root.transform.position.x * (-targetPerformance.root.transform.localScale.x / Mathf.Abs(targetPerformance.root.transform.localScale.x)))
+                    if (!auxBool1 && (animated2.transform.position.x) * (root.transform.localScale.x / Mathf.Abs(root.transform.localScale.x)) > (targetPerformance.root.transform.position.x) * (-targetPerformance.root.transform.localScale.x / Mathf.Abs(targetPerformance.root.transform.localScale.x)) - characterBounds.size.x)
                     {
                         auxBool1 = true;
                         targetPerformance.Represent(GlobalData.Skills[0], importantFloats);
@@ -295,7 +309,7 @@ public class VisualCharacter : MonoBehaviour {
                         //targetPerformance.Represent(GlobalData.Skills[performing], importantFloats);
                         performing = -1;
                         statusPerformance = "none";
-                        animated2.transform.localPosition = new Vector3(-4f, 7f, 0f);
+                        animated2.transform.localPosition = new Vector3(-7f, 4.2f, animated2.transform.localPosition.z);
                         animated2.SetActive(false);
                         animated.GetComponent<Animator>().CrossFade("Idle", GlobalData.crossfadeAnimation, 0, 0f);
                         lastAnimationOrder = "Idle";
@@ -303,10 +317,10 @@ public class VisualCharacter : MonoBehaviour {
                 }
                 else
                 {
-                    if (animated.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.6f && animated.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName(lastAnimationOrder) && lastAnimationOrder == "S2")
+                    if (animated.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.39f && animated.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName(lastAnimationOrder) && lastAnimationOrder == "S2")
                     {
                         animated2.SetActive(true);
-                        animated2.GetComponent<Animator>().Play("Axe");
+                        animated2.GetComponent<Animator>().Play("Axe", 0, 0.06f);
                     }
                 }
 
@@ -323,7 +337,7 @@ public class VisualCharacter : MonoBehaviour {
             {
                 // ES EL S3 DEL BARBARO
 
-                if (animated.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.55f && targetPerformance != null)
+                if (animated.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).normalizedTime >= 0.55f && animated.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName(lastAnimationOrder) && lastAnimationOrder == "S3" && targetPerformance != null)
                 {
                     targetPerformance.Represent(GlobalData.Skills[performing], importantFloats);
                     targetPerformance = null;
@@ -443,7 +457,7 @@ public class VisualCharacter : MonoBehaviour {
                     float auxScale = Mathf.Lerp(-Mathf.Abs(bloodBFSplat.transform.localScale.x), -0.5f, Time.deltaTime * 40f);
                     if ((bloodBFSplatOriginalScale.x < 0 && root.transform.localScale.x > 0) || (bloodBFSplatOriginalScale.x > 0 && root.transform.localScale.x < 0)) { auxScale = -auxScale; }
                     bloodBFSplat.transform.localScale = new Vector3(auxScale, Mathf.Abs(auxScale), Mathf.Abs(auxScale));
-                    bloodBFSplat.transform.position = new Vector3(bloodBFSplatOriginalPosition.x + bloodBFSplat.GetComponent<SpriteRenderer>().bounds.size.x * 1 / 2f * -(bloodBFSplatOriginalScale.x / Mathf.Abs(bloodBFSplatOriginalScale.x)), bloodBFSplatOriginalPosition.y - characterBounds.size.y * 1 / 2f, bloodBFSplat.transform.position.z);
+                    bloodBFSplat.transform.position = new Vector3(bloodBFSplatOriginalPosition.x + bloodBFSplat.GetComponent<SpriteRenderer>().bounds.size.x * 1 / 2f * -(bloodBFSplatOriginalScale.x / Mathf.Abs(bloodBFSplatOriginalScale.x)), bloodBFSplatOriginalPosition.y - characterBounds.size.y * 0.75f, bloodBFSplat.transform.position.z);
 
                     auxScale = 1;
                     if (bloodBFSplatOriginalScale.x < 0) { auxScale = -auxScale; }
@@ -491,6 +505,7 @@ public class VisualCharacter : MonoBehaviour {
 
     public void Represent(Skill s, float[] aux)
     {
+
         if (s.getID() == 0)
         {
             // ES EL S1 DEL BARBARO
@@ -542,6 +557,8 @@ public class VisualCharacter : MonoBehaviour {
         }
 
         representing = s.getID();
+
+		currentVirtualHealth = currentTrueHealth;
 
     }
 
