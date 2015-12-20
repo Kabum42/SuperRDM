@@ -27,6 +27,9 @@ public class VisualBattle : MonoBehaviour {
 
     public SkillBar skillBar;
 
+    private int currentLeft = 0;
+    private int currentRight = 0;
+
     private SpeechManager speechManager;
 
 	// Use this for initialization
@@ -154,13 +157,29 @@ public class VisualBattle : MonoBehaviour {
             }
         }
 
-        
 	
 	}
 
     public Character[] GetCurrentCharacters()
     {
         return bs.getCurrentCharacters();
+    }
+
+    public int GetCurrentCharactersNotNull()
+    {
+        int aux = 0;
+
+        Character[] temp = GetCurrentCharacters();
+        for (int i = 0; i < bs.getCurrentCharacters().Length; i++)
+        {
+            if (bs.getCurrentCharacters()[i] != null)
+            {
+                aux++;
+            }
+        }
+
+        return aux;
+
     }
 
     public void AllowInteraction()
@@ -186,9 +205,6 @@ public class VisualBattle : MonoBehaviour {
 	public void setBattleScript(BattleScript auxBs) {
 
 		bs = auxBs;
-
-		int currentLeft = 0;
-		int currentRight = 0;
 
 		Character[] temp = GetCurrentCharacters();
 
@@ -252,6 +268,39 @@ public class VisualBattle : MonoBehaviour {
         
 
 	}
+
+    public void addVisualCharacter(int ID)
+    {
+        if (ID == 0)
+        {
+            // ES UNA PUTA GALLINA
+            int i = GetCurrentCharactersNotNull();
+
+            visualCharacters[i] = (Instantiate(Resources.Load("Prefabs/VisualCharacterObject")) as GameObject).GetComponent<VisualCharacter>();
+            visualCharacters[i].gameObject.transform.parent = this.gameObject.transform;
+            visualCharacters[i].setClass(bs.getCurrentCharacters()[i].getOwnClass());
+            //visualCharacters[i].previousHealth = (float)temp[i].getCurrentHealth();
+            visualCharacters[i].currentTrueHealth = visualCharacters[i].previousHealth;
+            visualCharacters[i].currentVirtualHealth = visualCharacters[i].previousHealth;
+            visualCharacters[i].positionInArray = i;
+
+            float percentHealth = Mathf.Clamp(visualCharacters[i].previousHealth / visualCharacters[i].currentTrueMaxHealth, 0.000001f, 0.9999999f);
+            visualCharacters[i].health.GetComponent<Animator>().Play("Health", 0, percentHealth);
+
+            if (bs.getCurrentCharacters()[i].getBottom())
+            {
+                // ESTA A LA IZQUIERDA
+                visualCharacters[i].SetBattlePosition(true, currentLeft);
+                currentLeft++;
+            }
+            else
+            {
+                // ESTA A LA DERECHA
+                visualCharacters[i].SetBattlePosition(false, currentRight);
+                currentRight++;
+            }
+        }
+    }
 
 	public bool isWaiting() {
 

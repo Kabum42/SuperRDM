@@ -147,7 +147,7 @@ public class Skill {
 				for (int i = 0; i<CharactersInBattle.Length; i++){
 					if (CharactersInBattle[i] == null){
 						if (CharactersInBattle[CharactersInBattle.Length-1] == null){
-							CharactersInBattle[i] = new EventCharacter (6, "Chicken", 10, 100, GlobalData.Classes [6], Biome.Prairie);
+							CharactersInBattle[i] = new EventCharacter (8, "Chicken", 10, 100, GlobalData.Classes [8], Biome.Prairie);
 							CharactersInBattle[i].setBottom(CharactersInBattle[Attacker].getBottom());
 							CharactersInBattle[i].setCurrentHealth(CharactersInBattle[i].getMaxHealth());
 							CharactersInBattle[i].setPreviousHealth(CharactersInBattle[i].getMaxHealth());

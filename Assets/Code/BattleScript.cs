@@ -371,7 +371,10 @@ public class BattleScript : MonoBehaviour {
 		lastSkill = CurrentCharacters [CharacterTurn].getLastSkillUsed ();
         if (lastSkill != null)
         {
-            //vb.visualCharacters[CharacterTurn].Perform(lastSkill, vb.visualCharacters[CurrentCharacters[CharacterTurn].getLastEnemyAttacked()], new float[] { lastSkill.getLastDamage() });
+            int lastAttacked = CurrentCharacters[CharacterTurn].getLastEnemyAttacked();
+            Debug.Log("LAST ATTACKED: " + lastAttacked);
+            if (lastAttacked < 0) { lastAttacked = 0; }
+            vb.visualCharacters[CharacterTurn].Perform(lastSkill, vb.visualCharacters[lastAttacked], new float[] { lastSkill.getLastDamage() });
         }
         UpdateEffects ();
 		if (lastSkill != null) {

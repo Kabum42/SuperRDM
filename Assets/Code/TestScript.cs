@@ -24,7 +24,7 @@ public class TestScript : MonoBehaviour {
 
         player1 = (Instantiate(Resources.Load("Prefabs/VisualCharacterObject")) as GameObject).GetComponent<VisualCharacter>();
         player2 = (Instantiate(Resources.Load("Prefabs/VisualCharacterObject")) as GameObject).GetComponent<VisualCharacter>();
-		player1.setClass (GlobalData.Classes [0]);
+		player1.setClass (GlobalData.Classes [3]);
 		player2.setClass (GlobalData.Classes [0]);
 		player1.SetBattlePosition(true, 0);
 		player2.SetBattlePosition(false, 0);
@@ -64,17 +64,17 @@ public class TestScript : MonoBehaviour {
 
         if (Input.GetKeyDown(KeyCode.Q)) {
             float[] aux = {Mathf.Floor(Random.Range(0f, 100f))};
-            player1.Perform(GlobalData.Skills[0], player2, aux);
+            player1.Perform(player1.ownClass.getSkill(0), player2, aux);
         }
 
         if (Input.GetKeyDown(KeyCode.W)) {
             float[] aux = {Mathf.Floor(Random.Range(0f, 100f))};
-            player1.Perform(GlobalData.Skills[1], player2, aux);
+            player1.Perform(player1.ownClass.getSkill(1), player2, aux);
         }
 
         if (Input.GetKeyDown(KeyCode.E)) {
             float[] aux = {Mathf.Floor(Random.Range(0f, 100f))};
-            player1.Perform(GlobalData.Skills[2], player2, aux);
+            player1.Perform(player1.ownClass.getSkill(2), player2, aux);
         }
 
 	

@@ -26,6 +26,7 @@ public class VisualCharacter : MonoBehaviour {
     private Vector3 bloodBFSplatOriginalPosition;
     private Vector3 bloodBFSplatOriginalScale;
 	private Vector3 originalRootPosition;
+    public Class ownClass;
 
     private AudioSource audio1;
     private AudioSource audio2;
@@ -44,12 +45,16 @@ public class VisualCharacter : MonoBehaviour {
 
 	public int positionInArray;
 
+    public static int Barbarian = 0;
+    public static int Henmancer = 3;
+
 	//public Material palette1;
 	//public Material palette2;
 	//public Material palette3;
 
 	// Use this for initialization
 	void Awake () {
+
         root = this.gameObject;
 
         //Time.timeScale = 0.1f;
@@ -90,13 +95,25 @@ public class VisualCharacter : MonoBehaviour {
     public void setClass(Class c)
     {
 
+        ownClass = c;
+
         if (c.getID () == 0) {
 			// ES EL BARBARO
 			character = Instantiate (Resources.Load ("Prefabs/Barbarian")) as GameObject;
 			//HueExperiment();
-		} else {
-			character = Instantiate (Resources.Load ("Prefabs/Barbarian")) as GameObject;
-		}
+        }
+        else if (c.getID() == 3)
+        {
+            character = Instantiate(Resources.Load("Prefabs/Henmancer")) as GameObject;
+        }
+        else if (c.getID() == 9)
+        {
+            character = Instantiate(Resources.Load("Prefabs/Hen")) as GameObject;
+        }
+        else
+        {
+            character = Instantiate(Resources.Load("Prefabs/Barbarian")) as GameObject;
+        }
 
         character.transform.parent = root.transform;
         animated = character.transform.FindChild("Animated").gameObject;
@@ -269,7 +286,7 @@ public class VisualCharacter : MonoBehaviour {
         {
             // HACE EL ATAQUE
 
-            if (performing == 0)
+            if (performing == GlobalData.Classes[Barbarian].getSkillID(0))
             {
                 // ES EL S1 DEL BARBARO
 
@@ -288,8 +305,7 @@ public class VisualCharacter : MonoBehaviour {
 
 
             }
-
-            if (performing == 1)
+            else if (performing == GlobalData.Classes[Barbarian].getSkillID(1))
             {
                 // ES EL S2 DEL BARBARO
 
@@ -332,8 +348,7 @@ public class VisualCharacter : MonoBehaviour {
                 
 
             }
-
-            if (performing == 2)
+            else if (performing == GlobalData.Classes[Barbarian].getSkillID(2))
             {
                 // ES EL S3 DEL BARBARO
 
@@ -353,6 +368,50 @@ public class VisualCharacter : MonoBehaviour {
 
                 
             }
+            else if (performing == GlobalData.Classes[Henmancer].getSkillID(0))
+            {
+                // ES EL S1 DEL HENMANCER
+
+                if (animated.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).normalizedTime >= 1f && animated.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName(lastAnimationOrder))
+                {
+                    performing = -1;
+                    statusPerformance = "none";
+                    animated.GetComponent<Animator>().Play("Idle");
+                    lastAnimationOrder = "Idle";
+
+                    this.transform.parent.GetComponent<VisualBattle>().addVisualCharacter(0);
+                }
+
+            }
+            else if (performing == GlobalData.Classes[Henmancer].getSkillID(1))
+            {
+                // ES EL S1 DEL HENMANCER
+
+                if (animated.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).normalizedTime >= 1f && animated.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName(lastAnimationOrder))
+                {
+                    performing = -1;
+                    statusPerformance = "none";
+                    animated.GetComponent<Animator>().Play("Idle");
+                    lastAnimationOrder = "Idle";
+                }
+
+            }
+            else if (performing == GlobalData.Classes[Henmancer].getSkillID(2))
+            {
+                // ES EL S1 DEL HENMANCER
+
+                if (animated.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).normalizedTime >= 1f && animated.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName(lastAnimationOrder))
+                {
+                    targetPerformance.Represent(GlobalData.Skills[performing], importantFloats);
+                    targetPerformance = null;
+
+                    performing = -1;
+                    statusPerformance = "none";
+                    animated.GetComponent<Animator>().Play("Idle");
+                    lastAnimationOrder = "Idle";
+                }
+
+            }
             
         }
 
@@ -360,9 +419,11 @@ public class VisualCharacter : MonoBehaviour {
         if (representing != -1)
         {
 
-            if (representing == 0)
+            if (representing == GlobalData.Classes[Barbarian].getSkillID(0) ||
+                representing == GlobalData.Classes[Henmancer].getSkillID(2))
             {
                 // ES EL S1 DEL BARBARO
+                // O EL S3 DEL HENMANCER
 
                 if (forceY < 0 && root.transform.position.y <= originalRootPosition.y +1f)
                 {
@@ -490,12 +551,12 @@ public class VisualCharacter : MonoBehaviour {
 
         if (auxSide)
         {
-			root.transform.position = new Vector3(-5f -changeX*2f -changeY*0.5f, -2f +characterBounds.size.y/2f +changeY*0.5f, root.transform.position.z +changeY*0.1f);
+            root.transform.position = new Vector3(-5f - changeX * 2f - changeY * 0.5f, -0.6119308f, root.transform.position.z + changeY * 0.1f);
         }
         else
         {
             root.transform.localScale = new Vector3(-root.transform.localScale.x, root.transform.localScale.y, root.transform.localScale.z);
-			root.transform.position = new Vector3(5f +changeX*2f +changeY*0.5f, -2f +characterBounds.size.y/2f +changeY*0.5f, root.transform.position.z +changeY*0.1f);
+            root.transform.position = new Vector3(5f + changeX * 2f + changeY * 0.5f, -0.6119308f, root.transform.position.z + changeY * 0.1f);
         }
         side = auxSide;
 
@@ -506,9 +567,12 @@ public class VisualCharacter : MonoBehaviour {
     public void Represent(Skill s, float[] aux)
     {
 
-        if (s.getID() == 0)
+
+        if (s.getID() == GlobalData.Classes[Barbarian].getSkillID(0) ||
+            s.getID() == GlobalData.Classes[Henmancer].getSkillID(2) )
         {
             // ES EL S1 DEL BARBARO
+            // O EL S3 DEL HENMANCER
             animated.GetComponent<Animator>().CrossFade("Hurt", GlobalData.crossfadeAnimation, 0, 0f);
             lastAnimationOrder = "Hurt";
             forceY = 0.2f;
@@ -529,7 +593,7 @@ public class VisualCharacter : MonoBehaviour {
             blood2.SetActive(true);
         }
 
-        if (s.getID() == 2)
+        else if (s.getID() == 2)
         {
             // ES EL S3 DEL BARBARO
 			animated.GetComponent<Animator>().CrossFade("Hurt", GlobalData.crossfadeAnimation, 0, 0f);
@@ -569,25 +633,45 @@ public class VisualCharacter : MonoBehaviour {
         targetPerformance = v;
         importantFloats = auxFloats;
 
-        if (performing == 0)
+        if (performing == GlobalData.Classes[Barbarian].getSkillID(0))
         {
             statusPerformance = "chasing";
             animated.GetComponent<Animator>().CrossFade("Move", GlobalData.crossfadeAnimation, 0, 0f);
         }
-
-        if (performing == 1)
+        else if (performing == GlobalData.Classes[Barbarian].getSkillID(1))
         {
             statusPerformance = "executing";
             animated.GetComponent<Animator>().CrossFade("S2", GlobalData.crossfadeAnimation, 0, 0f);
             lastAnimationOrder = "S2";
             auxBool1 = false;
         }
-
-        if (performing == 2)
+        else if (performing == GlobalData.Classes[Barbarian].getSkillID(2))
         {
             statusPerformance = "chasing";
             animated.GetComponent<Animator>().CrossFade("Move", GlobalData.crossfadeAnimation, 0, 0f);
         }
+        else if (performing == GlobalData.Classes[Henmancer].getSkillID(0))
+        {
+            statusPerformance = "executing";
+            animated.GetComponent<Animator>().Play("S1");
+            //animated.GetComponent<Animator>().CrossFade("S1", GlobalData.crossfadeAnimation, 0, 0f);
+            lastAnimationOrder = "S1";
+        }
+        else if (performing == GlobalData.Classes[Henmancer].getSkillID(1))
+        {
+            statusPerformance = "executing";
+            animated.GetComponent<Animator>().Play("S2");
+            //animated.GetComponent<Animator>().CrossFade("S2", GlobalData.crossfadeAnimation, 0, 0f);
+            lastAnimationOrder = "S2";
+        }
+        else if (performing == GlobalData.Classes[Henmancer].getSkillID(2))
+        {
+            statusPerformance = "executing";
+            animated.GetComponent<Animator>().Play("S3");
+            //animated.GetComponent<Animator>().CrossFade("S3", GlobalData.crossfadeAnimation, 0, 0f);
+            lastAnimationOrder = "S3";
+        }
+
 
     }
 
