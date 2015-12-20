@@ -14,7 +14,6 @@ public class Class {
 		this.Skills[0] = FirstSkill;
 		this.Skills[1] = SecondSkill;
 		this.Skills[2] = ThirdSkill;
-		Debug.Log("Class " + this.Name + " created");
 	}
 	
 	public void UseSkill(int SkillSelected, int Attacker, ref Character[] CharactersInBattle, int EnemyFocused)
@@ -36,17 +35,36 @@ public class Class {
 		return Skills [position].getNeedEnemy();
 	}
 
-	public string getSkillName(int position){
+
+	public Skill getSkill(int position){
 		if (Skills [position] != null) {
-			return Skills [position].getName ();
+			return Skills [position];
 		} else {
-			return "Simple Attack";
+			return null;
 		}
 	}
+
+
+    public int getSkillID(int position)
+    {
+        if (Skills[position] != null)
+        {
+            return Skills[position].getID();
+        }
+        else
+        {
+            return -1;
+        }
+    }
 
 	public string getName(){
 		return this.Name;
 	}
+
+    public int getID()
+    {
+        return this.ID;
+    }
 }
 
 

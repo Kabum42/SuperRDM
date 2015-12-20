@@ -1,11 +1,14 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class BattleScript : MonoBehaviour {
 
 	private static int MaxCharacters = 6;
 	private int ActualCharacters = 0;
 	private Character[] CurrentCharacters = new Character[MaxCharacters];
+	private MainCharacter Player;
+	private Effect[] auxEffects;
 	private int MaxTop;
 	private int MaxBottom;
 	private int[] PositionTops = new int[3];
@@ -14,6 +17,7 @@ public class BattleScript : MonoBehaviour {
 	private int EnemyAttacked = -1;
 	private int PlayerCharacter = 0;
 	private bool TurnoActivo = true;
+	private Skill lastSkill;
 	private GameObject[] Skills = new GameObject[3];
 	private GameObject[] StatsTop = new GameObject[3];
 	private GameObject[] StatsBottom = new GameObject[1];
@@ -31,6 +35,8 @@ public class BattleScript : MonoBehaviour {
 	private int Top;
 	private int Bottom;
 
+	private VisualBattle vb;
+
 	// Use this for initialization
 	void Start () {
 		if (!GlobalData.started)
@@ -44,11 +50,25 @@ public class BattleScript : MonoBehaviour {
 		CheckPositions ();
 		UpdateInformation ();
 		LogCharacters ();
+		Player = (MainCharacter) CurrentCharacters [PlayerCharacter];
+
+		vb = (Instantiate(Resources.Load("Prefabs/VisualBattleObject")) as GameObject).GetComponent<VisualBattle>();
+		vb.gameObject.transform.parent = GameObject.Find ("Battle").transform;
+		vb.setBattleScript (this);
 
 	}
 	
 	// Update is called once per frame
 	void Update () {
+
+        if (vb.hasOrders)
+        {
+            SelectedSkill = true;
+            SkillSelected = vb.skillOrder;
+            CurrentEnemy = vb.targetOrder;
+            vb.hasOrders = false;
+        }
+
 		if (CharacterTurn == -1) {
 			TimerIPBar += Time.deltaTime;
 			if (TimerIPBar > 0.01) {
@@ -70,16 +90,22 @@ public class BattleScript : MonoBehaviour {
 					if (TimerTurn > 1) {
 						TimerTurn = 0;
 						Turn ();
-						LogCharacters ();
+						// LogEffects();
 						SelectedSkill = false;
 					}
 				} 
 				else {
-					SelectSkill ();
+                    vb.AllowInteraction();
 				}
 			}
 		}
 		UpdateInformation ();
+	}
+
+	public Character[] getCurrentCharacters() {
+
+		return CurrentCharacters;
+
 	}
 
 	void InitializeGameObjects(){
@@ -96,14 +122,62 @@ public class BattleScript : MonoBehaviour {
 	}
 
 	void AsignCharacters(){
-		CurrentCharacters [0] = GlobalData.agents [0];
-		CurrentCharacters [0].setBottom (true);
+        int auxposition = 0;
+        CurrentCharacters[auxposition] = GlobalData.agents[GlobalData.positionCharacterCombat[0]];
+        CurrentCharacters[auxposition].setBottom(true);
+        auxposition++;
 
-		CurrentCharacters [1] = GlobalData.RandomEnemies [0];
-		CurrentCharacters [1].setBottom (false);
+        if (GlobalData.positionCharacterCombat[1] != -1)
+        {
+            CurrentCharacters[auxposition] = GlobalData.agents[GlobalData.positionCharacterCombat[1]];
+            CurrentCharacters[auxposition].setBottom(false);
+        }
+        else
+        {
+            switch (GlobalData.currentBiome)
+            {
+                case Biome.Prairie:
+                    CurrentCharacters[auxposition] = GlobalData.RandomEnemies[0];
+                    break;
 
-		CurrentCharacters [2] = GlobalData.RandomEnemies [1];
-		CurrentCharacters [2].setBottom (false);
+                case Biome.Forest:
+                    CurrentCharacters[auxposition] = GlobalData.RandomEnemies[1];
+                    break;
+
+                case Biome.Swamp:
+                    CurrentCharacters[auxposition] = GlobalData.RandomEnemies[2];
+                    break;
+
+                case Biome.TheEvil:
+                    CurrentCharacters[auxposition] = GlobalData.RandomEnemies[3];
+                    break;
+
+                default:
+                    break;
+            }
+            CurrentCharacters[auxposition].setBottom(false);
+        }
+
+		// Setting Effects
+		MainCharacter auxCharacter;
+		Class auxClass;
+		for (int i = 0; i<MaxCharacters; i++){
+			if (CurrentCharacters[i] != null){
+				auxClass = CurrentCharacters[i].getOwnClass();
+				switch (auxClass.getName ()){
+					case "Pilumantic": 
+						auxCharacter = (MainCharacter) CurrentCharacters[i];
+						auxCharacter.addEffect("Pilosity Stacks", ref CurrentCharacters, -1, CurrentCharacters[i].getID ());
+						break;
+
+					case "Dreamwalker":
+						auxCharacter = (MainCharacter) CurrentCharacters[i];
+						auxCharacter.addEffect("Pierce Stacks", ref CurrentCharacters, -1, CurrentCharacters[i].getID ());
+						auxCharacter.addEffect("DeepDream Effect", ref CurrentCharacters, -1, CurrentCharacters[i].getID ());
+						break;
+				}
+			}
+		}
 	}
 
 	void InitializeBars(){
@@ -166,7 +240,7 @@ public class BattleScript : MonoBehaviour {
 		}
 
 		for (int i = 0; i<Skills.Length; i++) {
-			Skills[i].GetComponent<TextMesh>().text = CurrentCharacters[PlayerCharacter].getSkillName(i);
+			Skills[i].GetComponent<TextMesh>().text = CurrentCharacters[PlayerCharacter].getSkill(i).getName();
 			Skills[i].GetComponent<TextMesh> ().color = Color.black;
 		}
 	
@@ -185,7 +259,7 @@ public class BattleScript : MonoBehaviour {
 
 	void CalculateProgressIP(){
 		for (int i = 0; i<ActualCharacters; i++) {
-			if (CurrentCharacters[i] != null){
+			if (CurrentCharacters[i] != null && CurrentCharacters[i].IsNotStun()){
 				if (CurrentCharacters[i].getProgressIPBar() == CurrentCharacters[i].getMaxIPBar()){
 					if (CharacterTurn == -1){
 						CharacterTurn = i;
@@ -217,59 +291,47 @@ public class BattleScript : MonoBehaviour {
 		}
 	}
 
-	void SelectSkill(){
-		if (!NeedEnemy) {
-			if (Input.GetKeyDown (KeyCode.LeftArrow)) {
-				if (SkillSelected == 0) {
-					SkillSelected = 2;
-				} else {
-					SkillSelected -= 1;
+	void LogEffects(){
+		string Effectstring = "";
+		for (int i = 0; i<MaxCharacters; i++) {
+			if (CurrentCharacters[i] != null){
+				auxEffects = CurrentCharacters[i].getCurrentEffects();
+				Effectstring += CurrentCharacters[i].getName() + "\n";
+				for (int j = 0; j<auxEffects.Length; j++){
+					if (auxEffects[j] != null){
+						Effectstring += auxEffects[j].getName() + ": " ;
+						Effectstring += auxEffects[j].getStackedNumber() + ", " + auxEffects[j].getDuration() + "\n\n";
+					}
 				}
-			}
-			if (Input.GetKeyDown (KeyCode.RightArrow)) {
-				if (SkillSelected == 2) {
-					SkillSelected = 0;
-				} else {
-					SkillSelected += 1;
-				}
-			}
-			if (Input.GetKeyDown (KeyCode.Return)) {
-				if(CurrentCharacters [CharacterTurn].CheckEnemies(SkillSelected)){
-					NeedEnemy = true;
-				}
-				else {
-					SelectedSkill = true;
-					CurrentEnemy = -1;
-				}
-
-			}
-		} 
-		else {
-			if (Input.GetKeyDown (KeyCode.LeftArrow)) {
-				if (CurrentEnemy == 0) {
-					CurrentEnemy = MaxTop;
-				} else {
-					CurrentEnemy -= 1;
-				}
-			}
-			if (Input.GetKeyDown (KeyCode.RightArrow)) {
-				if (CurrentEnemy == MaxTop) {
-					CurrentEnemy = 0;
-				} else {
-					CurrentEnemy += 1;
-				}
-			}
-			if (Input.GetKeyDown (KeyCode.Return)) {
-				SelectedSkill = true;
 			}
 		}
+		Debug.Log (Effectstring);
 	}
 
 	void Turn(){
 		Attack ();
-		SkillUsed.GetComponent<TextMesh>().text = CurrentCharacters[CharacterTurn].getName() + " used: " 
-				+ CurrentCharacters[CharacterTurn].getSkillName(SkillSelected);
-		UpdateHealth = true;
+		lastSkill = CurrentCharacters [CharacterTurn].getLastSkillUsed ();
+        if (lastSkill != null)
+        {
+            vb.visualCharacters[CharacterTurn].Perform(lastSkill, vb.visualCharacters[CurrentCharacters[CharacterTurn].getLastEnemyAttacked()], new float[] { lastSkill.getLastDamage() });
+        }
+        UpdateEffects ();
+		if (lastSkill != null) {
+			SkillUsed.GetComponent<TextMesh> ().text = CurrentCharacters [CharacterTurn].getName () + " used: " + lastSkill.getName ();
+			if (CheckInstantHealth()) {
+				UpdateHealth = true;
+			} 
+			else {
+				CharacterTurn = -1;
+				UpdateHealth = false;
+			}
+		} 
+		else {
+			SkillUsed.GetComponent<TextMesh> ().text = CurrentCharacters [CharacterTurn].getName () + " used: " 
+				+ "Simple Attack";
+			UpdateHealth = true;
+		}
+
 	}
 
 	void Attack(){
@@ -278,13 +340,30 @@ public class BattleScript : MonoBehaviour {
 			CurrentCharacters [CharacterTurn].UseSkill (SkillSelected, CharacterTurn, ref CurrentCharacters, CurrentEnemy);
 		} 
 		else {
-			if (NeedEnemy){
-				CurrentEnemy = PositionTops[CurrentEnemy];
-				NeedEnemy = false;
+			if (CharacterTurn == PlayerCharacter){
+				CurrentCharacters [CharacterTurn].UseSkill (SkillSelected, CharacterTurn, ref CurrentCharacters, CurrentEnemy);
 			}
-			CurrentCharacters [CharacterTurn].UseSkill (SkillSelected, CharacterTurn, ref CurrentCharacters, CurrentEnemy);
+			else {
+				MainCharacter CurrentNPC = (MainCharacter) CurrentCharacters[CharacterTurn];
+				CurrentNPC.ApplyEnemyIA(CharacterTurn, ref CurrentCharacters);
+			}
 		}
 
+	}
+			                   
+
+	bool CheckInstantHealth(){
+		for (int i = 0; i<ActualCharacters; i++) {
+			if (CurrentCharacters[i] != null){
+				if (CurrentCharacters[i].getCurrentHealth() < CurrentCharacters[i].getPreviousHealth()){
+					return true;
+				}
+				else if (CurrentCharacters[i].getCurrentHealth() > CurrentCharacters[i].getPreviousHealth()){
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	void CheckHealth(){
@@ -314,9 +393,20 @@ public class BattleScript : MonoBehaviour {
 		for (int i = 0; i<ActualCharacters; i++) {
 			if (CurrentCharacters[i] != null){
 				if (CurrentCharacters[i].getCurrentHealth() <= 0){
+					if (CurrentCharacters[i].getBottom () != CurrentCharacters[PlayerCharacter].getBottom ()){
+						Player.setExperience(70);
+					}
 					CurrentCharacters[i] = null;
 					CheckPositions();
 				}
+			}
+		}
+	}
+
+	void UpdateEffects(){
+		for (int i = 0; i<ActualCharacters; i++) {
+			if (CurrentCharacters[i] != null){
+				CurrentCharacters[i].UpdateEffects(CharacterTurn, ref CurrentCharacters, i);
 			}
 		}
 	}
@@ -335,16 +425,45 @@ public class BattleScript : MonoBehaviour {
 		}
 
 		if (Bottom == 0) {
-			Debug.Log ("Top Wins");
-            GlobalData.World();
-            Destroy(GameObject.Find("Battle"));
+			vb.EndBattle();
 		} 
 		else if (Top == 0){
-			Debug.Log ("Bottom Wins");
-            GlobalData.World();
-            Destroy(GameObject.Find("Battle"));
+			vb.EndBattle();
 		}
 	}
+
+	public List<int> getTargets(int caster, int position) {
+
+		List<int> aux = new List<int> ();
+		//aux.Add (0);
+        if (CurrentCharacters[caster].CheckEnemies(position))
+        {
+            for (int i = 0; i < ActualCharacters; i++)
+            {
+                if (CurrentCharacters[i] != null)
+                {
+                    if (CurrentCharacters[i].getBottom() != CurrentCharacters[caster].getBottom())
+                    {
+                        aux.Add(i);
+                    }
+                }
+            }
+        }
+		return aux;
+
+	}
+
+    public Character[] GetCurrentCharacters()
+    {
+        return CurrentCharacters;
+    }
+
+    public static void simulateBattle(int i) {
+
+        GlobalData.agents[i].setExperience(70);
+        GlobalData.agents[i].setCurrentFatigue(GlobalData.agents[i].getCurrentFatigue() + Random.Range(0f, 0.5f));
+
+    }
 
 }
 

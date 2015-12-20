@@ -6,6 +6,10 @@ public class BoardCell : System.IEquatable<BoardCell> {
     public Biome biome;
     public GameObject root;
     public GameObject text;
+    public GameObject chains;
+    public int chainsCountDown = 0;
+    public Color chainsColor;
+    public float chainsBrightness = 0f;
     public int positionInArray = 0;
 
     public int ring = 0;

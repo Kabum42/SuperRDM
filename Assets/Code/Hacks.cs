@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public static class Hacks {
 
@@ -17,12 +18,23 @@ public static class Hacks {
     // SPRITE RENDERER ALPHA
     public static void SpriteRendererAlpha(GameObject g, float a)
     {
-        g.GetComponent<SpriteRenderer>().color = new Color(g.GetComponent<SpriteRenderer>().color.r, g.GetComponent<SpriteRenderer>().color.g, g.GetComponent<SpriteRenderer>().color.b, a);
+        SpriteRendererAlpha(g.GetComponent<SpriteRenderer>(), a);
     }
 
     public static void SpriteRendererAlpha(SpriteRenderer s, float a)
     {
         s.color = new Color(s.color.r, s.color.g, s.color.b, a);
+    }
+
+    // SPRITE RENDERER COLOR
+    public static void SpriteRendererColor(GameObject g, Color c)
+    {
+        SpriteRendererColor(g.GetComponent<SpriteRenderer>(), c);
+    }
+
+    public static void SpriteRendererColor(SpriteRenderer s, Color c)
+    {
+        s.color = new Color(c.r, c.g, c.b, s.color.a);
     }
 
     // BINARY PERLIN
@@ -60,5 +72,39 @@ public static class Hacks {
         }
         return false;
     }
+
+
+	// TEXT
+	public static string TextMultilineCentered(GameObject g, string s) {
+
+
+        string previousString = g.GetComponent<TextMesh>().text;
+
+		string result = "";
+		string[] lines = s.Split('\n');
+		float maxSizeX = 0f;
+
+		for (int i = 0; i < lines.Length; i++) {
+			g.GetComponent<TextMesh>().text = lines[i];
+			if (g.GetComponent<Renderer>().bounds.size.x > maxSizeX) {
+				maxSizeX = g.GetComponent<Renderer>().bounds.size.x;
+			}
+		}
+
+		for (int i = 0; i < lines.Length; i++) {
+			g.GetComponent<TextMesh>().text = lines[i];
+			while (g.GetComponent<Renderer>().bounds.size.x < maxSizeX) {
+				lines[i] = " "+lines[i]+" "; 
+				g.GetComponent<TextMesh>().text = lines[i];
+			}
+			result += lines[i];
+			if (i < lines.Length-1) { result += "\n"; }
+		}
+
+        g.GetComponent<TextMesh>().text = previousString;
+
+		return result;
+
+	}
 
 }
