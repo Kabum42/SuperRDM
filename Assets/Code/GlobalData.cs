@@ -30,7 +30,11 @@ public static class GlobalData {
 
 	public static EventCharacter[] RandomEnemies = new EventCharacter[25];
 	public static Skill[] Skills = new Skill[24];
+
 	public static Class[] Classes = new Class[8];
+
+	public static float[] ExperienceEachLevel = new float[10];
+	public static float LevelModifier = 1.25f;
 
     public static bool online = false;
     public static bool hosting = false;
@@ -79,6 +83,7 @@ public static class GlobalData {
 		GenerateSkills ();
 		GenerateClasses ();
 		GenerateEnemies ();
+		GenerateExperienceLevels ();
 
         biomeCosts = new int[11];
         biomeCosts[(int)Biome.Sanctuary] = 1;
@@ -117,6 +122,12 @@ public static class GlobalData {
 		Skills [6] = new Skill (6, "Pierce", 30, 0, 10, true);
 		Skills [7] = new Skill (7, "Daymare", 30, 0, 0, true);
 		Skills [8] = new Skill (8, "Deep Dream", 70, 0, 0, true);
+		Skills [9] = new Skill (9, "Summon Hen", 10, 0, 0, false);
+		Skills [10] = new Skill (10, "Roast Chicken", 30, 0, 10, false);
+		Skills [11] = new Skill (11, "Kamikahen", 20, 0, 20, true);
+		Skills [12] = new Skill (12, "Haunt", 30, 15, 20, true);
+		Skills [13] = new Skill (13, "Death Kiss", 20, 15, 20, true);
+		Skills [14] = new Skill (14, "Dark Pact", 10, 30, 0, false);
 		 
 		
 	}
@@ -125,8 +136,8 @@ public static class GlobalData {
 		Classes [0] = new Class (0, "Boar Ryder", Skills [0], Skills [1], Skills [2]);
         Classes [1] = new Class (1, "Pilumantic", Skills [3], Skills [4], Skills [5]);
         Classes [2] = new Class (2, "Dreamwalker", Skills [6], Skills [7], Skills [8]);
-        Classes [3] = new Class (3, "Henmancer", Skills [0], Skills [1], Skills [2]);
-        Classes [4] = new Class (4, "Disembodied", Skills [0], Skills [1], Skills [2]);
+        Classes [3] = new Class (3, "Henmancer", Skills [9], Skills [10], Skills [11]);
+        Classes [4] = new Class (4, "Disembodied", Skills [12], Skills [13], Skills [14]);
         Classes [5] = new Class (5, "Black Shield", Skills [0], Skills [1], Skills [2]);
 		Classes [6] = new Class (6, "Animal", null, null, null);
         Classes [7] = new Class (7, "FinalBoss", null, null, null);
@@ -138,11 +149,21 @@ public static class GlobalData {
 	private static void GenerateEnemies (){
 		Biome newBiome;
 		newBiome = Biome.Forest;
-		RandomEnemies [0] = new EventCharacter (3, "Rabbit", 50, 100, Classes [6], Biome.Prairie);
-		RandomEnemies[1] = new EventCharacter (4, "Wolf", 50, 100, Classes [6], Biome.Forest);
-		RandomEnemies[2] = new EventCharacter (5, "Frog", 50, 100, Classes [6], Biome.Swamp);
+
+		RandomEnemies [0] = new EventCharacter (7, "Patateitor", 50, 100, Classes [6], Biome.Sanctuary);
+		RandomEnemies [1] = new EventCharacter (8, "Patateitor paria", 25, 100, Classes [6], Biome.Sanctuary);
+		RandomEnemies [2] = new EventCharacter (9, "Patateitor alfa", 100, 100, Classes [6], Biome.Sanctuary);
         RandomEnemies[3] = new EventCharacter(6, "FinalBoss", 100, 100, Classes[7], Biome.TheEvil);
 
+	}
+
+	private static void GenerateExperienceLevels (){
+		float auxExperience = 100;
+        ExperienceEachLevel[0] = auxExperience;
+		for (int i = 1; i<ExperienceEachLevel.Length; i++) {
+			ExperienceEachLevel[i] = ExperienceEachLevel[i-1] + auxExperience * Mathf.Pow(1.10f, i);
+            Debug.Log(ExperienceEachLevel[i]);
+		}
 	}
 
 

@@ -27,7 +27,7 @@ public class Class {
 	}
 
 	public void SimpleAttack(int Attacker, ref Character[] CharactersInBattle, int EnemyFocused){
-		CharactersInBattle [EnemyFocused].setCurrentHealth (CharactersInBattle [EnemyFocused].getCurrentHealth () - 10);
+		CharactersInBattle [EnemyFocused].setCurrentHealth (CharactersInBattle [EnemyFocused].getCurrentHealth () - 10 * (Mathf.Pow (GlobalData.LevelModifier, CharactersInBattle[Attacker].getCurrentLevel())));
 		CharactersInBattle[Attacker].setProgressIPBar (CharactersInBattle[Attacker].getProgressIPBar () - 20);
 	}
 

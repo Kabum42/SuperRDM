@@ -68,7 +68,7 @@ public class PreparationScript : MonoBehaviour {
         preparation.clip = Resources.Load("Music/Menu/Preparation") as AudioClip;
         preparation.volume = 1f;
         preparation.loop = true;
-        preparation.Play();
+        //preparation.Play();
 
         menuOk = gameObject.AddComponent<AudioSource>();
         menuOk.clip = Resources.Load("Music/Menu/MenuOk") as AudioClip;
