@@ -30,6 +30,7 @@ public class BattleScript : MonoBehaviour {
 	private float TimerIPBar = 0;
 	private float TimerHealth = 0;
 	private bool UpdateHealth = false;
+    private bool EndIsNear = false;
 
 	private int Top;
 	private int Bottom;
@@ -46,7 +47,7 @@ public class BattleScript : MonoBehaviour {
 		}
 
 		//InitializeGameObjects();
-		Automatic = true;
+		Automatic = false;
 		AsignCharacters ();
 		InitializeBars();
 		CheckPositions ();
@@ -57,6 +58,7 @@ public class BattleScript : MonoBehaviour {
 		vb = (Instantiate(Resources.Load("Prefabs/VisualBattleObject")) as GameObject).GetComponent<VisualBattle>();
 		vb.gameObject.transform.parent = GameObject.Find ("Battle").transform;
 		vb.setBattleScript (this);
+
 		if (Automatic) {
 			PlayerCharacter = -1;
 		} else {
@@ -69,11 +71,17 @@ public class BattleScript : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
-		if (Automatic) {
-			AutomaticMode ();
-		} else {
-			ManualMode ();
-		}
+        if (!EndIsNear)
+        {
+            if (Automatic)
+            {
+                AutomaticMode();
+            }
+            else
+            {
+                ManualMode();
+            }
+        }
 		//UpdateInformation ();
 	}
 
@@ -122,9 +130,6 @@ public class BattleScript : MonoBehaviour {
 					if (TimerTurn > 1) {
 						TimerTurn = 0;
 						Turn ();
-						LogEffects();
-						LogCharacters();
-						Debug.Log (lastSkill.getName());
 						SelectedSkill = false;
 					}
 				} 
@@ -157,8 +162,7 @@ public class BattleScript : MonoBehaviour {
 
 	void AsignCharacters(){
         int auxposition = 0;
-        //CurrentCharacters[auxposition] = GlobalData.agents[GlobalData.positionCharacterCombat[0]];
-		CurrentCharacters [auxposition] = new MainCharacter (26, "Henmancer", 100, 100, GlobalData.Classes[3]);
+        CurrentCharacters[auxposition] = GlobalData.agents[GlobalData.positionCharacterCombat[0]];
         CurrentCharacters[auxposition].setBottom(true);
 		auxposition++;
 
@@ -170,6 +174,7 @@ public class BattleScript : MonoBehaviour {
         else
         {
 
+
 			int randomNumber = Random.Range (0, 3);
 			if (randomNumber == 3){
 				randomNumber = 2;
@@ -177,6 +182,7 @@ public class BattleScript : MonoBehaviour {
 			CurrentCharacters[auxposition] = GlobalData.RandomEnemies[randomNumber];
             
 			CurrentCharacters[auxposition].setCurrentLevel(CurrentCharacters[0].getCurrentLevel());
+
             CurrentCharacters[auxposition].setBottom(false);
         }
 
@@ -213,7 +219,7 @@ public class BattleScript : MonoBehaviour {
 			if (CurrentCharacters[i] != null){
 				if (CurrentCharacters[i].GetType() == typeof(MainCharacter)){
 					auxCharacter = (MainCharacter) CurrentCharacters[i];
-					CurrentCharacters[i].setCurrentHealth(CurrentCharacters[i].getMaxHealth() * auxCharacter.getCurrentFatigue());
+					CurrentCharacters[i].setCurrentHealth(CurrentCharacters[i].getMaxHealth() * (1f -auxCharacter.getCurrentFatigue()));
 					CurrentCharacters[i].setPreviousHealth(CurrentCharacters[i].getCurrentHealth());
 				}
 				else {
@@ -403,10 +409,26 @@ public class BattleScript : MonoBehaviour {
 
 	void AsignExperience(MainCharacter currentCharacter, Character enemyCharacter){
 		int enemyLevel = enemyCharacter.getCurrentLevel ();
-		float typeOfEnemyModifier = 1;
-		float constantModifier = 0.75f;
-		float specialModifier = 0.25f;
-		float newExperience = typeOfEnemyModifier * (constantModifier * GlobalData.ExperienceEachLevel [enemyLevel - 1] + specialModifier * GlobalData.ExperienceEachLevel [enemyLevel - 1]);
+		float typeOfEnemyModifier = 1f;
+        switch (enemyCharacter.getName())
+        {
+            case "Patateitor paria":
+                typeOfEnemyModifier = 0.5f;
+                break;
+
+            case "Patateitor alfa":
+                typeOfEnemyModifier = 2f;
+                break;
+
+            default:
+                typeOfEnemyModifier = 1f;
+                break;
+
+
+        }
+		float constantModifier = 100f;
+		float specialModifier = 0f;
+		float newExperience = typeOfEnemyModifier * (constantModifier + specialModifier);
 		currentCharacter.setExperience (newExperience);
 	}
 			                   
@@ -443,7 +465,7 @@ public class BattleScript : MonoBehaviour {
 			if (CurrentCharacters[i] != null){
 				if (CurrentCharacters[i].getCurrentHealth() < CurrentCharacters[i].getPreviousHealth()){
 					CurrentCharacters[i].setPreviousHealth(CurrentCharacters[i].getPreviousHealth()-1);
-					if (CurrentCharacters[i].getCurrentHealth() == CurrentCharacters[i].getPreviousHealth()){
+					if (CurrentCharacters[i].getCurrentHealth() >= CurrentCharacters[i].getPreviousHealth()){
 						UpdateHealth = false;
 						CheckLifes ();
 						CheckEnd ();
@@ -451,7 +473,7 @@ public class BattleScript : MonoBehaviour {
 				}
 				else if (CurrentCharacters[i].getCurrentHealth() > CurrentCharacters[i].getPreviousHealth()){
 					CurrentCharacters[i].setPreviousHealth(CurrentCharacters[i].getPreviousHealth()+1);
-					if (CurrentCharacters[i].getCurrentHealth() == CurrentCharacters[i].getPreviousHealth()){
+					if (CurrentCharacters[i].getCurrentHealth() <= CurrentCharacters[i].getPreviousHealth()){
 						UpdateHealth = false;
 						CharacterTurn = -1;
 					}
@@ -511,12 +533,14 @@ public class BattleScript : MonoBehaviour {
 			}
 		}
 
+
 		if (Bottom == 0 || Top == 0) {
 			LogCharacters ();
 			CalculateFatigue();
-            GlobalData.World();
-            Destroy(GameObject.Find("Battle"));
+            EndIsNear = true;
+            vb.EndBattle();
 		} 
+
 	}
 
 	void CalculateFatigue(){
@@ -525,11 +549,8 @@ public class BattleScript : MonoBehaviour {
 		for (int i = 0; i<MaxCharacters; i++) {
 			if (CurrentCharacters [i] != null && CurrentCharacters[i].GetType() == typeof(MainCharacter)) {
 				auxCharacter = (MainCharacter) CurrentCharacters[i];
-				Debug.Log (auxCharacter.getCurrentFatigue());
 				previousFatigue = auxCharacter.getCurrentFatigue();
-				auxCharacter.setCurrentFatigue(0.50f * (1 - auxCharacter.getCurrentHealth()/auxCharacter.getMaxHealth()));
-				Debug.Log (auxCharacter.getCurrentFatigue());
-
+				auxCharacter.setCurrentFatigue(previousFatigue + 0.25f * (1 - auxCharacter.getCurrentHealth()/auxCharacter.getMaxHealth()));
 			}
 		}
 	}
@@ -553,6 +574,43 @@ public class BattleScript : MonoBehaviour {
 		return aux;
 
 	}
+
+    public Character[] GetCurrentCharacters()
+    {
+        return CurrentCharacters;
+    }
+
+    public static void simulateBattle(int i) {
+        int randomNumber = Random.Range(0, 3);
+        float possibleFatigue = Random.Range(0.1f, 0.4f);
+        float typeOfEnemyModifier = 0.5f;
+        if (randomNumber == 3)
+        {
+            randomNumber = 2;
+        }
+        switch (randomNumber)
+        {
+            case 0:
+                typeOfEnemyModifier = 0.5f;
+                break;
+
+            case 2:
+                typeOfEnemyModifier = 2f;
+                break;
+
+            default:
+                typeOfEnemyModifier = 1f;
+                break;
+        }
+
+        possibleFatigue *= typeOfEnemyModifier;
+        float constantModifier = 100f;
+        float specialModifier = 0f;
+        float newExperience = typeOfEnemyModifier * (constantModifier + specialModifier);
+        GlobalData.agents[i].setExperience(newExperience);
+        GlobalData.agents[i].setCurrentFatigue( GlobalData.agents[i].getCurrentFatigue() + 0.25f * (1 - possibleFatigue));
+
+    }
 
 }
 

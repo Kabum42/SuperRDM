@@ -15,6 +15,7 @@ public class VisualCharacter : MonoBehaviour {
     private GameObject animated2;
 	private string lastAnimationOrder;
     public Bounds characterBounds;
+    public GameObject health;
     private GameObject text1;
     private GameObject text2;
     private GameObject blood1;
@@ -35,6 +36,13 @@ public class VisualCharacter : MonoBehaviour {
     private bool auxBool1 = false;
 
     private string statusPerformance = "none";
+
+	public float previousHealth;
+	public float currentVirtualHealth;
+	public float currentTrueHealth;
+	public float currentTrueMaxHealth;
+
+	public int positionInArray;
 
 	//public Material palette1;
 	//public Material palette2;
@@ -65,6 +73,8 @@ public class VisualCharacter : MonoBehaviour {
 
         bloodBFAnimation = root.transform.FindChild("BloodBFAnimation").gameObject;
         bloodBFAnimation.SetActive(false);
+
+        health = root.transform.FindChild("Health").gameObject;
 
         bloodBFSplat = root.transform.FindChild("BloodBFSplat").gameObject;
         bloodBFSplat.transform.localScale = new Vector3(0f, 0f, 0f);
@@ -146,6 +156,7 @@ public class VisualCharacter : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+
 
 
         if (statusPerformance == "chasing")
@@ -494,6 +505,7 @@ public class VisualCharacter : MonoBehaviour {
 
     public void Represent(Skill s, float[] aux)
     {
+
         if (s.getID() == 0)
         {
             // ES EL S1 DEL BARBARO
@@ -545,6 +557,8 @@ public class VisualCharacter : MonoBehaviour {
         }
 
         representing = s.getID();
+
+		currentVirtualHealth = currentTrueHealth;
 
     }
 

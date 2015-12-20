@@ -220,4 +220,9 @@ public class Character {
 	public int getCurrentLevel(){
 		return CurrentLevel;
 	}
+
+    public float getBaseHealth()
+    {
+        return this.BaseHealth;
+    }
 }

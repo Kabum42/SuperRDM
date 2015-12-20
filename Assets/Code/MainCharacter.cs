@@ -9,7 +9,7 @@ public class MainCharacter : Character {
 	private int CurrentMP;
 	private int MaxMP;
 	private float Experience;
-	private float CurrentFatigue = 0.50f;
+	private float CurrentFatigue = 0f;
     public NetworkPlayer player;
     public bool IA = false;
     public int currentCell;
@@ -27,7 +27,7 @@ public class MainCharacter : Character {
 		this.Experience = 0;
 		this.CurrentLevel = 1;
 
-        MaxMP = 6;
+        MaxMP = 2;
         CurrentMP = MaxMP;
 
 		switch (OwnClass.getName ()) {
@@ -108,7 +108,7 @@ public class MainCharacter : Character {
 
 				for (int i = 1; i < CharactersInBattle.Length; i++){
 					if (CharactersInBattle[i] != null){
-						if(CharactersInBattle[i].getStackedNumberEffect("Pilosity Stacks") > 0){
+						if(CharactersInBattle[i].getStackedNumberEffect("Pilosity Stacks") > 0 && i != FocusEnemy){
 							SkillSelected = 2;
 						}
 					}
@@ -130,6 +130,7 @@ public class MainCharacter : Character {
 				// Number of Enemies and check Daymare 
 				bool Daymare = false;
 				int Enemies = 0;
+                FocusEnemy = CheckLowestHPEnemy(Attacker, CharactersInBattle);
 				for (int i = 0; i < CharactersInBattle.Length; i++){
 					if (CharactersInBattle[i] != null){
 						if (CharactersInBattle[i].getBottom () != CharactersInBattle[Attacker].getBottom ()){
@@ -148,7 +149,6 @@ public class MainCharacter : Character {
 					}
 					else {
 						SkillSelected = 1;
-						FocusEnemy = CheckLowestHPEnemy(Attacker, CharactersInBattle);
 					}
 				}
 				else {
@@ -158,11 +158,9 @@ public class MainCharacter : Character {
 						}
 						else {
 							SkillSelected = 1;
-							FocusEnemy = CheckLowestHPEnemy(Attacker, CharactersInBattle);
 						}
 					}
 					else {
-						FocusEnemy = CheckLowestHPEnemy(Attacker, CharactersInBattle);
 						SkillSelected = 2;
 					}
 				}
@@ -201,7 +199,8 @@ public class MainCharacter : Character {
 
 			case "Disembodied":
 				FocusEnemy = CheckLowestHPEnemy(Attacker, CharactersInBattle);
-				if (CharactersInBattle[FocusEnemy].getCurrentHealth() <= 20){
+                if (CharactersInBattle[FocusEnemy].getCurrentHealth() <= (20 / CharactersInBattle[FocusEnemy].getBaseHealth()) * CharactersInBattle[FocusEnemy].getMaxHealth())
+                {
 					SkillSelected = 1;
 				}
 				else {
@@ -214,7 +213,8 @@ public class MainCharacter : Character {
 						}
 					}
 					else {
-						if(getCurrentHealth() < 40){
+                        if (getCurrentHealth() < (40 / BaseHealth) * MaxHealth)
+                        {
 							if (CharactersInBattle[FocusEnemy].getDurationEffect("Haunt Effect") > 0){
 								SkillSelected = 1;
 							}
@@ -258,6 +258,7 @@ public class MainCharacter : Character {
 		CheckLevel();
 	}
 
+
 	private void CheckLevel(){
 		for (int i = 0; i<GlobalData.ExperienceEachLevel.Length; i++) {
 			if (Experience < GlobalData.ExperienceEachLevel[i]){
@@ -266,6 +267,7 @@ public class MainCharacter : Character {
 			}
 		}
 		Debug.Log ("Level: " + this.CurrentLevel + "\n" + "Experience: " + this.Experience);
+
 	}
 
 	public void addEffect(string Effect, ref Character[] CharactersInBattle, int CharacterAffected, int IDCreator){
@@ -326,6 +328,7 @@ public class MainCharacter : Character {
 
     public int getMaxSteps()
     {
+		MaxMP = 2 + (int) Mathf.Floor(getCurrentLevel() / 2);
         return MaxMP;
     }
 
@@ -336,7 +339,7 @@ public class MainCharacter : Character {
 
     public int getCurrentLevel()
     {
-        return CurrentLevel;
+        return this.CurrentLevel;
     }
 
     public float getCurrentFatigue()
@@ -344,9 +347,13 @@ public class MainCharacter : Character {
         return CurrentFatigue;
     }
 
-	public void setCurrentFatigue(float Fatigue){
-		this.CurrentFatigue = Fatigue;
-	}
+
+    public void setCurrentFatigue(float newFatigue)
+    {
+        this.CurrentFatigue = Mathf.Clamp(newFatigue, 0f, 1f);
+    }
+
+
 	
 	
 }

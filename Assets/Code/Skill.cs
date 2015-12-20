@@ -201,7 +201,7 @@ public class Skill {
 				break;
 			
 		}
-		CharactersInBattle[Attacker].setCurrentHealth(CharactersInBattle[Attacker].getCurrentHealth() - CostHealth);
+		CharactersInBattle[Attacker].setCurrentHealth(CharactersInBattle[Attacker].getCurrentHealth() - (CostHealth  * (Mathf.Pow (GlobalData.LevelModifier, CharactersInBattle[Attacker].getCurrentLevel()))));
 		CharactersInBattle[Attacker].setProgressIPBar(CharactersInBattle[Attacker].getProgressIPBar() - CostIP);
         CharactersInBattle[Attacker].setLastEnemyAttacked(EnemyAttacked);
 	}
