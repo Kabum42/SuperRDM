@@ -5,12 +5,14 @@ public class Character {
 
 	protected int ID;
 	protected string Name;
+	protected float BaseHealth;
 	protected float PreviousHealth;
 	protected float CurrentHealth;
 	protected float MaxHealth;
 	protected float StunIPBar;
 	protected float ProgressIPBar;
 	protected float MaxIPBar;
+	protected int CurrentLevel;
 	protected Effect[] CurrentEffects = new Effect[6];
 	protected bool Aerial;
 	protected Class OwnClass;
@@ -118,6 +120,19 @@ public class Character {
 		return true;
 	}
 
+	public bool CheckRevive(){
+		switch (OwnClass.getName ()) {
+			case "Disembodied":
+				if (getDurationEffect("Dark Pact Effect")>0){
+					setCurrentHealth(25);
+					setProgressIPBar(100);
+					return false;
+				}
+				break;
+		}
+		return true;
+	}
+
 	// Getters and Setters
 
     public Skill getLastSkillUsed()
@@ -196,4 +211,18 @@ public class Character {
 	public Effect[] getCurrentEffects(){
 		return CurrentEffects;
 	}
+
+	public void setCurrentLevel(int Level){
+		this.CurrentLevel = Level;
+		MaxHealth = BaseHealth * (Mathf.Pow (GlobalData.LevelModifier, (float)Level));
+	}
+
+	public int getCurrentLevel(){
+		return CurrentLevel;
+	}
+
+    public float getBaseHealth()
+    {
+        return this.BaseHealth;
+    }
 }

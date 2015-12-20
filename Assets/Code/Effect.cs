@@ -38,6 +38,20 @@ public class Effect {
 					this.Duration -= 1;
 				}
 				break;
+
+			case "Haunt Effect":
+				if (CharactersInBattle[CharacterTurn].getID() == IDCreator){
+					CharactersInBattle[CharacterSelected].setCurrentHealth(CharactersInBattle[CharacterSelected].getCurrentHealth()- DamageValue * (Mathf.Pow (GlobalData.LevelModifier, CharactersInBattle[CharacterSelected].getCurrentLevel())));
+					this.Duration -= 1;
+				}
+				break;
+
+			case "Dark Pact Effect":
+				if (CharactersInBattle[CharacterTurn].getID() == IDCreator){
+					CharactersInBattle[CharacterSelected].setCurrentHealth(CharactersInBattle[CharacterSelected].getCurrentHealth() - DamageValue * (Mathf.Pow (GlobalData.LevelModifier, CharactersInBattle[CharacterSelected].getCurrentLevel())));
+					this.Duration -= 1;
+				}
+				break;
 		}
 	}
 
