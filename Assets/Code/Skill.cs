@@ -214,7 +214,11 @@ public class Skill {
             case "Cuadra HP":
                 CharactersInBattle[Attacker].setCurrentHealth(CharactersInBattle[Attacker].getMaxHealth()/4);
                 break;
-			
+            /*
+            case "Simple":
+				CharactersInBattle[EnemyAttacked].setCurrentHealth(CharactersInBattle[EnemyAttacked].getCurrentHealth() - Damage * (Mathf.Pow (GlobalData.LevelModifier, CharactersInBattle[Attacker].getCurrentLevel())));
+                break;
+			*/
 			
 		}
 		CharactersInBattle[Attacker].setCurrentHealth(CharactersInBattle[Attacker].getCurrentHealth() - (CostHealth  * (Mathf.Pow (GlobalData.LevelModifier, CharactersInBattle[Attacker].getCurrentLevel()))));

@@ -64,6 +64,21 @@ public class VisualBattle : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
+        if (Input.GetKeyDown(KeyCode.Escape)) {
+            EndBattle();
+        }
+
+        if (isWaiting())
+        {
+            for (int i = 0; i < visualCharacters.Length; i++)
+            {
+                if (visualCharacters[i] != null && visualCharacters[i].currentTrueHealth != null)
+                {
+                    visualCharacters[i].currentVirtualHealth = visualCharacters[i].currentTrueHealth;
+                }
+            }
+        }
+
         if (speechManager != null)
         {
             speechManager.update();
@@ -188,15 +203,6 @@ public class VisualBattle : MonoBehaviour {
         {
             vInterface.AllowInteraction();
         }
-
-        for (int i = 0; i < visualCharacters.Length; i++)
-        {
-            if (visualCharacters[i] != null && visualCharacters[i].currentTrueHealth != null)
-            {
-                visualCharacters[i].currentVirtualHealth = visualCharacters[i].currentTrueHealth;
-            }
-        }
-
     }
 
     public void setOrders(int skill, int target)

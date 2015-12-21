@@ -31,7 +31,6 @@ public class BattleScript : MonoBehaviour {
 	private float TimerHealth = 0;
 	private bool UpdateHealth = false;
     private bool EndIsNear = false;
-    private bool Testing = false;
     private int EnemyAttackChicken = -1;
 
 	private int Top;
@@ -50,7 +49,6 @@ public class BattleScript : MonoBehaviour {
 
 		//InitializeGameObjects();
 		Automatic = false;
-        Testing = false;
 		AsignCharacters ();
 		InitializeBars();
 		CheckPositions ();
@@ -165,16 +163,41 @@ public class BattleScript : MonoBehaviour {
 
 	void AsignCharacters(){
         int auxposition = 0;
-        if (Testing)
+        if (GlobalData.testingBattle >= 1)
         {
+
             CurrentCharacters[auxposition] = new MainCharacter(26, "Dummie", 100, 100, GlobalData.Classes[9]);
             CurrentCharacters[auxposition].setCurrentLevel(5);
             CurrentCharacters[auxposition].setBottom(true);
             auxposition++;
 
-            CurrentCharacters[auxposition] = new MainCharacter(10, "Boar Ryder", 100, 100, GlobalData.Classes[0]);
-            CurrentCharacters[auxposition].setCurrentLevel(CurrentCharacters[0].getCurrentLevel());
-            CurrentCharacters[auxposition].setBottom(false);
+            if (GlobalData.testingBattle == 1)
+            {
+                CurrentCharacters[auxposition] = new MainCharacter(10, "Boar Ryder", 100, 100, GlobalData.Classes[0]);
+                CurrentCharacters[auxposition].setCurrentLevel(CurrentCharacters[0].getCurrentLevel());
+                CurrentCharacters[auxposition].setBottom(false);
+            }
+            else if (GlobalData.testingBattle == 2)
+            {
+                CurrentCharacters[auxposition] = new MainCharacter(10, "Dreamwalker", 100, 100, GlobalData.Classes[2]);
+                CurrentCharacters[auxposition].setCurrentLevel(CurrentCharacters[0].getCurrentLevel());
+                CurrentCharacters[auxposition].setBottom(false);
+            }
+            else if (GlobalData.testingBattle == 3)
+            {
+                CurrentCharacters[auxposition] = new MainCharacter(10, "Henmancer", 100, 100, GlobalData.Classes[3]);
+                CurrentCharacters[auxposition].setCurrentLevel(CurrentCharacters[0].getCurrentLevel());
+                CurrentCharacters[auxposition].setBottom(false);
+            }
+            else if (GlobalData.testingBattle == 4)
+            {
+                CurrentCharacters[auxposition] = new MainCharacter(10, "Disembodied", 100, 100, GlobalData.Classes[4]);
+                CurrentCharacters[auxposition].setCurrentLevel(CurrentCharacters[0].getCurrentLevel());
+                CurrentCharacters[auxposition].setBottom(false);
+            }
+
+
+            
         }
         else
         {
@@ -191,9 +214,7 @@ public class BattleScript : MonoBehaviour {
             {
 
                 int randomNumber = Random.Range (0, 3);
-                if (randomNumber == 3){
-                    randomNumber = 2;
-                }
+
                 CurrentCharacters[auxposition] = GlobalData.RandomEnemies[randomNumber];
             
                 CurrentCharacters[auxposition].setCurrentLevel(CurrentCharacters[0].getCurrentLevel());

@@ -50,6 +50,8 @@ public static class GlobalData {
 
     public static int eventFinalBoss = 42;
 
+    public static int testingBattle = -1;
+
     // Use this for initialization
     public static void Start () {
 
@@ -130,8 +132,9 @@ public static class GlobalData {
 		Skills [13] = new Skill (13, "Death Kiss", 20, 15, 20, true);
 		Skills [14] = new Skill (14, "Dark Pact", 10, 30, 0, false);
         Skills [15] = new Skill(15, "Full HP", 25, 0, 0, false);
-        Skills[16] = new Skill(15, "Half HP", 25, 0, 0, false);
-        Skills[17] = new Skill(15, "Cuadra HP", 25, 0, 0, false);
+        Skills[16] = new Skill(16, "Half HP", 25, 0, 0, false);
+        Skills[17] = new Skill(17, "Cuadra HP", 25, 0, 0, false);
+        Skills[18] = new Skill(18, "Simple", 25, 0, 0, true);
 		
 	}
 
@@ -146,6 +149,9 @@ public static class GlobalData {
         Classes [7] = new Class (7, "FinalBoss", null, null, null);
         Classes[8] = new Class(8, "Hen", null, null, null);
         Classes[9] = new Class(9, "Dummie", Skills[15], Skills[16], Skills[17]);
+        Classes[10] = new Class(10, "Patateitor paria", Skills[18], null, null);
+        Classes[11] = new Class(11, "Patateitor", Skills[18], null, null);
+        Classes[12] = new Class(12, "Patateitor alfa", Skills[18], null, null);
 	}
 
 
@@ -155,9 +161,9 @@ public static class GlobalData {
 		Biome newBiome;
 		newBiome = Biome.Forest;
 
-		RandomEnemies [0] = new EventCharacter (7, "Patateitor", 50, 100, Classes [6], Biome.Sanctuary);
-		RandomEnemies [1] = new EventCharacter (8, "Patateitor paria", 25, 100, Classes [6], Biome.Sanctuary);
-		RandomEnemies [2] = new EventCharacter (9, "Patateitor alfa", 100, 100, Classes [6], Biome.Sanctuary);
+        RandomEnemies[0] = new EventCharacter(8, "Patateitor paria", 25, 100, Classes[10], Biome.Sanctuary);
+		RandomEnemies [1] = new EventCharacter (7, "Patateitor", 50, 100, Classes [11], Biome.Sanctuary);
+		RandomEnemies [2] = new EventCharacter (9, "Patateitor alfa", 100, 100, Classes [12], Biome.Sanctuary);
         RandomEnemies[3] = new EventCharacter(6, "FinalBoss", 100, 100, Classes[7], Biome.TheEvil);
 
 	}

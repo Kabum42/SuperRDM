@@ -1686,6 +1686,34 @@ public class WorldScript : MonoBehaviour {
             fadingEvent = true;
             usedTurn = true;
         }
+        if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            GlobalData.testingBattle = 1;
+            fadingBattle = true;
+            usedTurn = true;
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha4))
+        {
+            GlobalData.testingBattle = 2;
+            fadingBattle = true;
+            usedTurn = true;
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha5))
+        {
+            GlobalData.testingBattle = 3;
+            fadingBattle = true;
+            usedTurn = true;
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha6))
+        {
+            GlobalData.testingBattle = 4;
+            fadingBattle = true;
+            usedTurn = true;
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha0))
+        {
+            GlobalData.testingBattle = -1;
+        }
 
     }
 
