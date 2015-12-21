@@ -178,7 +178,8 @@ public class Skill {
 							EnemyAttacked = i;
 							CharactersInBattle[EnemyAttacked].setCurrentHealth(CharactersInBattle[EnemyAttacked].getCurrentHealth() - 10);
 							CharactersInBattle[EnemyFocused].setCurrentHealth(CharactersInBattle[EnemyFocused].getCurrentHealth() - Damage * (Mathf.Pow (GlobalData.LevelModifier, CharactersInBattle[Attacker].getCurrentLevel())));
-							Debug.Log (true);
+                            EnemyAttacked = EnemyFocused;
+                            //Debug.Log (true);
 							break;
 						}
 					}
@@ -199,6 +200,21 @@ public class Skill {
 			case "Dark Pact":
 				CharactersInBattle[Attacker].setDurationEffect ("Dark Pact Effect", 4);
 				break;
+
+            // Dummie
+
+            case "Full HP":
+                CharactersInBattle[Attacker].setCurrentHealth(CharactersInBattle[Attacker].getMaxHealth());
+                break;
+
+            case "Half HP":
+                CharactersInBattle[Attacker].setCurrentHealth(CharactersInBattle[Attacker].getMaxHealth()/2);
+                break;
+
+            case "Cuadra HP":
+                CharactersInBattle[Attacker].setCurrentHealth(CharactersInBattle[Attacker].getMaxHealth()/4);
+                break;
+			
 			
 		}
 		CharactersInBattle[Attacker].setCurrentHealth(CharactersInBattle[Attacker].getCurrentHealth() - (CostHealth  * (Mathf.Pow (GlobalData.LevelModifier, CharactersInBattle[Attacker].getCurrentLevel()))));

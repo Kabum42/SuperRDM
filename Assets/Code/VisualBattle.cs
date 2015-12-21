@@ -99,14 +99,14 @@ public class VisualBattle : MonoBehaviour {
 			if (visualCharacters[i] != null)
 			{
 
-				if (!endingBattle) {
+				if (!endingBattle && temp[i] != null) {
 					visualCharacters[i].currentTrueHealth = Mathf.Clamp((float)temp[i].getCurrentHealth(), 0.000001f, float.MaxValue);
 					visualCharacters[i].currentTrueMaxHealth = (float)temp[i].getMaxHealth();
 				}
 
 
 
-				float percentHealth = 1;
+				float percentHealth = 1f;
 				
 				if (visualCharacters[i].previousHealth < visualCharacters[i].currentVirtualHealth-0.001f  ||  visualCharacters[i].previousHealth > visualCharacters[i].currentVirtualHealth+0.001f) {
 					
@@ -188,6 +188,15 @@ public class VisualBattle : MonoBehaviour {
         {
             vInterface.AllowInteraction();
         }
+
+        for (int i = 0; i < visualCharacters.Length; i++)
+        {
+            if (visualCharacters[i] != null && visualCharacters[i].currentTrueHealth != null)
+            {
+                visualCharacters[i].currentVirtualHealth = visualCharacters[i].currentTrueHealth;
+            }
+        }
+
     }
 
     public void setOrders(int skill, int target)
@@ -274,12 +283,14 @@ public class VisualBattle : MonoBehaviour {
         if (ID == 0)
         {
             // ES UNA PUTA GALLINA
-            int i = GetCurrentCharactersNotNull();
+            Character[] temp = GetCurrentCharacters();
+
+            int i = GetCurrentCharactersNotNull() -1;
 
             visualCharacters[i] = (Instantiate(Resources.Load("Prefabs/VisualCharacterObject")) as GameObject).GetComponent<VisualCharacter>();
             visualCharacters[i].gameObject.transform.parent = this.gameObject.transform;
             visualCharacters[i].setClass(bs.getCurrentCharacters()[i].getOwnClass());
-            //visualCharacters[i].previousHealth = (float)temp[i].getCurrentHealth();
+            visualCharacters[i].previousHealth = (float)temp[i].getCurrentHealth();
             visualCharacters[i].currentTrueHealth = visualCharacters[i].previousHealth;
             visualCharacters[i].currentVirtualHealth = visualCharacters[i].previousHealth;
             visualCharacters[i].positionInArray = i;
@@ -300,6 +311,22 @@ public class VisualBattle : MonoBehaviour {
                 currentRight++;
             }
         }
+    }
+
+    public void removeVisualCharacter(VisualCharacter v)
+    {
+        int aux = -1;
+        for (int i = 0; i < visualCharacters.Length; i++)
+        {
+            if (visualCharacters[i] == v)
+            {
+                aux = i;
+                Destroy(visualCharacters[aux].gameObject);
+                visualCharacters[aux] = null;
+                break;
+            }
+        }
+        
     }
 
 	public bool isWaiting() {
