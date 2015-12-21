@@ -836,7 +836,7 @@ public class PreparationScript : MonoBehaviour {
                 Class auxClass = null;
 
                 if (selectables[i].currentLegend == "random") {
-                    int num = (int)Mathf.Ceil(Hacks.BinaryPerlin(0, 6, 3, 9568.24581f + startingPerlin, GlobalData.boardSeed));
+                    int num = (int)Mathf.Ceil(Hacks.BinaryPerlin(0, 5, 3, 9568.24581f + startingPerlin, GlobalData.boardSeed));
                     auxClass = GlobalData.Classes[num];
                     startingPerlin += 23.23464f;
                 }

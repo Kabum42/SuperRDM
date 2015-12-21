@@ -717,6 +717,11 @@ public class TalkScript : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            endCondition = 100f;
+        }
+
         if (endCondition == 100f)
         {
             fadingMode = 2;

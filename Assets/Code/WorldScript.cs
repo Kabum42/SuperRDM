@@ -238,7 +238,7 @@ public class WorldScript : MonoBehaviour {
 
         addSpecialEvent();
 
-        GlobalData.agents[GlobalData.myAgent].setExperience(700);
+        GlobalData.agents[GlobalData.myAgent].setExperience(1400);
         
         //Debug.Log(GlobalData.agents[GlobalData.myAgent].getCurrentLevel());
 
@@ -1768,6 +1768,14 @@ public class WorldScript : MonoBehaviour {
         GlobalData.agents[agent].cellChampion = Instantiate(Resources.Load("Prefabs/Champion")) as GameObject;
         GlobalData.agents[agent].cellChampion.name = "Champion_" + agent;
         GlobalData.agents[agent].cellChampion.transform.parent = GameObject.Find("Champions").transform;
+
+        string auxName = GlobalData.agents[agent].getOwnClass().getName();
+        if (auxName == "Boar Ryder") { auxName = "Barbarian"; }
+        else if (auxName == "Black Shield") { auxName = "Barbarian"; }
+
+        GlobalData.agents[agent].cellChampion.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Boardcells/Champions/"+auxName);
+
+        GlobalData.agents[agent].cellChampion.GetComponent<SpriteRenderer>().color = GlobalData.colorCharacters[agent];
         GlobalData.agents[agent].sanctuary = currentCell;
 
         if (num == 0) {
