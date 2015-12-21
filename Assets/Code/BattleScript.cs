@@ -31,6 +31,8 @@ public class BattleScript : MonoBehaviour {
 	private float TimerHealth = 0;
 	private bool UpdateHealth = false;
     private bool EndIsNear = false;
+    private bool Testing = false;
+    private int EnemyAttackChicken = -1;
 
 	private int Top;
 	private int Bottom;
@@ -48,6 +50,7 @@ public class BattleScript : MonoBehaviour {
 
 		//InitializeGameObjects();
 		Automatic = false;
+        Testing = false;
 		AsignCharacters ();
 		InitializeBars();
 		CheckPositions ();
@@ -86,7 +89,7 @@ public class BattleScript : MonoBehaviour {
 	}
 
 	void AutomaticMode (){
-		if (CharacterTurn == -1) {
+		if (CharacterTurn == -1 && !UpdateHealth) {
 			CalculateProgressIPAutomatic ();
 		} 
 		else {
@@ -162,28 +165,41 @@ public class BattleScript : MonoBehaviour {
 
 	void AsignCharacters(){
         int auxposition = 0;
-        CurrentCharacters[auxposition] = GlobalData.agents[GlobalData.positionCharacterCombat[0]];
-        CurrentCharacters[auxposition].setBottom(true);
-		auxposition++;
-
-        if (GlobalData.positionCharacterCombat[1] != -1)
+        if (Testing)
         {
-            CurrentCharacters[auxposition] = GlobalData.agents[GlobalData.positionCharacterCombat[1]];
+            CurrentCharacters[auxposition] = new MainCharacter(26, "Dummie", 100, 100, GlobalData.Classes[9]);
+            CurrentCharacters[auxposition].setCurrentLevel(5);
+            CurrentCharacters[auxposition].setBottom(true);
+            auxposition++;
+
+            CurrentCharacters[auxposition] = new MainCharacter(10, "Boar Ryder", 100, 100, GlobalData.Classes[0]);
+            CurrentCharacters[auxposition].setCurrentLevel(CurrentCharacters[0].getCurrentLevel());
             CurrentCharacters[auxposition].setBottom(false);
         }
         else
         {
+            CurrentCharacters[auxposition] = GlobalData.agents[GlobalData.positionCharacterCombat[0]];
+            CurrentCharacters[auxposition].setBottom(true);
+            auxposition++;
 
+            if (GlobalData.positionCharacterCombat[1] != -1)
+            {
+                CurrentCharacters[auxposition] = GlobalData.agents[GlobalData.positionCharacterCombat[1]];
+                CurrentCharacters[auxposition].setBottom(false);
+            }
+            else
+            {
 
-			int randomNumber = Random.Range (0, 3);
-			if (randomNumber == 3){
-				randomNumber = 2;
-			}
-			CurrentCharacters[auxposition] = GlobalData.RandomEnemies[randomNumber];
+                int randomNumber = Random.Range (0, 3);
+                if (randomNumber == 3){
+                    randomNumber = 2;
+                }
+                CurrentCharacters[auxposition] = GlobalData.RandomEnemies[randomNumber];
             
-			CurrentCharacters[auxposition].setCurrentLevel(CurrentCharacters[0].getCurrentLevel());
+                CurrentCharacters[auxposition].setCurrentLevel(CurrentCharacters[0].getCurrentLevel());
 
-            CurrentCharacters[auxposition].setBottom(false);
+                CurrentCharacters[auxposition].setBottom(false);
+            }
         }
 
 		// Setting Effects
@@ -301,6 +317,7 @@ public class BattleScript : MonoBehaviour {
 				if (CurrentCharacters[i].getProgressIPBar() == CurrentCharacters[i].getMaxIPBar()){
 					if (CharacterTurn == -1){
 						CharacterTurn = i;
+                        if (CharacterTurn == 1) { Debug.Log("OMG"); }
 					}
 				}
 				else {
@@ -369,24 +386,42 @@ public class BattleScript : MonoBehaviour {
 	void Turn(){
 		Attack ();
 		lastSkill = CurrentCharacters [CharacterTurn].getLastSkillUsed ();
-        if (lastSkill != null)
-        {
-            //vb.visualCharacters[CharacterTurn].Perform(lastSkill, vb.visualCharacters[CurrentCharacters[CharacterTurn].getLastEnemyAttacked()], new float[] { lastSkill.getLastDamage() });
-        }
         UpdateEffects ();
 		if (lastSkill != null) {
 			if (CheckInstantHealth()) {
 				UpdateHealth = true;
 			} 
 			else {
-				CharacterTurn = -1;
 				UpdateHealth = false;
 			}
+
+            int lastAttacked = CurrentCharacters[CharacterTurn].getLastEnemyAttacked();
+            Debug.Log("LAST ATTACKED: " + lastAttacked);
+            if (lastAttacked < 0) { lastAttacked = 0; }
+
+            vb.visualCharacters[CharacterTurn].Perform(lastSkill, vb.visualCharacters[lastAttacked], new float[] { lastSkill.getLastDamage() });
+
+
+            if (EnemyAttackChicken != -1)
+            {
+                vb.visualCharacters[EnemyAttackChicken].Perform(lastSkill, vb.visualCharacters[lastAttacked], new float[] { lastSkill.getLastDamage() });
+            }
+
+
+            if (!UpdateHealth)
+            {
+                CharacterTurn = -1;
+            }
+
 		} 
 		else {
 			UpdateHealth = true;
+            // AQUI LA SIMPLE SKILL
 		}
+
+
 		LogCharacters ();
+        EnemyAttackChicken = -1;
 
 	}
 
@@ -434,17 +469,27 @@ public class BattleScript : MonoBehaviour {
 			                   
 
 	bool CheckInstantHealth(){
+
+        bool aux = false;
+
 		for (int i = 0; i<MaxCharacters; i++) {
 			if (CurrentCharacters[i] != null){
-				if (CurrentCharacters[i].getCurrentHealth() < CurrentCharacters[i].getPreviousHealth()){
-					return true;
-				}
-				else if (CurrentCharacters[i].getCurrentHealth() > CurrentCharacters[i].getPreviousHealth()){
-					return true;
+				if (CurrentCharacters[i].getCurrentHealth() != CurrentCharacters[i].getPreviousHealth()){
+                    
+                    if (CurrentCharacters[i].getName() == "Chicken")
+                    {
+                        //CurrentCharacters[j] = null;
+                        EnemyAttackChicken = i;
+                        Debug.Log("BLA: "+EnemyAttackChicken);
+                    }
+                    Debug.Log("BLA2: " + CurrentCharacters[i].getName());
+                            
+                    aux = true;
 				}
 			}
 		}
-		return false;
+
+		return aux;
 	}
 
 	void SetHealth(){
@@ -467,8 +512,8 @@ public class BattleScript : MonoBehaviour {
 					CurrentCharacters[i].setPreviousHealth(CurrentCharacters[i].getPreviousHealth()-1);
 					if (CurrentCharacters[i].getCurrentHealth() >= CurrentCharacters[i].getPreviousHealth()){
 						UpdateHealth = false;
-						CheckLifes ();
-						CheckEnd ();
+                        CheckLifes();
+                        CheckEnd();
 					}
 				}
 				else if (CurrentCharacters[i].getCurrentHealth() > CurrentCharacters[i].getPreviousHealth()){
@@ -486,6 +531,8 @@ public class BattleScript : MonoBehaviour {
 		for (int i = 0; i<MaxCharacters; i++) {
 			if (CurrentCharacters[i] != null){
 				if (CurrentCharacters[i].getCurrentHealth() <= 0 && CurrentCharacters[i].CheckRevive()){
+                    Debug.Log(CharacterTurn);
+                    Debug.Log(CurrentCharacters[CharacterTurn]);
 					if (CurrentCharacters[i].getBottom () != CurrentCharacters[CharacterTurn].getBottom () && CurrentCharacters[CharacterTurn].GetType () == typeof(MainCharacter)){
 						AsignExperience((MainCharacter) CurrentCharacters[CharacterTurn], CurrentCharacters[i]);
 					}

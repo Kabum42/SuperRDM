@@ -31,7 +31,7 @@ public static class GlobalData {
 	public static EventCharacter[] RandomEnemies = new EventCharacter[25];
 	public static Skill[] Skills = new Skill[24];
 
-	public static Class[] Classes = new Class[8];
+	public static Class[] Classes = new Class[15];
 
 	public static float[] ExperienceEachLevel = new float[10];
 	public static float LevelModifier = 1.25f;
@@ -113,6 +113,7 @@ public static class GlobalData {
     }
 
 	private static void GenerateSkills(){
+
 		Skills [0] = new Skill (0, "Hack", 40, 0, 20, false);
 		Skills [1] = new Skill (1, "Axe Throw", 60, 0, 30, true);
 		Skills [2] = new Skill (2, "Axe Dunk", 45, 0, 10, true);
@@ -128,7 +129,9 @@ public static class GlobalData {
 		Skills [12] = new Skill (12, "Haunt", 30, 15, 20, true);
 		Skills [13] = new Skill (13, "Death Kiss", 20, 15, 20, true);
 		Skills [14] = new Skill (14, "Dark Pact", 10, 30, 0, false);
-		 
+        Skills [15] = new Skill(15, "Full HP", 25, 0, 0, false);
+        Skills[16] = new Skill(15, "Half HP", 25, 0, 0, false);
+        Skills[17] = new Skill(15, "Cuadra HP", 25, 0, 0, false);
 		
 	}
 
@@ -141,6 +144,8 @@ public static class GlobalData {
         Classes [5] = new Class (5, "Black Shield", Skills [0], Skills [1], Skills [2]);
 		Classes [6] = new Class (6, "Animal", null, null, null);
         Classes [7] = new Class (7, "FinalBoss", null, null, null);
+        Classes[8] = new Class(8, "Hen", null, null, null);
+        Classes[9] = new Class(9, "Dummie", Skills[15], Skills[16], Skills[17]);
 	}
 
 

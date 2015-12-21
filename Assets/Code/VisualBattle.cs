@@ -27,6 +27,9 @@ public class VisualBattle : MonoBehaviour {
 
     public SkillBar skillBar;
 
+    private int currentLeft = 0;
+    private int currentRight = 0;
+
     private SpeechManager speechManager;
 
 	// Use this for initialization
@@ -96,14 +99,14 @@ public class VisualBattle : MonoBehaviour {
 			if (visualCharacters[i] != null)
 			{
 
-				if (!endingBattle) {
+				if (!endingBattle && temp[i] != null) {
 					visualCharacters[i].currentTrueHealth = Mathf.Clamp((float)temp[i].getCurrentHealth(), 0.000001f, float.MaxValue);
 					visualCharacters[i].currentTrueMaxHealth = (float)temp[i].getMaxHealth();
 				}
 
 
 
-				float percentHealth = 1;
+				float percentHealth = 1f;
 				
 				if (visualCharacters[i].previousHealth < visualCharacters[i].currentVirtualHealth-0.001f  ||  visualCharacters[i].previousHealth > visualCharacters[i].currentVirtualHealth+0.001f) {
 					
@@ -154,7 +157,6 @@ public class VisualBattle : MonoBehaviour {
             }
         }
 
-        
 	
 	}
 
@@ -163,12 +165,38 @@ public class VisualBattle : MonoBehaviour {
         return bs.getCurrentCharacters();
     }
 
+    public int GetCurrentCharactersNotNull()
+    {
+        int aux = 0;
+
+        Character[] temp = GetCurrentCharacters();
+        for (int i = 0; i < bs.getCurrentCharacters().Length; i++)
+        {
+            if (bs.getCurrentCharacters()[i] != null)
+            {
+                aux++;
+            }
+        }
+
+        return aux;
+
+    }
+
     public void AllowInteraction()
     {
         if (!skillBar.isActive && (speechManager == null || !speechManager.writingSomething))
         {
             vInterface.AllowInteraction();
         }
+
+        for (int i = 0; i < visualCharacters.Length; i++)
+        {
+            if (visualCharacters[i] != null && visualCharacters[i].currentTrueHealth != null)
+            {
+                visualCharacters[i].currentVirtualHealth = visualCharacters[i].currentTrueHealth;
+            }
+        }
+
     }
 
     public void setOrders(int skill, int target)
@@ -186,9 +214,6 @@ public class VisualBattle : MonoBehaviour {
 	public void setBattleScript(BattleScript auxBs) {
 
 		bs = auxBs;
-
-		int currentLeft = 0;
-		int currentRight = 0;
 
 		Character[] temp = GetCurrentCharacters();
 
@@ -252,6 +277,57 @@ public class VisualBattle : MonoBehaviour {
         
 
 	}
+
+    public void addVisualCharacter(int ID)
+    {
+        if (ID == 0)
+        {
+            // ES UNA PUTA GALLINA
+            Character[] temp = GetCurrentCharacters();
+
+            int i = GetCurrentCharactersNotNull() -1;
+
+            visualCharacters[i] = (Instantiate(Resources.Load("Prefabs/VisualCharacterObject")) as GameObject).GetComponent<VisualCharacter>();
+            visualCharacters[i].gameObject.transform.parent = this.gameObject.transform;
+            visualCharacters[i].setClass(bs.getCurrentCharacters()[i].getOwnClass());
+            visualCharacters[i].previousHealth = (float)temp[i].getCurrentHealth();
+            visualCharacters[i].currentTrueHealth = visualCharacters[i].previousHealth;
+            visualCharacters[i].currentVirtualHealth = visualCharacters[i].previousHealth;
+            visualCharacters[i].positionInArray = i;
+
+            float percentHealth = Mathf.Clamp(visualCharacters[i].previousHealth / visualCharacters[i].currentTrueMaxHealth, 0.000001f, 0.9999999f);
+            visualCharacters[i].health.GetComponent<Animator>().Play("Health", 0, percentHealth);
+
+            if (bs.getCurrentCharacters()[i].getBottom())
+            {
+                // ESTA A LA IZQUIERDA
+                visualCharacters[i].SetBattlePosition(true, currentLeft);
+                currentLeft++;
+            }
+            else
+            {
+                // ESTA A LA DERECHA
+                visualCharacters[i].SetBattlePosition(false, currentRight);
+                currentRight++;
+            }
+        }
+    }
+
+    public void removeVisualCharacter(VisualCharacter v)
+    {
+        int aux = -1;
+        for (int i = 0; i < visualCharacters.Length; i++)
+        {
+            if (visualCharacters[i] == v)
+            {
+                aux = i;
+                Destroy(visualCharacters[aux].gameObject);
+                visualCharacters[aux] = null;
+                break;
+            }
+        }
+        
+    }
 
 	public bool isWaiting() {
 
