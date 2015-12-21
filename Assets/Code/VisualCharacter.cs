@@ -46,7 +46,9 @@ public class VisualCharacter : MonoBehaviour {
 	public int positionInArray;
 
     public static int Barbarian = 0;
+    public static int Dreamwalker = 2;
     public static int Henmancer = 3;
+    public static int Disembodied = 4;
     public static int Hen = 8;
 
 	//public Material palette1;
@@ -98,19 +100,27 @@ public class VisualCharacter : MonoBehaviour {
 
         ownClass = c;
 
-        if (c.getID () == 0) {
+        if (c.getID () == Barbarian) {
 			// ES EL BARBARO
 			character = Instantiate (Resources.Load ("Prefabs/Barbarian")) as GameObject;
 			//HueExperiment();
         }
-        else if (c.getID() == 3)
+        else if (c.getID() == Henmancer)
         {
             character = Instantiate(Resources.Load("Prefabs/Henmancer")) as GameObject;
         }
-        else if (c.getID() == 8)
+        else if (c.getID() == Hen)
         {
             character = Instantiate(Resources.Load("Prefabs/Hen")) as GameObject;
             health.SetActive(false);
+        }
+        else if (c.getID() == Disembodied)
+        {
+            character = Instantiate(Resources.Load("Prefabs/Disembodied")) as GameObject;
+        }
+        else if (c.getID() == Dreamwalker)
+        {
+            character = Instantiate(Resources.Load("Prefabs/Dreamwalker")) as GameObject;
         }
         else
         {
@@ -423,6 +433,93 @@ public class VisualCharacter : MonoBehaviour {
                 }
 
             }
+            else if (performing == GlobalData.Classes[Disembodied].getSkillID(0))
+            {
+                // ES EL S1 DEL DISEMBODIED
+
+                if (animated.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).normalizedTime >= 1f && animated.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName(lastAnimationOrder))
+                {
+                    targetPerformance.Represent(GlobalData.Skills[performing], importantFloats);
+                    targetPerformance = null;
+
+                    performing = -1;
+                    statusPerformance = "none";
+                    animated.GetComponent<Animator>().Play("Idle");
+                    lastAnimationOrder = "Idle";
+                }
+
+            }
+            else if (performing == GlobalData.Classes[Disembodied].getSkillID(1))
+            {
+                // ES EL S2 DEL DISEMBODIED
+
+                if (animated.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).normalizedTime >= 1f && animated.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName(lastAnimationOrder))
+                {
+                    targetPerformance.Represent(GlobalData.Skills[performing], importantFloats);
+                    targetPerformance = null;
+
+                    performing = -1;
+                    statusPerformance = "none";
+                    animated.GetComponent<Animator>().Play("Idle");
+                    lastAnimationOrder = "Idle";
+                }
+
+            }
+            else if (performing == GlobalData.Classes[Disembodied].getSkillID(2))
+            {
+                // ES EL S3 DEL DISEMBODIED
+
+                if (animated.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).normalizedTime >= 1f && animated.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName(lastAnimationOrder))
+                {
+                    performing = -1;
+                    statusPerformance = "none";
+                    animated.GetComponent<Animator>().Play("Idle");
+                    lastAnimationOrder = "Idle";
+                }
+
+            }
+            else if (performing == GlobalData.Classes[Dreamwalker].getSkillID(0))
+            {
+                // ES EL S1 DEL DREAMWALKER
+
+                if (animated.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).normalizedTime >= 1f && animated.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName(lastAnimationOrder))
+                {
+                    targetPerformance.Represent(GlobalData.Skills[performing], importantFloats);
+                    targetPerformance = null;
+
+                    performing = -1;
+                    statusPerformance = "none";
+                    animated.GetComponent<Animator>().Play("Idle");
+                    lastAnimationOrder = "Idle";
+                }
+
+            }
+            else if (performing == GlobalData.Classes[Dreamwalker].getSkillID(1))
+            {
+                // ES EL S2 DEL DREAMWALKER
+
+                if (animated.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).normalizedTime >= 1f && animated.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName(lastAnimationOrder))
+                {
+                    performing = -1;
+                    statusPerformance = "none";
+                    animated.GetComponent<Animator>().Play("Idle");
+                    lastAnimationOrder = "Idle";
+                }
+
+            }
+            else if (performing == GlobalData.Classes[Dreamwalker].getSkillID(2))
+            {
+                // ES EL S3 DEL DREAMWALKER
+
+                if (animated.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).normalizedTime >= 1f && animated.GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName(lastAnimationOrder))
+                {
+                    performing = -1;
+                    statusPerformance = "none";
+                    animated.GetComponent<Animator>().Play("Idle");
+                    lastAnimationOrder = "Idle";
+                }
+
+            }
             
         }
 
@@ -431,7 +528,10 @@ public class VisualCharacter : MonoBehaviour {
         {
 
             if (representing == GlobalData.Classes[Barbarian].getSkillID(0) ||
-                representing == GlobalData.Classes[Henmancer].getSkillID(2))
+                representing == GlobalData.Classes[Henmancer].getSkillID(2) ||
+                representing == GlobalData.Classes[Disembodied].getSkillID(0) ||
+                representing == GlobalData.Classes[Disembodied].getSkillID(1) ||
+                representing == GlobalData.Classes[Dreamwalker].getSkillID(0)) 
             {
                 // ES EL S1 DEL BARBARO
                 // O EL S3 DEL HENMANCER
@@ -581,9 +681,17 @@ public class VisualCharacter : MonoBehaviour {
     {
 
 
-        if (s.getID() == GlobalData.Classes[Barbarian].getSkillID(0))
+        if (s.getID() == GlobalData.Classes[Barbarian].getSkillID(0) || 
+            s.getID() == GlobalData.Classes[Henmancer].getSkillID(2) || 
+            s.getID() == GlobalData.Classes[Disembodied].getSkillID(0) ||
+            s.getID() == GlobalData.Classes[Disembodied].getSkillID(1) ||
+            s.getID() == GlobalData.Classes[Dreamwalker].getSkillID(0))
         {
             // ES EL S1 DEL BARBARO
+            // O EL S3 DEL HENMANCER
+            // O EL S1 DEL DISEMBODIED
+            // O EL S2 DEL DISEMBODIED
+            // O EL S1 DEL DREAMWALKER
             animated.GetComponent<Animator>().CrossFade("Hurt", GlobalData.crossfadeAnimation, 0, 0f);
             lastAnimationOrder = "Hurt";
             forceY = 0.2f;
@@ -630,9 +738,10 @@ public class VisualCharacter : MonoBehaviour {
             }
             bloodBFSplat.SetActive(true);
         }
+        /*
         else if (s.getID() == GlobalData.Classes[Henmancer].getSkillID(2))
         {
-            // O EL S3 DEL HENMANCER
+            
             
             animated.GetComponent<Animator>().CrossFade("Hurt", GlobalData.crossfadeAnimation, 0, 0f);
             lastAnimationOrder = "Hurt";
@@ -654,6 +763,7 @@ public class VisualCharacter : MonoBehaviour {
             blood2.SetActive(true);
 
         }
+        */
 
         representing = s.getID();
 
@@ -700,6 +810,48 @@ public class VisualCharacter : MonoBehaviour {
             lastAnimationOrder = "S2";
         }
         else if (performing == GlobalData.Classes[Henmancer].getSkillID(2))
+        {
+            statusPerformance = "executing";
+            animated.GetComponent<Animator>().Play("S3");
+            //animated.GetComponent<Animator>().CrossFade("S3", GlobalData.crossfadeAnimation, 0, 0f);
+            lastAnimationOrder = "S3";
+        }
+        else if (performing == GlobalData.Classes[Disembodied].getSkillID(0))
+        {
+            statusPerformance = "executing";
+            animated.GetComponent<Animator>().Play("S1");
+            //animated.GetComponent<Animator>().CrossFade("S1", GlobalData.crossfadeAnimation, 0, 0f);
+            lastAnimationOrder = "S1";
+        }
+        else if (performing == GlobalData.Classes[Disembodied].getSkillID(1))
+        {
+            statusPerformance = "executing";
+            animated.GetComponent<Animator>().Play("S2");
+            //animated.GetComponent<Animator>().CrossFade("S2", GlobalData.crossfadeAnimation, 0, 0f);
+            lastAnimationOrder = "S2";
+        }
+        else if (performing == GlobalData.Classes[Disembodied].getSkillID(2))
+        {
+            statusPerformance = "executing";
+            animated.GetComponent<Animator>().Play("S3");
+            //animated.GetComponent<Animator>().CrossFade("S3", GlobalData.crossfadeAnimation, 0, 0f);
+            lastAnimationOrder = "S3";
+        }
+        else if (performing == GlobalData.Classes[Dreamwalker].getSkillID(0))
+        {
+            statusPerformance = "executing";
+            animated.GetComponent<Animator>().Play("S1");
+            //animated.GetComponent<Animator>().CrossFade("S1", GlobalData.crossfadeAnimation, 0, 0f);
+            lastAnimationOrder = "S1";
+        }
+        else if (performing == GlobalData.Classes[Dreamwalker].getSkillID(1))
+        {
+            statusPerformance = "executing";
+            animated.GetComponent<Animator>().Play("S2");
+            //animated.GetComponent<Animator>().CrossFade("S2", GlobalData.crossfadeAnimation, 0, 0f);
+            lastAnimationOrder = "S2";
+        }
+        else if (performing == GlobalData.Classes[Dreamwalker].getSkillID(2))
         {
             statusPerformance = "executing";
             animated.GetComponent<Animator>().Play("S3");

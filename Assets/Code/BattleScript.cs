@@ -538,6 +538,7 @@ public class BattleScript : MonoBehaviour {
 					}
 					CheckDeathConsequences(i);
 					CheckPositions();
+                    CheckEnd();
 				}
 			}
 		}

@@ -24,7 +24,7 @@ public class TestScript : MonoBehaviour {
 
         player1 = (Instantiate(Resources.Load("Prefabs/VisualCharacterObject")) as GameObject).GetComponent<VisualCharacter>();
         player2 = (Instantiate(Resources.Load("Prefabs/VisualCharacterObject")) as GameObject).GetComponent<VisualCharacter>();
-		player1.setClass (GlobalData.Classes [3]);
+		player1.setClass (GlobalData.Classes [2]);
 		player2.setClass (GlobalData.Classes [0]);
 		player1.SetBattlePosition(true, 0);
 		player2.SetBattlePosition(false, 0);
