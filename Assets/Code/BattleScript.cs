@@ -478,11 +478,8 @@ public class BattleScript : MonoBehaviour {
                     
                     if (CurrentCharacters[i].getName() == "Chicken")
                     {
-                        //CurrentCharacters[j] = null;
                         EnemyAttackChicken = i;
-                        Debug.Log("BLA: "+EnemyAttackChicken);
                     }
-                    Debug.Log("BLA2: " + CurrentCharacters[i].getName());
                             
                     aux = true;
 				}
@@ -531,13 +528,12 @@ public class BattleScript : MonoBehaviour {
 		for (int i = 0; i<MaxCharacters; i++) {
 			if (CurrentCharacters[i] != null){
 				if (CurrentCharacters[i].getCurrentHealth() <= 0 && CurrentCharacters[i].CheckRevive()){
-                    Debug.Log(CharacterTurn);
-                    Debug.Log(CurrentCharacters[CharacterTurn]);
 					if (CurrentCharacters[i].getBottom () != CurrentCharacters[CharacterTurn].getBottom () && CurrentCharacters[CharacterTurn].GetType () == typeof(MainCharacter)){
 						AsignExperience((MainCharacter) CurrentCharacters[CharacterTurn], CurrentCharacters[i]);
 					}
 					CheckDeathConsequences(i);
 					CheckPositions();
+					CheckEnd();
 				}
 			}
 		}
@@ -556,6 +552,7 @@ public class BattleScript : MonoBehaviour {
 				}
 				break;
 		}
+		Debug.Log ("Ha muerto: " + CurrentCharacters[position].getName ());
 		CurrentCharacters[position] = null;
 	}
 
@@ -579,7 +576,6 @@ public class BattleScript : MonoBehaviour {
 				}
 			}
 		}
-
 
 		if (Bottom == 0 || Top == 0) {
 			LogCharacters ();
