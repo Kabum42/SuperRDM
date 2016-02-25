@@ -1,0 +1,469 @@
+fileFormatVersion: 2
+guid: 4848acd75053c4745bf7dec7b0b8160c
+timeCreated: 1429976190
+licenseType: Free
+ModelImporter:
+  serializedVersion: 18
+  fileIDToRecycleName:
+    100000: Armature
+    100002: Butt
+    100004: Butt.L
+    100006: Butt.L_end
+    100008: Butt.R
+    100010: Butt.R_end
+    100012: Butt_end
+    100014: Cube.003
+    100016: Eye
+    100018: Eye.L
+    100020: Eye.L_end
+    100022: Eye.R
+    100024: Eye.R_end
+    100026: Eye_end
+    100028: Head
+    100030: MiniEye
+    100032: MiniEye.3
+    100034: MiniEye.3_end
+    100036: MiniEye.R
+    100038: MiniEye.R_end
+    100040: MiniEye_end
+    100042: Mouth
+    100044: Mouth.001
+    100046: Mouth.001_end
+    100048: Mouth.002
+    100050: Mouth.002_end
+    100052: Mouth.003
+    100054: Mouth.003_end
+    100056: Mouth.2
+    100058: Mouth.3
+    100060: Mouth.3_end
+    100062: Mouth.L
+    100064: Mouth.L2
+    100066: Mouth.L3
+    100068: Mouth.L3_end
+    100070: Mouth.R
+    100072: Mouth.R2
+    100074: Mouth.R3
+    100076: Mouth.R3_end
+    100078: //RootNode
+    400000: Armature
+    400002: Butt
+    400004: Butt.L
+    400006: Butt.L_end
+    400008: Butt.R
+    400010: Butt.R_end
+    400012: Butt_end
+    400014: Cube.003
+    400016: Eye
+    400018: Eye.L
+    400020: Eye.L_end
+    400022: Eye.R
+    400024: Eye.R_end
+    400026: Eye_end
+    400028: Head
+    400030: MiniEye
+    400032: MiniEye.3
+    400034: MiniEye.3_end
+    400036: MiniEye.R
+    400038: MiniEye.R_end
+    400040: MiniEye_end
+    400042: Mouth
+    400044: Mouth.001
+    400046: Mouth.001_end
+    400048: Mouth.002
+    400050: Mouth.002_end
+    400052: Mouth.003
+    400054: Mouth.003_end
+    400056: Mouth.2
+    400058: Mouth.3
+    400060: Mouth.3_end
+    400062: Mouth.L
+    400064: Mouth.L2
+    400066: Mouth.L3
+    400068: Mouth.L3_end
+    400070: Mouth.R
+    400072: Mouth.R2
+    400074: Mouth.R3
+    400076: Mouth.R3_end
+    400078: //RootNode
+    4300000: Cube.003
+    7400000: Armature|BulletFrom
+    7400002: Armature|CHANGE
+    7400004: Armature|ShredderForm
+    9500000: //RootNode
+    13700000: Cube.003
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    optimizeGameObjects: 0
+    motionNodeName: 
+    animationCompression: 1
+    animationRotationError: .5
+    animationPositionError: .5
+    animationScaleError: .5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    clipAnimations:
+    - serializedVersion: 16
+      name: Armature|BulletFrom
+      takeName: Armature|BulletFrom
+      firstFrame: 0
+      lastFrame: 1
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      loopTime: 1
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: Armature
+        weight: 1
+      - path: Armature/Head
+        weight: 1
+      - path: Armature/Head/Butt
+        weight: 1
+      - path: Armature/Head/Butt/Butt_end
+        weight: 1
+      - path: Armature/Head/Butt.L
+        weight: 1
+      - path: Armature/Head/Butt.L/Butt.L_end
+        weight: 1
+      - path: Armature/Head/Butt.R
+        weight: 1
+      - path: Armature/Head/Butt.R/Butt.R_end
+        weight: 1
+      - path: Armature/Head/Eye
+        weight: 1
+      - path: Armature/Head/Eye/Eye_end
+        weight: 1
+      - path: Armature/Head/Eye.L
+        weight: 1
+      - path: Armature/Head/Eye.L/Eye.L_end
+        weight: 1
+      - path: Armature/Head/Eye.R
+        weight: 1
+      - path: Armature/Head/Eye.R/Eye.R_end
+        weight: 1
+      - path: Armature/Head/MiniEye
+        weight: 1
+      - path: Armature/Head/MiniEye/MiniEye_end
+        weight: 1
+      - path: Armature/Head/MiniEye.3
+        weight: 1
+      - path: Armature/Head/MiniEye.3/MiniEye.3_end
+        weight: 1
+      - path: Armature/Head/MiniEye.R
+        weight: 1
+      - path: Armature/Head/MiniEye.R/MiniEye.R_end
+        weight: 1
+      - path: Armature/Head/Mouth.L
+        weight: 1
+      - path: Armature/Head/Mouth.L/Mouth.002
+        weight: 1
+      - path: Armature/Head/Mouth.L/Mouth.002/Mouth.002_end
+        weight: 1
+      - path: Armature/Head/Mouth.L/Mouth.L2
+        weight: 1
+      - path: Armature/Head/Mouth.L/Mouth.L2/Mouth.L3
+        weight: 1
+      - path: Armature/Head/Mouth.L/Mouth.L2/Mouth.L3/Mouth.L3_end
+        weight: 1
+      - path: Armature/Head/Mouth.R
+        weight: 1
+      - path: Armature/Head/Mouth.R/Mouth.003
+        weight: 1
+      - path: Armature/Head/Mouth.R/Mouth.003/Mouth.003_end
+        weight: 1
+      - path: Armature/Head/Mouth.R/Mouth.R2
+        weight: 1
+      - path: Armature/Head/Mouth.R/Mouth.R2/Mouth.R3
+        weight: 1
+      - path: Armature/Head/Mouth.R/Mouth.R2/Mouth.R3/Mouth.R3_end
+        weight: 1
+      - path: Armature/Mouth
+        weight: 1
+      - path: Armature/Mouth/Mouth.001
+        weight: 1
+      - path: Armature/Mouth/Mouth.001/Mouth.001_end
+        weight: 1
+      - path: Armature/Mouth/Mouth.2
+        weight: 1
+      - path: Armature/Mouth/Mouth.2/Mouth.3
+        weight: 1
+      - path: Armature/Mouth/Mouth.2/Mouth.3/Mouth.3_end
+        weight: 1
+      - path: Cube.003
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+    - serializedVersion: 16
+      name: Armature|CHANGE
+      takeName: Armature|CHANGE
+      firstFrame: 0
+      lastFrame: 40
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      loopTime: 1
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: Armature
+        weight: 1
+      - path: Armature/Head
+        weight: 1
+      - path: Armature/Head/Butt
+        weight: 1
+      - path: Armature/Head/Butt/Butt_end
+        weight: 1
+      - path: Armature/Head/Butt.L
+        weight: 1
+      - path: Armature/Head/Butt.L/Butt.L_end
+        weight: 1
+      - path: Armature/Head/Butt.R
+        weight: 1
+      - path: Armature/Head/Butt.R/Butt.R_end
+        weight: 1
+      - path: Armature/Head/Eye
+        weight: 1
+      - path: Armature/Head/Eye/Eye_end
+        weight: 1
+      - path: Armature/Head/Eye.L
+        weight: 1
+      - path: Armature/Head/Eye.L/Eye.L_end
+        weight: 1
+      - path: Armature/Head/Eye.R
+        weight: 1
+      - path: Armature/Head/Eye.R/Eye.R_end
+        weight: 1
+      - path: Armature/Head/MiniEye
+        weight: 1
+      - path: Armature/Head/MiniEye/MiniEye_end
+        weight: 1
+      - path: Armature/Head/MiniEye.3
+        weight: 1
+      - path: Armature/Head/MiniEye.3/MiniEye.3_end
+        weight: 1
+      - path: Armature/Head/MiniEye.R
+        weight: 1
+      - path: Armature/Head/MiniEye.R/MiniEye.R_end
+        weight: 1
+      - path: Armature/Head/Mouth.L
+        weight: 1
+      - path: Armature/Head/Mouth.L/Mouth.002
+        weight: 1
+      - path: Armature/Head/Mouth.L/Mouth.002/Mouth.002_end
+        weight: 1
+      - path: Armature/Head/Mouth.L/Mouth.L2
+        weight: 1
+      - path: Armature/Head/Mouth.L/Mouth.L2/Mouth.L3
+        weight: 1
+      - path: Armature/Head/Mouth.L/Mouth.L2/Mouth.L3/Mouth.L3_end
+        weight: 1
+      - path: Armature/Head/Mouth.R
+        weight: 1
+      - path: Armature/Head/Mouth.R/Mouth.003
+        weight: 1
+      - path: Armature/Head/Mouth.R/Mouth.003/Mouth.003_end
+        weight: 1
+      - path: Armature/Head/Mouth.R/Mouth.R2
+        weight: 1
+      - path: Armature/Head/Mouth.R/Mouth.R2/Mouth.R3
+        weight: 1
+      - path: Armature/Head/Mouth.R/Mouth.R2/Mouth.R3/Mouth.R3_end
+        weight: 1
+      - path: Armature/Mouth
+        weight: 1
+      - path: Armature/Mouth/Mouth.001
+        weight: 1
+      - path: Armature/Mouth/Mouth.001/Mouth.001_end
+        weight: 1
+      - path: Armature/Mouth/Mouth.2
+        weight: 1
+      - path: Armature/Mouth/Mouth.2/Mouth.3
+        weight: 1
+      - path: Armature/Mouth/Mouth.2/Mouth.3/Mouth.3_end
+        weight: 1
+      - path: Cube.003
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+    - serializedVersion: 16
+      name: Armature|ShredderForm
+      takeName: Armature|ShredderForm
+      firstFrame: 0
+      lastFrame: 1
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      loopTime: 1
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: Armature
+        weight: 1
+      - path: Armature/Head
+        weight: 1
+      - path: Armature/Head/Butt
+        weight: 1
+      - path: Armature/Head/Butt/Butt_end
+        weight: 1
+      - path: Armature/Head/Butt.L
+        weight: 1
+      - path: Armature/Head/Butt.L/Butt.L_end
+        weight: 1
+      - path: Armature/Head/Butt.R
+        weight: 1
+      - path: Armature/Head/Butt.R/Butt.R_end
+        weight: 1
+      - path: Armature/Head/Eye
+        weight: 1
+      - path: Armature/Head/Eye/Eye_end
+        weight: 1
+      - path: Armature/Head/Eye.L
+        weight: 1
+      - path: Armature/Head/Eye.L/Eye.L_end
+        weight: 1
+      - path: Armature/Head/Eye.R
+        weight: 1
+      - path: Armature/Head/Eye.R/Eye.R_end
+        weight: 1
+      - path: Armature/Head/MiniEye
+        weight: 1
+      - path: Armature/Head/MiniEye/MiniEye_end
+        weight: 1
+      - path: Armature/Head/MiniEye.3
+        weight: 1
+      - path: Armature/Head/MiniEye.3/MiniEye.3_end
+        weight: 1
+      - path: Armature/Head/MiniEye.R
+        weight: 1
+      - path: Armature/Head/MiniEye.R/MiniEye.R_end
+        weight: 1
+      - path: Armature/Head/Mouth.L
+        weight: 1
+      - path: Armature/Head/Mouth.L/Mouth.002
+        weight: 1
+      - path: Armature/Head/Mouth.L/Mouth.002/Mouth.002_end
+        weight: 1
+      - path: Armature/Head/Mouth.L/Mouth.L2
+        weight: 1
+      - path: Armature/Head/Mouth.L/Mouth.L2/Mouth.L3
+        weight: 1
+      - path: Armature/Head/Mouth.L/Mouth.L2/Mouth.L3/Mouth.L3_end
+        weight: 1
+      - path: Armature/Head/Mouth.R
+        weight: 1
+      - path: Armature/Head/Mouth.R/Mouth.003
+        weight: 1
+      - path: Armature/Head/Mouth.R/Mouth.003/Mouth.003_end
+        weight: 1
+      - path: Armature/Head/Mouth.R/Mouth.R2
+        weight: 1
+      - path: Armature/Head/Mouth.R/Mouth.R2/Mouth.R3
+        weight: 1
+      - path: Armature/Head/Mouth.R/Mouth.R2/Mouth.R3/Mouth.R3_end
+        weight: 1
+      - path: Armature/Mouth
+        weight: 1
+      - path: Armature/Mouth/Mouth.001
+        weight: 1
+      - path: Armature/Mouth/Mouth.001/Mouth.001_end
+        weight: 1
+      - path: Armature/Mouth/Mouth.2
+        weight: 1
+      - path: Armature/Mouth/Mouth.2/Mouth.3
+        weight: 1
+      - path: Armature/Mouth/Mouth.2/Mouth.3/Mouth.3_end
+        weight: 1
+      - path: Cube.003
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    importBlendShapes: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    splitTangentsAcrossUV: 1
+    normalImportMode: 0
+    tangentImportMode: 1
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    human: []
+    skeleton: []
+    armTwist: .5
+    foreArmTwist: .5
+    upperLegTwist: .5
+    legTwist: .5
+    armStretch: .0500000007
+    legStretch: .0500000007
+    feetSpacing: 0
+    rootMotionBoneName: 
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 2
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

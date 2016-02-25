@@ -1,0 +1,183 @@
+fileFormatVersion: 2
+guid: c836924c523cf5f469c6172747e6f9c2
+timeCreated: 1430509484
+licenseType: Free
+ModelImporter:
+  serializedVersion: 18
+  fileIDToRecycleName:
+    100000: Armature.002
+    100002: Butt
+    100004: Butt.L
+    100006: Butt.L_end
+    100008: Butt.L_end.001
+    100010: Butt.L_end.001_end
+    100012: Butt.R
+    100014: Butt.R_end
+    100016: Butt.R_end.001
+    100018: Butt.R_end.001_end
+    100020: Butt_end
+    100022: Butt_end.001
+    100024: Butt_end.001_end
+    100026: Cube.003
+    100028: Eye
+    100030: Eye.L
+    100032: Eye.L_end
+    100034: Eye.R
+    100036: Eye.R_end
+    100038: Eye_end
+    100040: Head
+    100042: MiniEye
+    100044: MiniEye.3
+    100046: MiniEye.3_end
+    100048: MiniEye.R
+    100050: MiniEye.R_end
+    100052: MiniEye_end
+    100054: Mouth
+    100056: Mouth.2
+    100058: Mouth.3
+    100060: Mouth.3_end
+    100062: Mouth.L
+    100064: Mouth.L2
+    100066: Mouth.L3
+    100068: Mouth.L3_end
+    100070: Mouth.R
+    100072: Mouth.R2
+    100074: Mouth.R3
+    100076: Mouth.R3_end
+    100078: Spike
+    100080: Spike.L
+    100082: Spike.L_end
+    100084: Spike.R
+    100086: Spike.R_end
+    100088: Spike_end
+    100090: Tail
+    100092: Tail.2
+    100094: Tail.3
+    100096: Tail.4
+    100098: Tail.5
+    100100: Tail.6
+    100102: Tail.7
+    100104: Tail.8
+    100106: Tail.9
+    100108: Tail.9_end
+    100110: //RootNode
+    400000: Armature.002
+    400002: Butt
+    400004: Butt.L
+    400006: Butt.L_end
+    400008: Butt.L_end.001
+    400010: Butt.L_end.001_end
+    400012: Butt.R
+    400014: Butt.R_end
+    400016: Butt.R_end.001
+    400018: Butt.R_end.001_end
+    400020: Butt_end
+    400022: Butt_end.001
+    400024: Butt_end.001_end
+    400026: Cube.003
+    400028: Eye
+    400030: Eye.L
+    400032: Eye.L_end
+    400034: Eye.R
+    400036: Eye.R_end
+    400038: Eye_end
+    400040: Head
+    400042: MiniEye
+    400044: MiniEye.3
+    400046: MiniEye.3_end
+    400048: MiniEye.R
+    400050: MiniEye.R_end
+    400052: MiniEye_end
+    400054: Mouth
+    400056: Mouth.2
+    400058: Mouth.3
+    400060: Mouth.3_end
+    400062: Mouth.L
+    400064: Mouth.L2
+    400066: Mouth.L3
+    400068: Mouth.L3_end
+    400070: Mouth.R
+    400072: Mouth.R2
+    400074: Mouth.R3
+    400076: Mouth.R3_end
+    400078: Spike
+    400080: Spike.L
+    400082: Spike.L_end
+    400084: Spike.R
+    400086: Spike.R_end
+    400088: Spike_end
+    400090: Tail
+    400092: Tail.2
+    400094: Tail.3
+    400096: Tail.4
+    400098: Tail.5
+    400100: Tail.6
+    400102: Tail.7
+    400104: Tail.8
+    400106: Tail.9
+    400108: Tail.9_end
+    400110: //RootNode
+    4300000: Cube.003
+    7400000: Armature.002|Action
+    7400002: Armature.002|Armature.001|Armature|CHANGE|Armature|CHANGE
+    7400004: Cube.003|Action
+    9500000: //RootNode
+    13700000: Cube.003
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    optimizeGameObjects: 0
+    motionNodeName: 
+    animationCompression: 1
+    animationRotationError: .5
+    animationPositionError: .5
+    animationScaleError: .5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    importBlendShapes: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    splitTangentsAcrossUV: 1
+    normalImportMode: 0
+    tangentImportMode: 1
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    human: []
+    skeleton: []
+    armTwist: .5
+    foreArmTwist: .5
+    upperLegTwist: .5
+    legTwist: .5
+    armStretch: .0500000007
+    legStretch: .0500000007
+    feetSpacing: 0
+    rootMotionBoneName: 
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 2
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
